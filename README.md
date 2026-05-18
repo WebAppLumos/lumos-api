@@ -32,6 +32,34 @@
 - `src/main/java/com/group4/lumos_api/course` - 수업 관련 컨트롤러/서비스/레포/DTO
 - `src/main/resources/application.properties` - 데이터베이스 설정 및 JPA 옵션
 
+## 상세 디렉토리 구조
+```
+lumos-api/
+├── src/main/java/com/group4/lumos_api/
+│   ├── LumosApiApplication.java (진입점)
+│   ├── semester/
+│   │   ├── controller/    (SemesterContoller)
+│   │   ├── service/       (SemesterService)
+│   │   ├── repository/    (SemesterRepository)
+│   │   ├── entity/        (Semester)
+│   │   ├── dto/           (SemesterRequest, SemesterResponse)
+│   │   └── README.md      (API 문서)
+│   └── course/
+│       ├── controller/    (CourseController)
+│       ├── service/       (CourseService)
+│       ├── repository/    (CourseRepository)
+│       ├── entity/        (Course)
+│       ├── dto/           (CourseCreateRequest, CourseUpdateRequest, CourseResponse)
+│       └── README.md      (API 문서)
+├── src/main/resources/
+│   └── application.properties (설정 파일)
+├── src/test/java/
+├── build.gradle (의존성 및 빌드 설정)
+├── settings.gradle
+├── gradlew / gradlew.bat (Gradle 래퍼)
+└── README.md (이 파일)
+```
+
 ## 주요 엔드포인트
 - 학기
   - `POST /api/semesters` - 학기 생성
@@ -47,27 +75,104 @@
   - `DELETE /api/semesters/{semesterId}/courses/{courseId}` - 수업 삭제
 
 ## 빌드 및 실행
+
+### 사전 요구사항
+- **JDK 21 이상**
+- **Gradle 8.x 이상** (또는 포함된 gradlew 사용)
+- **PostgreSQL 12 이상** (또는 Neon 같은 클라우드 DB)
+
+### 환경 설정
+
+#### 1. 데이터베이스 설정
+`src/main/resources/application.properties` 파일을 수정하세요:
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/lumos_db
+spring.datasource.username=postgres
+spring.datasource.password=your_password
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+```
+
+**클라우드 DB(예: Neon) 사용 시:**
+```properties
+spring.datasource.url=jdbc:postgresql://your-host:5432/your_db?sslmode=require&channel_binding=require
+spring.datasource.username=your_user
+spring.datasource.password=your_password
+```
+
+#### 2. 로컬 PostgreSQL 설치 (Windows)
+- 공식 사이트에서 PostgreSQL 다운로드
+- 설치 중 포트(기본 5432) 및 슈퍼유저(postgres) 비밀번호 설정
+- pgAdmin 또는 psql로 DB 생성 확인
+
+### 빌드
 로컬에서 Gradle 래퍼 사용 권장:
 ```bash
+./gradlew clean build
 ./gradlew test
+```
+
+### 실행
+```bash
 ./gradlew bootRun
 ```
 
-애플리케이션은 기본적으로 `localhost:8080`에서 실행됩니다. 데이터베이스 연결 정보는 `src/main/resources/application.properties`를 확인하세요.
+애플리케이션은 기본적으로 `http://localhost:8080`에서 실행됩니다.
+
+### 빠른 시작
+```bash
+# 1. 저장소 클론
+git clone https://github.com/WebAppGroup4/lumos-api.git
+cd lumos-api
+
+# 2. 데이터베이스 설정 (application.properties 수정)
+
+# 3. 빌드 및 실행
+./gradlew bootRun
+
+# 4. API 테스트
+curl http://localhost:8080/api/semesters
+```
 
 ## 테스트 및 검증
 - 단위/통합 테스트: `./gradlew test` 실행
 - 실제 요청 예시와 Postman 데이터는 각 API별 `README.md`를 읽고 그대로 따라가면 됩니다.
+  - `src/main/java/com/group4/lumos_api/semester/README.md` - Semester API 예시
+  - `src/main/java/com/group4/lumos_api/course/README.md` - Course API 예시
 - 루트 `README.md`는 전체 구조와 실행 방법만 안내합니다.
+
+## 트러블슈팅
+
+### 포트 8080이 이미 사용 중일 때
+```bash
+# Windows PowerShell에서 PID 찾기
+netstat -ano | findstr :8080
+
+# 프로세스 종료
+taskkill /PID <PID> /F
+```
+
+### 데이터베이스 연결 실패
+- `application.properties`의 URL, 사용자명, 비밀번호 확인
+- PostgreSQL 서버 실행 상태 확인
+- 네트워크/방화벽 설정 확인
+
+### Gradle 빌드 실패
+```bash
+./gradlew clean
+./gradlew build
+```
 
 ## 주의사항
 - 색상 등 입력 유효성은 DTO의 검증 어노테이션(`@NotBlank` 등)에 의존합니다. 추가 포맷 검증이 필요하면 `@Pattern`을 적용하세요.
 - 문서의 엔드포인트와 코드 동작(특히 예외/HTTP 상태 코드)이 일치하는지 확인해 주세요.
 
 ## 기여 및 브랜치 규칙 (권장)
-- 기능: `feat/<short-desc>` (예: `feat/course-search`)
-- 버그: `fix/<short-desc>`
-- 커밋 메시지: `type(scope): 한줄요약` (예: `feat(course): 수업 CRUD 추가`)
+- 기능: `feature/기능명` (예: `feature/course-search`)
+- 버그: `bugfix/버그명`
+- 리팩토링: `refactor/대상명`
+- 문서: `docs/문서명`
+- 커밋 메시지: `type: 한줄요약` (예: `feat: 수업 CRUD 추가`)
 
 ---
 추가 설명이 필요하면 각 API별 `README.md`를 참고하세요.

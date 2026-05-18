@@ -1,6 +1,6 @@
 # Semester API
 
-학기(학기) 정보를 관리하는 API입니다.
+학기(Semester) 정보를 관리하는 API입니다.
 
 ## 개요
 

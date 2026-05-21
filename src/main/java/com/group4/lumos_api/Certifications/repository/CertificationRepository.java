@@ -1,6 +1,6 @@
-package com.group4.lumos_api.certification.repository;
+package com.group4.lumos_api.Certifications.repository;
 
-import com.group4.lumos_api.certification.entity.Certifications;
+import com.group4.lumos_api.Certifications.entity.Certifications;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

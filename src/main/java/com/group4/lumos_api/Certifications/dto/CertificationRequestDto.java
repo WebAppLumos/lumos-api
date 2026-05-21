@@ -1,4 +1,4 @@
-package com.group4.lumos_api.certification.dto;
+package com.group4.lumos_api.Certifications.dto;
 
 import lombok.*;
 import java.time.LocalDate;

@@ -1,8 +1,8 @@
-package com.group4.lumos_api.certification.controller;
+package com.group4.lumos_api.Certifications.controller;
 
-import com.group4.lumos_api.certification.dto.CertificationRequestDto;
-import com.group4.lumos_api.certification.dto.CertificationResponseDto;
-import com.group4.lumos_api.certification.service.CertificationService;
+import com.group4.lumos_api.Certifications.dto.CertificationRequestDto;
+import com.group4.lumos_api.Certifications.dto.CertificationResponseDto;
+import com.group4.lumos_api.Certifications.service.CertificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -28,14 +28,18 @@
 ※ 본 프로젝트는 Flyway 대신 `spring.jpa.hibernate.ddl-auto=update` 설정을 통해 스키마를 자동 관리합니다.
 
 ## 프로젝트 구조 (Package Structure)
-- `certification/`: 학생별 자격증 취득 정보 관리 기능
+- `Certifications/`: 학생별 자격증 취득 정보 관리 기능
+- `Language_Exams/`: 학생별 공인외국어 시험 성적 관리 기능
+- `student/`: 학생 기본 정보 관리 및 공통 참조 엔티티
 
 ## 상세 디렉토리 구조
 ```text
 lumos-api/
 ├── src/main/java/com/group4/lumos_api/
 │   ├── LumosApiApplication.java (메인 진입점)
-│   ├── certification/
+│   ├── Certifications/ (자격증 관리)
+│   ├── Language_Exams/ (공인외국어 성적 관리)
+│   ├── student/        (학생 기본 정보 관리)
 │   │   ├── controller/    (API 컨트롤러)
 │   │   ├── service/       (비즈니스 로직)
 │   │   ├── repository/    (DB 인터페이스)
@@ -55,6 +59,12 @@ lumos-api/
 - `POST /api/certifications` : 새로운 자격증 등록
 - `PUT  /api/certifications/{certId}` : 자격증 정보 수정
 - `DELETE /api/certifications/{certId}` : 자격증 삭제
+
+### 공인외국어 성적 (Language Exams)
+- `GET  /api/language-exams/student/{studentId}` : 학생별 성적 목록 조회
+- `POST /api/language-exams` : 새로운 성적 등록
+- `PUT  /api/language-exams/{examId}` : 성적 정보 수정
+- `DELETE /api/language-exams/{examId}` : 성적 삭제
 
 ## 빌드 및 실행 방법
 

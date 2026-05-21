@@ -1,4 +1,4 @@
-package com.group4.lumos_api.certification.entity;
+package com.group4.lumos_api.Certifications.entity;
 
 import com.group4.lumos_api.student.entity.Students;
 import jakarta.persistence.*;

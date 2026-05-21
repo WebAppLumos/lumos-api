@@ -1,9 +1,9 @@
-package com.group4.lumos_api.certification.service;
+package com.group4.lumos_api.Certifications.service;
 
-import com.group4.lumos_api.certification.dto.CertificationRequestDto;
-import com.group4.lumos_api.certification.dto.CertificationResponseDto;
-import com.group4.lumos_api.certification.entity.Certifications;
-import com.group4.lumos_api.certification.repository.CertificationRepository;
+import com.group4.lumos_api.Certifications.dto.CertificationRequestDto;
+import com.group4.lumos_api.Certifications.dto.CertificationResponseDto;
+import com.group4.lumos_api.Certifications.entity.Certifications;
+import com.group4.lumos_api.Certifications.repository.CertificationRepository;
 import com.group4.lumos_api.student.entity.Students;
 import com.group4.lumos_api.student.repository.StudentsRepository;
 import jakarta.persistence.EntityNotFoundException;

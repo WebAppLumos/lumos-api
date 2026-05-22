@@ -22,4 +22,10 @@ public class CalendarEventRequest {
     private LocalDate date;
 
     private Long studentId;
+
+    private boolean isCompleted;
+
+    private String category; // Enum name as String
+
+    private String priority; // Enum name as String
 }

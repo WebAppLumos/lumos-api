@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/calendar-events")
+@RequestMapping("/api/calendar/events")
 @Validated
 public class CalendarEventController {
 
@@ -24,31 +24,21 @@ public class CalendarEventController {
         this.service = service;
     }
 
+    // 일정 통합 조회 (전체, 날짜별, 검색, 유형별)
     @GetMapping
     public List<CalendarEventResponse> getEvents(
             @RequestParam(required = false) Long studentId,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                    LocalDate date) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String type) {
         
-        List<CalendarEvent> events;
-        
-        if (date != null) {
-            events = service.getEventsByDate(date);
-        } else if (studentId != null) {
-            // 학생 ID가 있으면 학사 일정 + 내 일정 조회
-            events = service.getMyAndGlobalEvents(studentId);
-        } else {
-            // 아무 조건 없으면 전체 조회 (관리자용 혹은 테스트용)
-            events = service.getAllEvents();
-        }
-        
-        return events.stream().map(this::toResponse).toList();
+        return service.searchEvents(studentId, date, keyword, type)
+                .stream().map(this::toResponse).toList();
     }
 
-    @GetMapping("/{id}")
-    public CalendarEventResponse getEvent(@PathVariable Long id) {
-        return toResponse(service.getEvent(id));
+    @GetMapping("/{eventId}")
+    public CalendarEventResponse getEvent(@PathVariable("eventId") Long eventId) {
+        return toResponse(service.getEvent(eventId));
     }
 
     @PostMapping
@@ -57,16 +47,21 @@ public class CalendarEventController {
         return toResponse(service.createEvent(request));
     }
 
-    @PutMapping("/{id}")
-    public CalendarEventResponse updateEvent(@PathVariable Long id,
+    @PutMapping("/{eventId}")
+    public CalendarEventResponse updateEvent(@PathVariable("eventId") Long eventId,
                                              @Valid @RequestBody CalendarEventRequest request) {
-        return toResponse(service.updateEvent(id, request));
+        return toResponse(service.updateEvent(eventId, request));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEvent(@PathVariable Long id) {
-        service.deleteEvent(id);
+    public void deleteEvent(@PathVariable("eventId") Long eventId) {
+        service.deleteEvent(eventId);
+    }
+
+    @PatchMapping("/{eventId}/toggle")
+    public CalendarEventResponse toggleCompletion(@PathVariable("eventId") Long eventId) {
+        return toResponse(service.toggleCompletion(eventId));
     }
 
     private CalendarEventResponse toResponse(CalendarEvent entity) {
@@ -76,6 +71,9 @@ public class CalendarEventController {
                 .content(entity.getContent())
                 .date(entity.getDate())
                 .studentId(entity.getStudentId())
+                .isCompleted(entity.isCompleted())
+                .category(entity.getCategory() != null ? entity.getCategory().name() : null)
+                .priority(entity.getPriority() != null ? entity.getPriority().name() : null)
                 .build();
     }
 }

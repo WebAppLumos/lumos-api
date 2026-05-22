@@ -30,4 +30,18 @@ public class CalendarEvent {
 
     @Column(name = "student_id")
     private Long studentId;
+
+    @Column(name = "is_completed", nullable = false)
+    @Builder.Default
+    private boolean isCompleted = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category")
+    @Builder.Default
+    private EventCategory category = EventCategory.OTHER;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "priority")
+    @Builder.Default
+    private EventPriority priority = EventPriority.MEDIUM;
 }

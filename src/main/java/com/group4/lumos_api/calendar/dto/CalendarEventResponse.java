@@ -16,4 +16,7 @@ public class CalendarEventResponse {
     private String content;
     private LocalDate date;
     private Long studentId;
+    private boolean isCompleted;
+    private String category;
+    private String priority;
 }

@@ -23,6 +23,31 @@ com.group4.lumos_api.calendar/
 
 ---
 
+## 🚀 API 명세 (Endpoints)
+
+### 📌 Calendar API 설계 (리소스 중심)
+
+| 기능명 | API명 | 엔드포인트 | Method | 설명 |
+| :--- | :--- | :--- | :--- | :--- |
+| **일정 통합 조회** | `events` | `/api/calendar/events` | `GET` | 전체 일정 조회 (필터/검색 포함) |
+| **날짜별 일정 조회** | `events` | `/api/calendar/events?date=YYYY-MM-DD` | `GET` | 특정 날짜 일정 조회 |
+| **일정 검색** | `events` | `/api/calendar/events?keyword=검색어` | `GET` | 일정 제목/내용 검색 |
+| **유형별 조회** | `events` | `/api/calendar/events?type=academic` | `GET` | 학사/개인 등 타입 필터 조회 |
+| **일정 상세 조회** | `event` | `/api/calendar/events/{eventId}` | `GET` | 특정 일정 1개 조회 |
+| **개인 일정 등록** | `eventCreate` | `/api/calendar/events` | `POST` | 새로운 일정 생성 |
+| **일정 수정** | `eventUpdate` | `/api/calendar/events/{eventId}` | `PUT` | 기존 일정 수정 |
+| **일정 삭제** | `eventDelete` | `/api/calendar/events/{eventId}` | `DELETE` | 일정 삭제 |
+| **완료 상태 토글** | `eventToggle` | `/api/calendar/events/{eventId}/toggle` | `PATCH` | 완료/미완료 상태 변경 |
+
+---
+
+### 💡 필터 조합 예시
+- **특정 학생의 학사+개인 일정 조회**: `GET /api/calendar/events?studentId=1`
+- **특정 날짜의 학사 일정만 조회**: `GET /api/calendar/events?date=2026-05-22&type=academic`
+- **전체 일정 중 '시험' 키워드 검색**: `GET /api/calendar/events?keyword=시험`
+
+---
+
 ## 🔒 데이터 정책 및 보안 (핵심 로직)
 
 이 시스템은 `studentId` 필드를 기준으로 **학사 일정**과 **개인 일정**을 철저히 구분합니다.
@@ -36,49 +61,16 @@ com.group4.lumos_api.calendar/
 - **생성(Create)**: `studentId`가 `null`인 요청은 `400 Bad Request`로 차단됩니다.
 - **수정(Update)**: 대상 데이터의 `studentId`가 `null`이거나 요청의 `studentId`를 `null`로 바꾸려는 시도는 차단됩니다.
 - **삭제(Delete)**: 대상 데이터의 `studentId`가 `null`이면 `403 Forbidden`을 반환합니다.
+- **상태 변경(Toggle)**: 학사 일정의 완료 여부는 변경할 수 없습니다.
 
 ---
 
-## 🚀 API 명세 (Endpoints)
+## 🎨 데이터 타입 상세 (Enum)
 
-### 1. 통합 일정 조회 (GET)
-학생 본인의 일정과 공통 학사 일정을 합쳐서 조회합니다.
-
-- **URL**: `GET /api/calendar-events`
-- **Query Params**:
-  - `studentId` (Long): 현재 로그인한 학생의 ID.
-  - `date` (LocalDate, Optional): `YYYY-MM-DD` 형식으로 특정 날짜만 필터링.
-- **특징**: `studentId=1`로 요청 시 `studentId IS NULL OR studentId = 1` 조건으로 검색됩니다.
-
-### 2. 일정 상세 조회 (GET)
-특정 일정의 상세 내용을 가져옵니다.
-
-- **URL**: `GET /api/calendar-events/{id}`
-
-### 3. 개인 일정 등록 (POST)
-새로운 개인 일정을 추가합니다.
-
-- **URL**: `POST /api/calendar-events`
-- **Body**:
-  ```json
-  {
-    "title": "DB 과제 마감",
-    "content": "LMS에 23:59까지 제출",
-    "date": "2026-03-20",
-    "studentId": 1
-  }
-  ```
-
-### 4. 개인 일정 수정 (PUT)
-기존에 등록한 개인 일정을 수정합니다.
-
-- **URL**: `PUT /api/calendar-events/{id}`
-- **Body**: 상동
-
-### 5. 개인 일정 삭제 (DELETE)
-특정 개인 일정을 삭제합니다.
-
-- **URL**: `DELETE /api/calendar-events/{id}`
+| 필드명 | 값 (Enum) | 설명 |
+| :--- | :--- | :--- |
+| **Category** | `STUDY`, `WORK`, `PRIVATE`, `ACADEMIC`, `OTHER` | 일정 분류 (예: 학업, 알바, 개인 등) |
+| **Priority** | `HIGH`, `MEDIUM`, `LOW` | 중요도 (빨강/노랑/초록 등 UI 활용) |
 
 ---
 

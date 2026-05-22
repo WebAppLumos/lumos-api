@@ -2,6 +2,8 @@ package com.group4.lumos_api.calendar.service;
 
 import com.group4.lumos_api.calendar.dto.CalendarEventRequest;
 import com.group4.lumos_api.calendar.entity.CalendarEvent;
+import com.group4.lumos_api.calendar.entity.EventCategory;
+import com.group4.lumos_api.calendar.entity.EventPriority;
 import com.group4.lumos_api.calendar.repository.CalendarEventRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,16 @@ public class CalendarEventService {
         return repository.findAllByDate(date);
     }
 
+    // 학사 일정만 조회
+    public List<CalendarEvent> getAcademicEvents() {
+        return repository.findByStudentIdIsNull();
+    }
+
+    // 통합 필터 검색
+    public List<CalendarEvent> searchEvents(Long studentId, LocalDate date, String keyword, String type) {
+        return repository.findByFilters(date, keyword, studentId, type);
+    }
+
     public CalendarEvent createEvent(CalendarEventRequest request) {
         // 일반 사용자가 학사 일정(null)을 생성하지 못하도록 방지
         if (request.getStudentId() == null) {
@@ -48,6 +60,9 @@ public class CalendarEventService {
                 .content(request.getContent())
                 .date(request.getDate())
                 .studentId(request.getStudentId())
+                .isCompleted(request.isCompleted())
+                .category(request.getCategory() != null ? EventCategory.valueOf(request.getCategory()) : EventCategory.OTHER)
+                .priority(request.getPriority() != null ? EventPriority.valueOf(request.getPriority()) : EventPriority.MEDIUM)
                 .build();
         return repository.save(event);
     }
@@ -69,6 +84,27 @@ public class CalendarEventService {
         event.setContent(request.getContent());
         event.setDate(request.getDate());
         event.setStudentId(request.getStudentId());
+        event.setCompleted(request.isCompleted());
+        
+        if (request.getCategory() != null) {
+            event.setCategory(EventCategory.valueOf(request.getCategory()));
+        }
+        if (request.getPriority() != null) {
+            event.setPriority(EventPriority.valueOf(request.getPriority()));
+        }
+        
+        return repository.save(event);
+    }
+
+    // 완료 상태 토글 (체크박스 클릭 시)
+    public CalendarEvent toggleCompletion(Long id) {
+        CalendarEvent event = getEvent(id);
+        
+        if (event.getStudentId() == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "학사 일정의 상태는 변경할 수 없습니다.");
+        }
+        
+        event.setCompleted(!event.isCompleted());
         return repository.save(event);
     }
 

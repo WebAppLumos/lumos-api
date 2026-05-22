@@ -12,5 +12,5 @@ public class LanguageExamsResponseDto {
     private Integer year;
     private String semester;
     private LocalDate expiryDate;
-    private Long studentId;
+    private String userId;
 }

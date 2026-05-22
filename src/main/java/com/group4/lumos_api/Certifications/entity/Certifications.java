@@ -1,6 +1,6 @@
 package com.group4.lumos_api.Certifications.entity;
 
-import com.group4.lumos_api.student.entity.Students;
+import com.group4.lumos_api.user.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -21,6 +21,6 @@ public class Certifications {
     private LocalDate issueDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id")
-    private Students student;
+    @JoinColumn(name = "user_id")
+    private Users user;
 }

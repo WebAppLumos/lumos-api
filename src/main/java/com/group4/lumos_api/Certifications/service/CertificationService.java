@@ -4,8 +4,8 @@ import com.group4.lumos_api.Certifications.dto.CertificationRequestDto;
 import com.group4.lumos_api.Certifications.dto.CertificationResponseDto;
 import com.group4.lumos_api.Certifications.entity.Certifications;
 import com.group4.lumos_api.Certifications.repository.CertificationRepository;
-import com.group4.lumos_api.student.entity.Students;
-import com.group4.lumos_api.student.repository.StudentsRepository;
+import com.group4.lumos_api.user.entity.Users;
+import com.group4.lumos_api.user.repository.UsersRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,24 +19,24 @@ import java.util.stream.Collectors;
 public class CertificationService {
 
     private final CertificationRepository certificationRepository;
-    private final StudentsRepository studentsRepository;
+    private final UsersRepository usersRepository;
 
     @Transactional(readOnly = true)
-    public List<CertificationResponseDto> getCertificationsByStudent(Long studentId) {
-        return certificationRepository.findByStudentStudentID(studentId).stream()
+    public List<CertificationResponseDto> getCertificationsByStudent(String userId) {
+        return certificationRepository.findByUserUserId(userId).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public CertificationResponseDto addCertification(CertificationRequestDto dto) {
-        Students student = studentsRepository.findById(dto.getStudentId())
-                .orElseThrow(() -> new EntityNotFoundException("Student not found"));
+        Users user = usersRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Certifications cert = Certifications.builder()
                 .certName(dto.getCertName())
                 .issueDate(dto.getIssueDate())
-                .student(student)
+                .user(user)
                 .build();
         return convertToDto(certificationRepository.save(cert));
     }
@@ -62,7 +62,7 @@ public class CertificationService {
                 .certId(cert.getCertId())
                 .certName(cert.getCertName())
                 .issueDate(cert.getIssueDate())
-                .studentId(cert.getStudent().getStudentID())
+                .userId(cert.getUser().getUserId())
                 .build();
     }
 }

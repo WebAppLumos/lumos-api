@@ -10,5 +10,5 @@ import java.time.LocalDate;
 public class CertificationRequestDto {
     private String certName;
     private LocalDate issueDate;
-    private Long studentId;
+    private String userId;
 }

@@ -4,8 +4,8 @@ import com.group4.lumos_api.Language_Exams.dto.LanguageExamsRequestDto;
 import com.group4.lumos_api.Language_Exams.dto.LanguageExamsResponseDto;
 import com.group4.lumos_api.Language_Exams.entity.LanguageExams;
 import com.group4.lumos_api.Language_Exams.repository.LanguageExamsRepository;
-import com.group4.lumos_api.student.entity.Students;
-import com.group4.lumos_api.student.repository.StudentsRepository;
+import com.group4.lumos_api.user.entity.Users;
+import com.group4.lumos_api.user.repository.UsersRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,19 +19,19 @@ import java.util.stream.Collectors;
 public class LanguageExamsService {
 
     private final LanguageExamsRepository languageExamsRepository;
-    private final StudentsRepository studentsRepository;
+    private final UsersRepository usersRepository;
 
     @Transactional(readOnly = true)
-    public List<LanguageExamsResponseDto> getExamsByStudent(Long studentId) {
-        return languageExamsRepository.findByStudentStudentID(studentId).stream()
+    public List<LanguageExamsResponseDto> getExamsByStudent(String userId) {
+        return languageExamsRepository.findByUserUserId(userId).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public LanguageExamsResponseDto addExam(LanguageExamsRequestDto dto) {
-        Students student = studentsRepository.findById(dto.getStudentId())
-                .orElseThrow(() -> new EntityNotFoundException("Student not found"));
+        Users user = usersRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         LanguageExams exam = LanguageExams.builder()
                 .examCategory(dto.getExamCategory())
@@ -40,7 +40,7 @@ public class LanguageExamsService {
                 .year(dto.getYear())
                 .semester(dto.getSemester())
                 .expiryDate(dto.getExpiryDate())
-                .student(student)
+                .user(user)
                 .build();
         return convertToDto(languageExamsRepository.save(exam));
     }
@@ -74,7 +74,7 @@ public class LanguageExamsService {
                 .year(exam.getYear())
                 .semester(exam.getSemester())
                 .expiryDate(exam.getExpiryDate())
-                .studentId(exam.getStudent().getStudentID())
+                .userId(exam.getUser().getUserId())
                 .build();
     }
 }

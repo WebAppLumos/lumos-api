@@ -28,9 +28,10 @@
 ※ 본 프로젝트는 Flyway 대신 `spring.jpa.hibernate.ddl-auto=update` 설정을 통해 스키마를 자동 관리합니다.
 
 ## 프로젝트 구조 (Package Structure)
-- `Certifications/`: 학생별 자격증 취득 정보 관리 기능
-- `Language_Exams/`: 학생별 공인외국어 시험 성적 관리 기능
-- `student/`: 학생 기본 정보 관리 및 공통 참조 엔티티
+- `Certifications/`: 사용자별 자격증 취득 정보 관리 기능
+- `Language_Exams/`: 사용자별 공인외국어 시험 성적 관리 기능
+- `user/`: 사용자 기본 정보 관리 (기존 student 모듈에서 확장 및 변경)
+- `previous_semester_scores/`: 직전 학기 성적 관리 기능
 
 ## 상세 디렉토리 구조
 ```text
@@ -39,32 +40,81 @@ lumos-api/
 │   ├── LumosApiApplication.java (메인 진입점)
 │   ├── Certifications/ (자격증 관리)
 │   ├── Language_Exams/ (공인외국어 성적 관리)
-│   ├── student/        (학생 기본 정보 관리)
-│   │   ├── controller/    (API 컨트롤러)
-│   │   ├── service/       (비즈니스 로직)
-│   │   ├── repository/    (DB 인터페이스)
-│   │   ├── entity/        (데이터 모델)
-│   │   ├── dto/           (데이터 전송 객체)
-│   │   └── README.md      (기능별 상세 문서)
-│   └── (semester, course 등 각 기능별 동일한 구조 적용)
+│   ├── user/           (사용자 기본 정보 관리)
+│   ├── previous_semester_scores/ (직전 학기 성적 관리)
+│   └── (기타 각 기능별 동일한 구조 적용)
 ├── src/main/resources/
 │   └── application.properties (PostgreSQL 및 JPA 설정)
 ├── build.gradle (빌드 및 의존성 설정)
 └── README.md (현재 파일)
 ```
 
-## 주요 엔드포인트 요약
+## 주요 엔드포인트 및 데이터 모델 요약
+
+### 사용자 (User)
+- `GET    /api/users`
+- `POST   /api/users`
+- `PATCH  /api/users/{userId}`
+
+**데이터 모델 (JSON):**
+```json
+{
+  "userId": "test-user-id",
+  "email": "user@example.com",
+  "name": "홍길동",
+  "phoneNumber": "010-1234-5678",
+  "department": "컴퓨터공학과",
+  "grade": 3,
+  "studentNumber": "2024001"
+}
+```
+
+### 직전 학기 성적 (Previous Semester Scores)
+- `GET    /api/users/{userId}/previous-semester-scores`
+- `POST   /api/users/{userId}/previous-semester-scores`
+- `PATCH  /api/previous-semester-scores/{scoreId}`
+
+**데이터 모델 (JSON):**
+```json
+{
+  "score": 4.25,
+  "year": "2024-03-01",
+  "semester": "1학기"
+}
+```
+
 ### 자격증 (Certification)
-- `GET  /api/certifications/student/{studentId}` : 학생별 자격증 목록 조회
-- `POST /api/certifications` : 새로운 자격증 등록
-- `PATCH  /api/certifications/{certId}` : 자격증 정보 수정
-- `DELETE /api/certifications/{certId}` : 자격증 삭제
+- `GET    /api/users/{userId}/certifications`
+- `POST   /api/users/{userId}/certifications`
+- `PATCH  /api/certifications/{certId}`
+
+**데이터 모델 (JSON):**
+```json
+{
+  "certName": "정보처리기사",
+  "issueDate": "2024-05-20"
+}
+```
 
 ### 공인외국어 성적 (Language Exams)
-- `GET  /api/language-exams/student/{studentId}` : 학생별 성적 목록 조회
-- `POST /api/language-exams` : 새로운 성적 등록
-- `PATCH  /api/language-exams/{examId}` : 성적 정보 수정
-- `DELETE /api/language-exams/{examId}` : 성적 삭제
+- `GET    /api/users/{userId}/language-exams`
+- `POST   /api/users/{userId}/language-exams`
+- `PATCH  /api/language-exams/{examId}`
+
+**데이터 모델 (JSON):**
+```json
+{
+  "examCategory": "TOEIC",
+  "score": "950",
+  "examDate": "2024-04-15",
+  "year": 2024,
+  "semester": "1학기",
+  "expiryDate": "2026-04-15"
+}
+```
+
+
+
 
 ## 빌드 및 실행 방법
 

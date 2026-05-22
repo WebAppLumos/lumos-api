@@ -1,178 +1,292 @@
 # Lumos API
 
-간단한 Spring Boot 기반 RESTful API 프로젝트입니다. 학기(Semester)와 수업(Course)을 관리하는 CRUD 엔드포인트를 제공합니다.
+Lumos의 학기, 수업, 시간표, 노트, 난이도 정보를 관리하는 Spring Boot 기반 REST API입니다.
 
 ## 개요
-- Java 21, Spring Boot 4.x 기반
-- RESTful API 구조를 따르며 Spring MVC + Spring Data JPA로 구현되었습니다.
 
-## 주요 기술 스택
+이 API는 학기를 최상위 기준으로 두고, 학기에 종속된 수업과 시간표를 관리합니다. 노트와 난이도는 수업에 종속되며, 수업 배치(Entry)는 시간표와 수업을 연결합니다.
+
+## 기술 스택
+
 - Java 21
-- Spring Boot 4.x (Web, Data JPA, Validation)
-- Spring MVC (REST)
-- Spring Data JPA (Hibernate)
-- PostgreSQL (JDBC 드라이버 포함)
-- Lombok (보일러플레이트 감소)
-- Jakarta Validation (`jakarta.validation`)
+- Spring Boot 4.x
+- Spring MVC
+- Spring Data JPA
+- Jakarta Validation
+- PostgreSQL
+- Lombok
+- Gradle Wrapper
 
-개발 편의:
-- Spring Boot DevTools (개발 시 자동 리스타트)
+## 도메인 관계
 
-## 주요 의존성 (build.gradle 기준)
-- `org.springframework.boot:spring-boot-starter-web` 또는 `spring-boot-starter-webmvc`
-- `org.springframework.boot:spring-boot-starter-data-jpa`
-- `org.postgresql:postgresql`
-- `org.projectlombok:lombok`
-- `org.springframework.boot:spring-boot-starter-validation`
-
-※ 참고: Flyway는 사용하지 않고 `spring.jpa.hibernate.ddl-auto=update`를 사용하도록 구성되어 있습니다.
-
-## 프로젝트 구조(요약)
-- `src/main/java/com/group4/lumos_api/semester` - 학기 관련 컨트롤러/서비스/레포/DTO
-- `src/main/java/com/group4/lumos_api/course` - 수업 관련 컨트롤러/서비스/레포/DTO
-- `src/main/resources/application.properties` - 데이터베이스 설정 및 JPA 옵션
-
-## 상세 디렉토리 구조
+```text
+Semester
+  ├─ Course
+  │   ├─ Note
+  │   └─ Difficulty
+  └─ Timetable
+      └─ Entry -> Course
 ```
+
+- `semester`: 독립 실행 가능
+- `course`: `semester`에 종속
+- `timetable`: `semester`에 종속
+- `note`: `course`에 종속
+- `difficulty`: `course`에 종속
+- `entry`: `timetable`과 `course`에 종속
+
+## 프로젝트 구조
+
+```text
 lumos-api/
 ├── src/main/java/com/group4/lumos_api/
-│   ├── LumosApiApplication.java (진입점)
+│   ├── LumosApiApplication.java
 │   ├── semester/
-│   │   ├── controller/    (SemesterContoller)
-│   │   ├── service/       (SemesterService)
-│   │   ├── repository/    (SemesterRepository)
-│   │   ├── entity/        (Semester)
-│   │   ├── dto/           (SemesterRequest, SemesterResponse)
-│   │   └── README.md      (API 문서)
-│   └── course/
-│       ├── controller/    (CourseController)
-│       ├── service/       (CourseService)
-│       ├── repository/    (CourseRepository)
-│       ├── entity/        (Course)
-│       ├── dto/           (CourseCreateRequest, CourseUpdateRequest, CourseResponse)
-│       └── README.md      (API 문서)
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── course/
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── timetable/
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── entry/
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── note/
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   └── difficulty/
+│       ├── controller/
+│       ├── dto/
+│       ├── entity/
+│       ├── repository/
+│       ├── service/
+│       └── README.md
 ├── src/main/resources/
-│   └── application.properties (설정 파일)
-├── src/test/java/
-├── build.gradle (의존성 및 빌드 설정)
+│   └── application.properties
+├── build.gradle
 ├── settings.gradle
-├── gradlew / gradlew.bat (Gradle 래퍼)
-└── README.md (이 파일)
+├── gradlew
+├── gradlew.bat
+└── README.md
 ```
 
-## 주요 엔드포인트
-- 학기
-  - `POST /api/semesters` - 학기 생성
-  - `GET  /api/semesters` - 학기 목록
-  - `GET  /api/semesters/{id}` - 학기 상세
-  - `PATCH /api/semesters/{id}` - 학기 수정
-  - `DELETE /api/semesters/{id}` - 학기 삭제
-- 수업 (학기 종속)
-  - `POST /api/semesters/{semesterId}/courses` - 수업 생성
-  - `GET  /api/semesters/{semesterId}/courses` - 학기별 수업 목록
-  - `GET  /api/semesters/{semesterId}/courses/{courseId}` - 수업 상세
-  - `PATCH /api/semesters/{semesterId}/courses/{courseId}` - 수업 수정
-  - `DELETE /api/semesters/{semesterId}/courses/{courseId}` - 수업 삭제
+## API 문서
 
-## 빌드 및 실행
+각 API별 상세 요청/응답 예시와 Postman 테스트 시나리오는 도메인별 README를 참고하세요.
+
+| 도메인 | 문서 | 설명 |
+|---|---|---|
+| Semester | [semester/README.md](src/main/java/com/group4/lumos_api/semester/README.md) | 학기 생성, 목록 조회, 상세 조회, 수정, 삭제 |
+| Course | [course/README.md](src/main/java/com/group4/lumos_api/course/README.md) | 학기에 종속된 수업 생성, 조회, 수정, 삭제 |
+| Timetable | [timetable/README.md](src/main/java/com/group4/lumos_api/timetable/README.md) | 학기에 종속된 시간표 생성, 조회, 수정, 삭제 |
+| Entry | [entry/README.md](src/main/java/com/group4/lumos_api/entry/README.md) | 시간표에 수업 배치, 배치 목록 조회, 삭제 |
+| Note | [note/README.md](src/main/java/com/group4/lumos_api/note/README.md) | 수업별 노트 생성, 조회, 검색, 수정, 삭제, 고정 |
+| Difficulty | [difficulty/README.md](src/main/java/com/group4/lumos_api/difficulty/README.md) | 수업 난이도 설정/조회, 시간표 평균 난이도 조회 |
+
+## 주요 엔드포인트
+
+### Semester
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 학기 생성 | POST | `/api/semesters` |
+| 학기 목록 조회 | GET | `/api/semesters` |
+| 학기 상세 조회 | GET | `/api/semesters/{semesterId}` |
+| 학기 수정 | PATCH | `/api/semesters/{semesterId}` |
+| 학기 삭제 | DELETE | `/api/semesters/{semesterId}` |
+
+### Course
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 수업 생성 | POST | `/api/semesters/{semesterId}/courses` |
+| 수업 목록 조회 | GET | `/api/semesters/{semesterId}/courses` |
+| 수업 상세 조회 | GET | `/api/semesters/{semesterId}/courses/{courseId}` |
+| 수업 수정 | PATCH | `/api/semesters/{semesterId}/courses/{courseId}` |
+| 수업 삭제 | DELETE | `/api/semesters/{semesterId}/courses/{courseId}` |
+
+### Timetable
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 시간표 생성 | POST | `/api/semesters/{semesterId}/timetables` |
+| 시간표 목록 조회 | GET | `/api/semesters/{semesterId}/timetables` |
+| 시간표 상세 조회 | GET | `/api/semesters/{semesterId}/timetables/{timetableId}` |
+| 시간표 수정 | PATCH | `/api/semesters/{semesterId}/timetables/{timetableId}` |
+| 시간표 삭제 | DELETE | `/api/semesters/{semesterId}/timetables/{timetableId}` |
+
+### Entry
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 수업 배치 | POST | `/api/semesters/{semesterId}/timetables/{timetableId}/entries` |
+| 수업 배치 목록 조회 | GET | `/api/semesters/{semesterId}/timetables/{timetableId}/entries` |
+| 수업 배치 삭제 | DELETE | `/api/semesters/{semesterId}/timetables/{timetableId}/entries/{entryId}` |
+
+### Note
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 노트 생성 | POST | `/api/semesters/{semesterId}/courses/{courseId}/notes` |
+| 노트 목록 조회 | GET | `/api/semesters/{semesterId}/courses/{courseId}/notes` |
+| 노트 검색 | GET | `/api/semesters/{semesterId}/courses/{courseId}/notes?q={keyword}` |
+| 노트 상세 조회 | GET | `/api/semesters/{semesterId}/courses/{courseId}/notes/{noteId}` |
+| 노트 수정 | PATCH | `/api/semesters/{semesterId}/courses/{courseId}/notes/{noteId}` |
+| 노트 삭제 | DELETE | `/api/semesters/{semesterId}/courses/{courseId}/notes/{noteId}` |
+| 노트 고정 설정/해제 | PATCH | `/api/semesters/{semesterId}/courses/{courseId}/notes/{noteId}/pin` |
+
+### Difficulty
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 난이도 설정 | POST | `/api/semesters/{semesterId}/courses/{courseId}/difficulty` |
+| 난이도 조회 | GET | `/api/semesters/{semesterId}/courses/{courseId}/difficulty` |
+| 시간표 평균 난이도 조회 | GET | `/api/semesters/{semesterId}/timetables/{timetableId}/difficulty` |
+
+## 데이터베이스
+
+PostgreSQL을 사용합니다. JPA 엔티티는 ERD의 물리 테이블명과 컬럼명을 기준으로 매핑되어 있습니다.
+
+| 테이블 | 설명 |
+|---|---|
+| `semester` | 학기 |
+| `course` | 수업 |
+| `timetable` | 시간표 |
+| `entry` | 시간표 수업 배치 |
+| `note` | 수업 노트 |
+| `difficulty` | 수업 난이도 |
+
+현재 설정은 `spring.jpa.hibernate.ddl-auto=update`를 사용합니다.
+
+## 실행 방법
 
 ### 사전 요구사항
-- **JDK 21 이상**
-- **Gradle 8.x 이상** (또는 포함된 gradlew 사용)
-- **PostgreSQL 12 이상** (또는 Neon 같은 클라우드 DB)
 
-### 환경 설정
+- JDK 21 이상
+- PostgreSQL 또는 Neon 같은 PostgreSQL 호환 DB
 
-#### 1. 데이터베이스 설정
-`src/main/resources/application.properties` 파일을 수정하세요:
+### 데이터베이스 설정
+
+`src/main/resources/application.properties`에서 DB 연결 정보를 설정합니다.
+
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/lumos_db
 spring.datasource.username=postgres
 spring.datasource.password=your_password
+spring.datasource.driver-class-name=org.postgresql.Driver
+
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=true
 ```
-
-**클라우드 DB(예: Neon) 사용 시:**
-```properties
-spring.datasource.url=jdbc:postgresql://your-host:5432/your_db?sslmode=require&channel_binding=require
-spring.datasource.username=your_user
-spring.datasource.password=your_password
-```
-
-#### 2. 로컬 PostgreSQL 설치 (Windows)
-- 공식 사이트에서 PostgreSQL 다운로드
-- 설치 중 포트(기본 5432) 및 슈퍼유저(postgres) 비밀번호 설정
-- pgAdmin 또는 psql로 DB 생성 확인
 
 ### 빌드
-로컬에서 Gradle 래퍼 사용 권장:
+
+Windows PowerShell:
+
 ```bash
-./gradlew clean build
-./gradlew test
+.\gradlew.bat build
 ```
 
-### 실행
+macOS/Linux:
+
 ```bash
-./gradlew bootRun
-```
-
-애플리케이션은 기본적으로 `http://localhost:8080`에서 실행됩니다.
-
-### 빠른 시작
-```bash
-# 1. 저장소 클론
-git clone https://github.com/WebAppGroup4/lumos-api.git
-cd lumos-api
-
-# 2. 데이터베이스 설정 (application.properties 수정)
-
-# 3. 빌드 및 실행
-./gradlew bootRun
-
-# 4. API 테스트
-curl http://localhost:8080/api/semesters
-```
-
-## 테스트 및 검증
-- 단위/통합 테스트: `./gradlew test` 실행
-- 실제 요청 예시와 Postman 데이터는 각 API별 `README.md`를 읽고 그대로 따라가면 됩니다.
-  - `src/main/java/com/group4/lumos_api/semester/README.md` - Semester API 예시
-  - `src/main/java/com/group4/lumos_api/course/README.md` - Course API 예시
-- 루트 `README.md`는 전체 구조와 실행 방법만 안내합니다.
-
-## 트러블슈팅
-
-### 포트 8080이 이미 사용 중일 때
-```bash
-# Windows PowerShell에서 PID 찾기
-netstat -ano | findstr :8080
-
-# 프로세스 종료
-taskkill /PID <PID> /F
-```
-
-### 데이터베이스 연결 실패
-- `application.properties`의 URL, 사용자명, 비밀번호 확인
-- PostgreSQL 서버 실행 상태 확인
-- 네트워크/방화벽 설정 확인
-
-### Gradle 빌드 실패
-```bash
-./gradlew clean
 ./gradlew build
 ```
 
-## 주의사항
-- 색상 등 입력 유효성은 DTO의 검증 어노테이션(`@NotBlank` 등)에 의존합니다. 추가 포맷 검증이 필요하면 `@Pattern`을 적용하세요.
-- 문서의 엔드포인트와 코드 동작(특히 예외/HTTP 상태 코드)이 일치하는지 확인해 주세요.
+### 실행
 
-## 기여 및 브랜치 규칙 (권장)
-- 기능: `feature/기능명` (예: `feature/course-search`)
-- 버그: `bugfix/버그명`
-- 리팩토링: `refactor/대상명`
-- 문서: `docs/문서명`
-- 커밋 메시지: `type: 한줄요약` (예: `feat: 수업 CRUD 추가`)
+Windows PowerShell:
 
----
-추가 설명이 필요하면 각 API별 `README.md`를 참고하세요.
+```bash
+.\gradlew.bat bootRun
+```
+
+macOS/Linux:
+
+```bash
+./gradlew bootRun
+```
+
+기본 실행 주소는 `http://localhost:8080`입니다.
+
+## Postman 테스트
+
+전체 API 흐름을 한 번에 테스트할 수 있는 Postman 컬렉션이 준비되어 있습니다.
+
+[docs/postman/lumos-api.postman_collection.json](../docs/postman/lumos-api.postman_collection.json)
+
+기본 컬렉션 변수:
+
+```text
+baseUrl=http://localhost:8080
+```
+
+권장 실행 순서:
+
+```text
+Semester -> Course -> Timetable -> Entry -> Note -> Difficulty
+```
+
+## 검증
+
+최근 확인한 빌드 명령:
+
+```bash
+.\gradlew.bat build
+```
+
+결과:
+
+```text
+BUILD SUCCESSFUL
+```
+
+## 브랜치 및 커밋 규칙
+
+권장 브랜치명:
+
+```text
+feature/기능명
+docs/문서명
+bugfix/버그명
+refactor/대상명
+```
+
+권장 커밋 메시지:
+
+```text
+feat(domain): 기능 요약
+docs(domain): 문서 요약
+fix(domain): 버그 수정 요약
+refactor(domain): 리팩터링 요약
+```
+
+예시:
+
+```text
+feat(note): 수업별 노트 관리 API 구현
+docs(note): 노트 API 사용 문서 추가
+```

@@ -57,13 +57,13 @@ lumos-api/
 ### 자격증 (Certification)
 - `GET  /api/certifications/student/{studentId}` : 학생별 자격증 목록 조회
 - `POST /api/certifications` : 새로운 자격증 등록
-- `PUT  /api/certifications/{certId}` : 자격증 정보 수정
+- `PATCH  /api/certifications/{certId}` : 자격증 정보 수정
 - `DELETE /api/certifications/{certId}` : 자격증 삭제
 
 ### 공인외국어 성적 (Language Exams)
 - `GET  /api/language-exams/student/{studentId}` : 학생별 성적 목록 조회
 - `POST /api/language-exams` : 새로운 성적 등록
-- `PUT  /api/language-exams/{examId}` : 성적 정보 수정
+- `PATCH  /api/language-exams/{examId}` : 성적 정보 수정
 - `DELETE /api/language-exams/{examId}` : 성적 삭제
 
 ## 빌드 및 실행 방법

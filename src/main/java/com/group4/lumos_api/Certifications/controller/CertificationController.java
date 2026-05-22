@@ -26,7 +26,7 @@ public class CertificationController {
         return ResponseEntity.ok(certificationService.addCertification(dto));
     }
 
-    @PutMapping("/{certId}")
+    @PatchMapping("/{certId}")
     public ResponseEntity<CertificationResponseDto> updateCertification(
             @PathVariable Long certId, 
             @RequestBody CertificationRequestDto dto) {

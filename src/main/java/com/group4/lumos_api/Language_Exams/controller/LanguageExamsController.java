@@ -26,7 +26,7 @@ public class LanguageExamsController {
         return ResponseEntity.ok(languageExamsService.addExam(dto));
     }
 
-    @PutMapping("/{examId}")
+    @PatchMapping("/{examId}")
     public ResponseEntity<LanguageExamsResponseDto> updateExam(
             @PathVariable Long examId, 
             @RequestBody LanguageExamsRequestDto dto) {

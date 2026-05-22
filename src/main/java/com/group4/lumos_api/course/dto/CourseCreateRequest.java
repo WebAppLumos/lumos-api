@@ -1,6 +1,7 @@
 package com.group4.lumos_api.course.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,14 +12,16 @@ import lombok.NoArgsConstructor;
 public class CourseCreateRequest {
 
     @NotBlank
-    private String name;
+    private String title;
 
-    @NotBlank
+    @Size(max = 8)
+    private String courseCode;
+
+    @Size(max = 50)
+    private String professor;
+
+    @Size(max = 50)
     private String classroom;
 
-    @NotBlank
-    private String professorName;
-
-    @NotBlank
-    private String color;
+    private Short credit;
 }

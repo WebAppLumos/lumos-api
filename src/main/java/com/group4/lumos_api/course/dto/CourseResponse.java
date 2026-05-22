@@ -15,13 +15,15 @@ public class CourseResponse {
 
     private Long semesterId;
 
-    private String name;
+    private String title;
+
+    private String courseCode;
+
+    private String professor;
 
     private String classroom;
 
-    private String professorName;
-
-    private String color;
+    private Short credit;
 
     private LocalDateTime createdAt;
 

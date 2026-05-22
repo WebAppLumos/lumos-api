@@ -31,10 +31,11 @@ public class CourseService {
 
         Course course = new Course();
         course.setSemester(semester);
-        course.setName(request.getName());
+        course.setTitle(request.getTitle());
+        course.setCourseCode(request.getCourseCode());
+        course.setProfessor(request.getProfessor());
         course.setClassroom(request.getClassroom());
-        course.setProfessorName(request.getProfessorName());
-        course.setColor(request.getColor());
+        course.setCredit(request.getCredit());
 
         Course saved = courseRepository.save(course);
         return convertToResponse(saved);
@@ -58,8 +59,8 @@ public class CourseService {
      * 특정 수업의 상세 정보를 조회한다.
      */
     @Transactional(readOnly = true)
-    public CourseResponse getCourseById(Long courseId) {
-        Course course = courseRepository.findById(courseId)
+    public CourseResponse getCourseById(Long semesterId, Long courseId) {
+        Course course = courseRepository.findByIdAndSemester_Id(courseId, semesterId)
                 .orElseThrow(() -> new RuntimeException("수업을 찾을 수 없습니다. ID: " + courseId));
         return convertToResponse(course);
     }
@@ -67,21 +68,24 @@ public class CourseService {
     /**
      * 수업명을 포함한 핵심 정보를 수정한다.
      */
-    public CourseResponse updateCourse(Long courseId, CourseUpdateRequest request) {
-        Course course = courseRepository.findById(courseId)
+    public CourseResponse updateCourse(Long semesterId, Long courseId, CourseUpdateRequest request) {
+        Course course = courseRepository.findByIdAndSemester_Id(courseId, semesterId)
                 .orElseThrow(() -> new RuntimeException("수업을 찾을 수 없습니다. ID: " + courseId));
 
-        if (request.getName() != null) {
-            course.setName(request.getName());
+        if (request.getTitle() != null) {
+            course.setTitle(request.getTitle());
+        }
+        if (request.getCourseCode() != null) {
+            course.setCourseCode(request.getCourseCode());
+        }
+        if (request.getProfessor() != null) {
+            course.setProfessor(request.getProfessor());
         }
         if (request.getClassroom() != null) {
             course.setClassroom(request.getClassroom());
         }
-        if (request.getProfessorName() != null) {
-            course.setProfessorName(request.getProfessorName());
-        }
-        if (request.getColor() != null) {
-            course.setColor(request.getColor());
+        if (request.getCredit() != null) {
+            course.setCredit(request.getCredit());
         }
 
         Course updated = courseRepository.save(course);
@@ -91,8 +95,8 @@ public class CourseService {
     /**
      * 수업을 삭제한다.
      */
-    public void deleteCourse(Long courseId) {
-        Course course = courseRepository.findById(courseId)
+    public void deleteCourse(Long semesterId, Long courseId) {
+        Course course = courseRepository.findByIdAndSemester_Id(courseId, semesterId)
                 .orElseThrow(() -> new RuntimeException("수업을 찾을 수 없습니다. ID: " + courseId));
         courseRepository.delete(course);
     }
@@ -104,10 +108,11 @@ public class CourseService {
         return new CourseResponse(
                 course.getId(),
                 course.getSemester().getId(),
-                course.getName(),
+                course.getTitle(),
+                course.getCourseCode(),
+                course.getProfessor(),
                 course.getClassroom(),
-                course.getProfessorName(),
-                course.getColor(),
+                course.getCredit(),
                 course.getCreatedAt(),
                 course.getUpdatedAt()
         );

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "courses")
+@Table(name = "course")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,28 +17,32 @@ public class Course {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "course_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    @Column(name = "title", nullable = false, length = 100)
+    private String title;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "course_code", length = 8)
+    private String courseCode;
+
+    @Column(name = "professor", length = 50)
+    private String professor;
+
+    @Column(name = "classroom", length = 50)
     private String classroom;
 
-    @Column(nullable = false, length = 100)
-    private String professorName;
+    @Column(name = "credit")
+    private Short credit;
 
-    @Column(nullable = false, length = 30)
-    private String color;
-
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist

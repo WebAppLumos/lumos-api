@@ -9,11 +9,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CourseUpdateRequest {
 
-    private String name;
+    private String title;
+
+    private String courseCode;
+
+    private String professor;
 
     private String classroom;
 
-    private String professorName;
-
-    private String color;
+    private Short credit;
 }

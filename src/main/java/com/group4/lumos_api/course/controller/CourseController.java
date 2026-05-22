@@ -48,7 +48,7 @@ public class CourseController {
     public ResponseEntity<CourseResponse> getCourseById(
             @PathVariable Long semesterId,
             @PathVariable Long courseId) {
-        return ResponseEntity.ok(courseService.getCourseById(courseId));
+        return ResponseEntity.ok(courseService.getCourseById(semesterId, courseId));
     }
 
     /**
@@ -60,7 +60,7 @@ public class CourseController {
             @PathVariable Long semesterId,
             @PathVariable Long courseId,
             @RequestBody CourseUpdateRequest request) {
-        return ResponseEntity.ok(courseService.updateCourse(courseId, request));
+        return ResponseEntity.ok(courseService.updateCourse(semesterId, courseId, request));
     }
 
     /**
@@ -71,7 +71,7 @@ public class CourseController {
     public ResponseEntity<Void> deleteCourse(
             @PathVariable Long semesterId,
             @PathVariable Long courseId) {
-        courseService.deleteCourse(courseId);
+        courseService.deleteCourse(semesterId, courseId);
         return ResponseEntity.noContent().build();
     }
 }

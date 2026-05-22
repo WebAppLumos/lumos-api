@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "semesters")
+@Table(name = "semester")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,30 +16,31 @@ public class Semester {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "semester_id")
     private Long id;
     
     // 학기명 (예: "2024-1학기", "2024 Spring")
-    @Column(nullable = false, length = 100)
-    private String name;
+    @Column(name = "title", nullable = false, length = 100)
+    private String title;
     
     // 시작 날짜
-    @Column(nullable = false)
+    @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
     
     // 종료 날짜
-    @Column(nullable = false)
+    @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
     
     // 활성 여부
-    @Column(nullable = false)
+    @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
     
     // 생성 일시
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
     // 수정 일시
-    @Column(nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
     @PrePersist

@@ -23,7 +23,7 @@ public class SemesterService {
      */
     public SemesterResponse createSemester(SemesterRequest request) {
         Semester semester = new Semester();
-        semester.setName(request.getName());
+        semester.setTitle(request.getTitle());
         semester.setStartDate(request.getStartDate());
         semester.setEndDate(request.getEndDate());
         semester.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
@@ -60,8 +60,8 @@ public class SemesterService {
         Semester semester = semesterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("학기를 찾을 수 없습니다. ID: " + id));
         
-        if (request.getName() != null) {
-            semester.setName(request.getName());
+        if (request.getTitle() != null) {
+            semester.setTitle(request.getTitle());
         }
         if (request.getStartDate() != null) {
             semester.setStartDate(request.getStartDate());
@@ -92,7 +92,7 @@ public class SemesterService {
     private SemesterResponse convertToResponse(Semester semester) {
         return new SemesterResponse(
                 semester.getId(),
-                semester.getName(),
+                semester.getTitle(),
                 semester.getStartDate(),
                 semester.getEndDate(),
                 semester.getIsActive(),

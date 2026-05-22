@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class SemesterRequest {
     // 학기명
-    private String name;
+    private String title;
     
     // 시작 날짜
     private LocalDate startDate;

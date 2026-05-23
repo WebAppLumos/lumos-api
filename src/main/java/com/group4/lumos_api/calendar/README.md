@@ -57,24 +57,139 @@ com.group4.lumos_api.calendar/
 
 ## 🎨 데이터 상세 (Enum & Fields)
 
-### 1. Request Body (POST/PUT)
+### 1. 필드 설명
+| 필드명 | 타입 | 설명 |
+| :--- | :--- | :--- |
+| **scheduleId** | Long | 일정 고유 ID (자동 생성) |
+| **title** | String | 일정 제목 (필수) |
+| **content** | String | 일정 상세 내용 |
+| **date** | LocalDate | 일정 날짜 (YYYY-MM-DD, 필수) |
+| **studentId** | Long | 학생 ID (학사 일정일 경우 `null`) |
+| **isCompleted** | Boolean | 완료 여부 |
+| **category** | String | 일정 분류 (`STUDY`, `WORK`, `PRIVATE`, `ACADEMIC`, `OTHER`) |
+| **priority** | String | 중요도 (`HIGH`, `MEDIUM`, `LOW`) |
+
+---
+
+## 🚀 Postman 테스트 데이터
+
+### 1. 개인 일정 생성 (POST)
+```bash
+POST http://localhost:8080/api/calendar/events
+Content-Type: application/json
+
+{
+  "title": "기말고사 공부",
+  "content": "도서관에서 알고리즘 공부",
+  "date": "2026-06-15",
+  "studentId": 1,
+  "category": "STUDY",
+  "priority": "HIGH"
+}
+```
+**응답 예시 (201 Created)**
 ```json
 {
-  "title": "필수 제목",
-  "content": "선택적 내용",
-  "date": "2026-05-22",
+  "scheduleId": 1,
+  "title": "기말고사 공부",
+  "content": "도서관에서 알고리즘 공부",
+  "date": "2026-06-15",
   "studentId": 1,
-  "category": "STUDY",  // 아래 옵션 참고
-  "priority": "HIGH",   // 아래 옵션 참고
-  "isCompleted": false
+  "isCompleted": false,
+  "category": "STUDY",
+  "priority": "HIGH"
 }
 ```
 
-### 2. Enum 옵션 리스트
-| 필드명 | 허용되는 값 (Enum) | 설명 |
-| :--- | :--- | :--- |
-| **Category** | `STUDY`, `WORK`, `PRIVATE`, `ACADEMIC`, `OTHER` | 일정 분류 |
-| **Priority** | `HIGH`, `MEDIUM`, `LOW` | 중요도 (UI 색상 대응용) |
+### 2. 일정 목록 조회 (GET)
+```bash
+GET http://localhost:8080/api/calendar/events?studentId=1
+```
+**응답 예시 (200 OK)**
+```json
+[
+  {
+    "scheduleId": 100,
+    "title": "여름방학 시작",
+    "content": "공식 학사 일정",
+    "date": "2026-06-22",
+    "studentId": null,
+    "isCompleted": false,
+    "category": "ACADEMIC",
+    "priority": "MEDIUM"
+  },
+  {
+    "scheduleId": 1,
+    "title": "기말고사 공부",
+    "content": "도서관에서 알고리즘 공부",
+    "date": "2026-06-15",
+    "studentId": 1,
+    "isCompleted": false,
+    "category": "STUDY",
+    "priority": "HIGH"
+  }
+]
+```
+
+### 3. 완료 상태 토글 (PATCH)
+```bash
+PATCH http://localhost:8080/api/calendar/events/1/toggle
+```
+**응답 예시 (200 OK)**
+```json
+{
+  "scheduleId": 1,
+  "isCompleted": true,
+  ...
+}
+```
+
+---
+
+## 테스트 시나리오 (순서대로 실행)
+# 1. 개인 일정 생성
+POST http://localhost:8080/api/calendar/events
+{
+  "title": "기말고사 공부",
+  "date": "2026-06-15",
+  "studentId": 1
+}
+# 응답에서 scheduleId=1 확인
+
+# 2. 내 일정 목록 확인
+GET http://localhost:8080/api/calendar/events?studentId=1
+
+# 3. 일정 검색 (키워드)
+GET http://localhost:8080/api/calendar/events?keyword=기말
+
+# 4. 일정 상태 완료 처리
+PATCH http://localhost:8080/api/calendar/events/1/toggle
+
+# 5. 일정 수정
+PUT http://localhost:8080/api/calendar/events/1
+{
+  "title": "수정된 제목",
+  "date": "2026-06-15",
+  "studentId": 1
+}
+
+# 6. 학사 일정 수정 시도 (에러 확인)
+PUT http://localhost:8080/api/calendar/events/100
+{ "title": "수정시도", "studentId": 1 }
+# 403 Forbidden 응답 확인
+
+# 7. 일정 삭제
+DELETE http://localhost:8080/api/calendar/events/1
+
+## 에러 응답
+- **404 Not Found**: 존재하지 않는 일정 ID
+- **403 Forbidden**: 학사 일정을 수정/삭제/상태변경 하려고 할 때
+- **400 Bad Request**: 필수 필드 누락 또는 잘못된 요청 형식
+
+## 주의사항
+- **학사 일정 보호**: `studentId`가 `null`인 일정은 시스템 전용이며, API를 통한 수정/삭제/완료처리가 금지됩니다.
+- **조회 정책**: `studentId` 쿼리 파라미터를 누락하면 전체 일정이 조회되나, 실무에서는 본인의 ID를 포함하여 호출하는 것을 권장합니다.
+- **데이터 초기화**: 서버 시작 시 `CalendarDataInitializer`를 통해 기본 학사 일정 데이터가 생성됩니다.
 
 ---
 

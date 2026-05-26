@@ -42,17 +42,14 @@ com.group4.lumos_api.calendar/
 
 ## 🚀 API 명세 (Endpoints)
 
-| 기능명 | API명 | 엔드포인트 | Method | 설명 |
-| :--- | :--- | :--- | :--- | :--- |
-| **일정 통합 조회** | `events` | `/api/calendar/events` | `GET` | 전체 일정 조회 (필터/검색 포함) |
-| **날짜별 일정 조회** | `events` | `/api/calendar/events?date=YYYY-MM-DD` | `GET` | 특정 날짜 일정 조회 |
-| **일정 검색** | `events` | `/api/calendar/events?keyword=검색어` | `GET` | 일정 제목/내용 검색 |
-| **유형별 조회** | `events` | `/api/calendar/events?type=academic` | `GET` | 학사(`academic`)/개인(`personal`) 필터 |
-| **일정 상세 조회** | `event` | `/api/calendar/events/{scheduleId}` | `GET` | 특정 일정 1개 상세 조회 |
-| **개인 일정 등록** | `eventCreate` | `/api/calendar/events` | `POST` | 새로운 일정 생성 (JSON Body 사용) |
-| **일정 수정** | `eventUpdate` | `/api/calendar/events/{scheduleId}` | `PUT` | 기존 일정 수정 |
-| **일정 삭제** | `eventDelete` | `/api/calendar/events/{scheduleId}` | `DELETE` | 일정 삭제 (학사 일정은 불가) |
-| **완료 상태 토글** | `eventToggle` | `/api/calendar/events/{scheduleId}/toggle` | `PATCH` | 완료/미완료 상태 반전 (True/False) |
+| 기능명 | 엔드포인트 | Method | 설명 |
+| :--- | :--- | :--- | :--- |
+| **일정 통합 조회/검색** | `/api/calendar/events` | `GET` | 필터(studentId, date, keyword, type) 기반 조회 |
+| **일정 상세 조회** | `/api/calendar/events/{scheduleId}` | `GET` | 특정 일정 1개 상세 조회 |
+| **개인 일정 등록** | `/api/calendar/events` | `POST` | 새로운 일정 생성 |
+| **일정 내용 수정** | `/api/calendar/events/{scheduleId}` | `PATCH` | 기존 일정 정보 수정 |
+| **완료 상태 토글** | `/api/calendar/events/{scheduleId}/toggle` | `PATCH` | 완료/미완료 상태 즉시 반전 |
+| **일정 삭제** | `/api/calendar/events/{scheduleId}` | `DELETE` | 일정 삭제 (학사 일정은 불가) |
 
 ---
 
@@ -69,68 +66,56 @@ com.group4.lumos_api.calendar/
 ### 1. 필드 설명
 | 필드명 | 타입 | 필수여부 | 설명 |
 | :--- | :--- | :--- | :--- |
-| **scheduleId** | Long | 자동생성 | 일정 고유 ID |
+| **scheduleId** | Long | 자동생성 | 일정 고유 ID (DB PK) |
 | **title** | String | **필수** | 일정 제목 |
 | **content** | String | 선택 | 일정 상세 내용 |
 | **date** | LocalDate | **필수** | 일정 날짜 (YYYY-MM-DD) |
-| **studentId** | Long | **필수** | 학생 ID (개인 일정일 경우 필수) |
+| **studentId** | Long | **필수** | 학생 ID (개인 일정 생성 시 필수) |
 | **isCompleted** | boolean | 선택 | 완료 여부 (기본값: `false`) |
 | **category** | String | 선택 | 일정 분류 (대문자 필수: `STUDY`, `WORK`, `PRIVATE`, `ACADEMIC`, `OTHER`) |
 | **priority** | String | 선택 | 중요도 (대문자 필수: `HIGH`, `MEDIUM`, `LOW`) |
 
 ---
 
-## 🧪 테스트 시나리오 (Full Test Suite)
+## 🧪 테스트 시나리오 (Test Flow)
 
-아래 순서대로 API를 호출하며 모든 기능을 검증하십시오. (모든 주소는 `http://localhost:8080` 기준)
+아래 순서대로 API를 호출하며 기능을 검증하십시오. (모든 주소는 `http://localhost:8080` 기준)
 **※ 주의: `{scheduleId}` 부분은 1단계 응답에서 받은 실제 ID 숫자로 바꿔서 테스트하세요.**
 
 ### 1단계: 개인 일정 생성 (POST)
+`isCompleted`는 서버에서 무조건 `false`로 시작하므로 생략 가능합니다.
 - **Endpoint**: `POST /api/calendar/events`
 - **Body**:
   ```json
   {
-    "title": "알고리즘 기말고사 공부",
-    "content": "도서관 4층에서 빡공하기",
+    "title": "기말고사 공부",
+    "content": "도서관에서 알고리즘 공부",
     "date": "2026-06-15",
     "studentId": 1,
     "category": "STUDY",
     "priority": "HIGH"
   }
   ```
-- **확인**: 생성된 `scheduleId`를 확인하세요. (이후 단계에서 사용)
+- **확인**: 응답 Body에서 생성된 **`scheduleId`**를 확인하세요. (예: 5)
 
-### 2단계: 통합 일정 조회 (GET)
-- **Endpoint**: `GET /api/calendar/events?studentId=1`
-- **설명**: 학사 일정(null)과 내 일정(1번)이 모두 잘 섞여서 나오는지 확인합니다.
+### 2단계: 내 일정 목록 조회 및 검색 (GET)
+방금 생성한 일정이 잘 나오는지, 검색이 잘 되는지 확인합니다.
+- **통합 조회**: `GET /api/calendar/events?studentId=1`
+- **키워드 검색**: `GET /api/calendar/events?studentId=1&keyword=알고리즘`
 
-### 3단계: 특정 날짜로 필터링 (GET)
-- **Endpoint**: `GET /api/calendar/events?studentId=1&date=2026-06-15`
-- **설명**: 방금 생성한 날짜의 일정만 필터링되어 나오는지 확인합니다.
-
-### 4단계: 키워드 검색 (GET)
-- **Endpoint**: `GET /api/calendar/events?studentId=1&keyword=알고리즘`
-- **설명**: 제목이나 내용에 '알고리즘'이 포함된 일정만 검색되는지 확인합니다.
-
-### 5단계: 유형별 필터링 (GET)
-- **학사 일정만 보기**: `GET /api/calendar/events?type=academic`
-- **개인 일정만 보기**: `GET /api/calendar/events?studentId=1&type=personal`
-
-### 6단계: 일정 상세 조회 (GET)
-- **Endpoint**: `GET /api/calendar/events/{scheduleId}`
-- **설명**: 특정 일정 1개의 상세 정보만 가져오는지 확인합니다.
-
-### 7단계: 완료 상태 토글 (PATCH)
+### 3단계: 완료 상태로 변경 (PATCH - Toggle)
+체크박스를 클릭하여 "완료" 처리하는 시나리오입니다.
 - **Endpoint**: `PATCH /api/calendar/events/{scheduleId}/toggle`
-- **설명**: 체크박스 클릭 시 `isCompleted`가 `true`로 바뀌는지 확인합니다.
+- **확인**: `isCompleted`가 `true`로 바뀌었는지 확인하세요.
 
-### 8단계: 일정 내용 수정 (PUT)
-- **Endpoint**: `PUT /api/calendar/events/{scheduleId}`
+### 4단계: 일정 내용 수정 (PATCH)
+상세 내용을 업데이트합니다. (날짜는 6월 15일로 동일하게 유지)
+- **Endpoint**: `PATCH /api/calendar/events/{scheduleId}`
 - **Body**:
   ```json
   {
-    "title": "수정된 알고리즘 공부",
-    "content": "카페로 장소 변경",
+    "title": "수정된 공부 일정",
+    "content": "장소를 카페로 변경",
     "date": "2026-06-15",
     "studentId": 1,
     "isCompleted": true,
@@ -138,10 +123,12 @@ com.group4.lumos_api.calendar/
     "priority": "MEDIUM"
   }
   ```
+- **설명**: To-Do 수정 폼에서 내용을 고치고 저장하는 시나리오입니다.
 
-### 9단계: 일정 삭제 (DELETE)
+### 5단계: 일정 삭제 (DELETE)
+테스트가 끝난 일정을 삭제합니다.
 - **Endpoint**: `DELETE /api/calendar/events/{scheduleId}`
-- **확인**: 삭제 후 다시 조회했을 때 데이터가 나오지 않아야 합니다.
+- **확인**: `204 No Content` 응답 확인 후 다시 조회했을 때 데이터가 없어야 합니다.
 
 ---
 
@@ -150,7 +137,7 @@ com.group4.lumos_api.calendar/
 1. **Enum 대소문자**: `category`, `priority`는 반드시 **대문자**여야 합니다. (`study` ❌ -> `STUDY` ✅)
 2. **학생 ID**: 현재 `Long` 타입이므로 숫자로 입력하십시오.
 3. **날짜**: 반드시 `YYYY-MM-DD` 형식을 사용하십시오.
-4. **학사 일정 보호**: `studentId`가 `null`인 일정은 `PUT`, `DELETE`, `PATCH` 요청 시 `403 Forbidden` 에러가 발생합니다.
+4. **학사 일정 보호**: `studentId`가 `null`인 일정은 `PATCH`, `DELETE` 요청 시 `403 Forbidden` 에러가 발생합니다.
 
 ---
 

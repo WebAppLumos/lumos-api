@@ -47,7 +47,7 @@ public class CalendarEventController {
         return toResponse(service.createEvent(request));
     }
 
-    @PutMapping("/{scheduleId}")
+    @PatchMapping("/{scheduleId}")
     public CalendarEventResponse updateEvent(@PathVariable("scheduleId") Long scheduleId,
                                              @Valid @RequestBody CalendarEventRequest request) {
         return toResponse(service.updateEvent(scheduleId, request));

@@ -36,9 +36,9 @@ public class CalendarEventController {
                 .stream().map(this::toResponse).toList();
     }
 
-    @GetMapping("/{eventId}")
-    public CalendarEventResponse getEvent(@PathVariable("eventId") Long eventId) {
-        return toResponse(service.getEvent(eventId));
+    @GetMapping("/{scheduleId}")
+    public CalendarEventResponse getEvent(@PathVariable("scheduleId") Long scheduleId) {
+        return toResponse(service.getEvent(scheduleId));
     }
 
     @PostMapping
@@ -47,21 +47,21 @@ public class CalendarEventController {
         return toResponse(service.createEvent(request));
     }
 
-    @PutMapping("/{eventId}")
-    public CalendarEventResponse updateEvent(@PathVariable("eventId") Long eventId,
+    @PutMapping("/{scheduleId}")
+    public CalendarEventResponse updateEvent(@PathVariable("scheduleId") Long scheduleId,
                                              @Valid @RequestBody CalendarEventRequest request) {
-        return toResponse(service.updateEvent(eventId, request));
+        return toResponse(service.updateEvent(scheduleId, request));
     }
 
-    @DeleteMapping("/{eventId}")
+    @DeleteMapping("/{scheduleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteEvent(@PathVariable("eventId") Long eventId) {
-        service.deleteEvent(eventId);
+    public void deleteEvent(@PathVariable("scheduleId") Long scheduleId) {
+        service.deleteEvent(scheduleId);
     }
 
-    @PatchMapping("/{eventId}/toggle")
-    public CalendarEventResponse toggleCompletion(@PathVariable("eventId") Long eventId) {
-        return toResponse(service.toggleCompletion(eventId));
+    @PatchMapping("/{scheduleId}/toggle")
+    public CalendarEventResponse toggleCompletion(@PathVariable("scheduleId") Long scheduleId) {
+        return toResponse(service.toggleCompletion(scheduleId));
     }
 
     private CalendarEventResponse toResponse(CalendarEvent entity) {

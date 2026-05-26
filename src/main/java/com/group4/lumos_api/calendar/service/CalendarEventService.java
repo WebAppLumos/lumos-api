@@ -60,7 +60,7 @@ public class CalendarEventService {
                 .content(request.getContent())
                 .date(request.getDate())
                 .studentId(request.getStudentId())
-                .isCompleted(request.isCompleted())
+                .isCompleted(false) // 생성 시에는 무조건 false로 고정
                 .category(request.getCategory() != null ? EventCategory.valueOf(request.getCategory()) : EventCategory.OTHER)
                 .priority(request.getPriority() != null ? EventPriority.valueOf(request.getPriority()) : EventPriority.MEDIUM)
                 .build();

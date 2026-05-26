@@ -1,5 +1,7 @@
 package com.group4.lumos_api.calendar.dto;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -23,7 +25,8 @@ public class CalendarEventRequest {
 
     private Long studentId;
 
-    private boolean isCompleted;
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    private boolean isCompleted = false;
 
     private String category; // Enum name as String
 

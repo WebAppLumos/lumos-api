@@ -42,20 +42,62 @@ lumos-api/
 - `POST   /api/users` - Create a new user
 - `PATCH  /api/users/{userId}` - Update user details
 
+**Data Model (JSON):**
+```json
+{
+  "userId": "test-user-id",
+  "email": "user@example.com",
+  "name": "홍길동",
+  "phoneNumber": "010-1234-5678",
+  "department": "컴퓨터공학과",
+  "grade": 3,
+  "studentNumber": "2024001"
+}
+```
+
 ### Previous Semester Scores
 - `GET    /api/users/{userId}/previous-semester-scores`
 - `POST   /api/users/{userId}/previous-semester-scores`
 - `PATCH  /api/previous-semester-scores/{scoreId}`
+
+**Data Model (JSON):**
+```json
+{
+  "score": 4.25,
+  "year": "2024-03-01",
+  "semester": "1학기"
+}
+```
 
 ### Certifications
 - `GET    /api/users/{userId}/certifications`
 - `POST   /api/users/{userId}/certifications`
 - `PATCH  /api/certifications/{certId}`
 
+**Data Model (JSON):**
+```json
+{
+  "certName": "정보처리기사",
+  "issueDate": "2024-05-20"
+}
+```
+
 ### Language Exams
 - `GET    /api/users/{userId}/language-exams`
 - `POST   /api/users/{userId}/language-exams`
 - `PATCH  /api/language-exams/{examId}`
+
+**Data Model (JSON):**
+```json
+{
+  "examCategory": "TOEIC",
+  "score": "950",
+  "examDate": "2024-04-15",
+  "year": 2024,
+  "semester": "1학기",
+  "expiryDate": "2026-04-15"
+}
+```
 
 ## Getting Started
 

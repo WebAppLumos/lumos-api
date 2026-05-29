@@ -49,16 +49,83 @@ User (Student)
 lumos-api/
 ├── src/main/java/com/group4/lumos_api/
 │   ├── LumosApiApplication.java
-│   ├── user/          # 사용자 관리
-│   ├── semester/      # 학기 관리
-│   ├── course/        # 수업 관리
-│   ├── timetable/     # 시간표 관리
-│   ├── entry/         # 수업 배치 관리
-│   ├── note/          # 노트 관리
-│   ├── difficulty/    # 난이도 관리
-│   ├── Certifications/ # 자격증 관리
-│   ├── Language_Exams/ # 어학 시험 관리
+│   ├── user/                  # 사용자 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── semester/              # 학기 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── course/                # 수업 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── timetable/             # 시간표 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── entry/                 # 수업 배치 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── note/                  # 노트 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── difficulty/            # 난이도 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── calendar/              # 캘린더 및 To-Do 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── Certifications/         # 자격증 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── Language_Exams/         # 어학 시험 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
 │   └── previous_semester_scores/ # 지난 학기 성적 관리
+│       ├── controller/
+│       ├── dto/
+│       ├── entity/
+│       ├── repository/
+│       ├── service/
+│       └── README.md
 ├── src/main/resources/
 │   └── application.properties
 ├── build.gradle

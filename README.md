@@ -20,20 +20,28 @@ Lumos의 학기, 수업, 시간표, 노트, 난이도 정보를 관리하는 Spr
 ## 도메인 관계
 
 ```text
-Semester
-  ├─ Course
-  │   ├─ Note
-  │   └─ Difficulty
-  └─ Timetable
-      └─ Entry -> Course
+User (Student)
+  ├─ Semester
+  │   ├─ Course
+  │   │   ├─ Note
+  │   │   └─ Difficulty
+  │   └─ Timetable
+  │       └─ Entry -> Course
+  ├─ Certifications
+  ├─ Language Exams
+  └─ Previous Semester Scores
 ```
 
-- `semester`: 독립 실행 가능
+- `user`: 시스템 사용자 (학생) 정보
+- `semester`: 독립 실행 가능 (논리적으로 `user`에 귀속)
 - `course`: `semester`에 종속
 - `timetable`: `semester`에 종속
 - `note`: `course`에 종속
 - `difficulty`: `course`에 종속
 - `entry`: `timetable`과 `course`에 종속
+- `certifications`: 학생의 자격증 취득 정보
+- `language_exams`: 학생의 어학 시험 성적 정보
+- `previous_semester_scores`: 학생의 지난 학기 성적 정보
 
 ## 프로젝트 구조
 
@@ -41,42 +49,77 @@ Semester
 lumos-api/
 ├── src/main/java/com/group4/lumos_api/
 │   ├── LumosApiApplication.java
-│   ├── semester/
+│   ├── user/                  # 사용자 관리
 │   │   ├── controller/
 │   │   ├── dto/
 │   │   ├── entity/
 │   │   ├── repository/
 │   │   ├── service/
 │   │   └── README.md
-│   ├── course/
+│   ├── semester/              # 학기 관리
 │   │   ├── controller/
 │   │   ├── dto/
 │   │   ├── entity/
 │   │   ├── repository/
 │   │   ├── service/
 │   │   └── README.md
-│   ├── timetable/
+│   ├── course/                # 수업 관리
 │   │   ├── controller/
 │   │   ├── dto/
 │   │   ├── entity/
 │   │   ├── repository/
 │   │   ├── service/
 │   │   └── README.md
-│   ├── entry/
+│   ├── timetable/             # 시간표 관리
 │   │   ├── controller/
 │   │   ├── dto/
 │   │   ├── entity/
 │   │   ├── repository/
 │   │   ├── service/
 │   │   └── README.md
-│   ├── note/
+│   ├── entry/                 # 수업 배치 관리
 │   │   ├── controller/
 │   │   ├── dto/
 │   │   ├── entity/
 │   │   ├── repository/
 │   │   ├── service/
 │   │   └── README.md
-│   └── difficulty/
+│   ├── note/                  # 노트 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── difficulty/            # 난이도 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── calendar/              # 캘린더 및 To-Do 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── Certifications/         # 자격증 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   ├── Language_Exams/         # 어학 시험 관리
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── repository/
+│   │   ├── service/
+│   │   └── README.md
+│   └── previous_semester_scores/ # 지난 학기 성적 관리
 │       ├── controller/
 │       ├── dto/
 │       ├── entity/
@@ -98,14 +141,27 @@ lumos-api/
 
 | 도메인 | 문서 | 설명 |
 |---|---|---|
+| User | [user/README.md](src/main/java/com/group4/lumos_api/user/README.md) | 사용자(학생) 생성, 조회, 수정, 삭제 |
 | Semester | [semester/README.md](src/main/java/com/group4/lumos_api/semester/README.md) | 학기 생성, 목록 조회, 상세 조회, 수정, 삭제 |
 | Course | [course/README.md](src/main/java/com/group4/lumos_api/course/README.md) | 학기에 종속된 수업 생성, 조회, 수정, 삭제 |
 | Timetable | [timetable/README.md](src/main/java/com/group4/lumos_api/timetable/README.md) | 학기에 종속된 시간표 생성, 조회, 수정, 삭제 |
 | Entry | [entry/README.md](src/main/java/com/group4/lumos_api/entry/README.md) | 시간표에 수업 배치, 배치 목록 조회, 삭제 |
 | Note | [note/README.md](src/main/java/com/group4/lumos_api/note/README.md) | 수업별 노트 생성, 조회, 검색, 수정, 삭제, 고정 |
 | Difficulty | [difficulty/README.md](src/main/java/com/group4/lumos_api/difficulty/README.md) | 수업 난이도 설정/조회, 시간표 평균 난이도 조회 |
+| Certifications | [Certifications/README.md](src/main/java/com/group4/lumos_api/Certifications/README.md) | 학생별 자격증 취득 정보 관리 |
+| Language Exams | [Language_Exams/README.md](src/main/java/com/group4/lumos_api/Language_Exams/README.md) | 어학 시험(TOEIC 등) 성적 관리 |
 
 ## 주요 엔드포인트
+
+### User
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 사용자 생성 | POST | `/api/users` |
+| 사용자 목록 조회 | GET | `/api/users` |
+| 사용자 상세 조회 | GET | `/api/users/{userId}` |
+| 사용자 수정 | PATCH | `/api/users/{userId}` |
+| 사용자 삭제 | DELETE | `/api/users/{userId}` |
 
 ### Semester
 
@@ -165,18 +221,49 @@ lumos-api/
 | 난이도 조회 | GET | `/api/semesters/{semesterId}/courses/{courseId}/difficulty` |
 | 시간표 평균 난이도 조회 | GET | `/api/semesters/{semesterId}/timetables/{timetableId}/difficulty` |
 
+### Certifications
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 자격증 등록 | POST | `/api/certifications` |
+| 자격증 목록 조회 | GET | `/api/certifications/student/{studentId}` |
+| 자격증 수정 | PUT | `/api/certifications/{certId}` |
+| 자격증 삭제 | DELETE | `/api/certifications/{certId}` |
+
+### Language Exams
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 성적 등록 | POST | `/api/language-exams` |
+| 성적 목록 조회 | GET | `/api/language-exams/student/{studentId}` |
+| 성적 수정 | PUT | `/api/language-exams/{examId}` |
+| 성적 삭제 | DELETE | `/api/language-exams/{examId}` |
+
+### Previous Semester Scores
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 성적 등록 | POST | `/api/users/{userId}/previous-semester-scores` |
+| 성적 목록 조회 | GET | `/api/users/{userId}/previous-semester-scores` |
+| 성적 수정 | PATCH | `/api/previous-semester-scores/{scoreId}` |
+| 성적 삭제 | DELETE | `/api/previous-semester-scores/{scoreId}` |
+
 ## 데이터베이스
 
 PostgreSQL을 사용합니다. JPA 엔티티는 ERD의 물리 테이블명과 컬럼명을 기준으로 매핑되어 있습니다.
 
 | 테이블 | 설명 |
 |---|---|
+| `users` | 사용자(학생) |
 | `semester` | 학기 |
 | `course` | 수업 |
 | `timetable` | 시간표 |
 | `entry` | 시간표 수업 배치 |
 | `note` | 수업 노트 |
 | `difficulty` | 수업 난이도 |
+| `certifications` | 자격증 정보 |
+| `language_exams` | 어학 시험 성적 |
+| `previous_semester_scores` | 지난 학기 성적 |
 
 현재 설정은 `spring.jpa.hibernate.ddl-auto=update`를 사용합니다.
 

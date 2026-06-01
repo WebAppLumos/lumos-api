@@ -23,7 +23,7 @@ public class CalendarEventRequest {
     @NotNull(message = "날짜를 입력해주세요.")
     private LocalDate date;
 
-    private Long studentId;
+    private String userId;
 
     @JsonSetter(nulls = Nulls.AS_EMPTY)
     private boolean isCompleted = false;

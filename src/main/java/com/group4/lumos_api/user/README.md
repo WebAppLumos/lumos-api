@@ -23,7 +23,7 @@
   "phoneNumber": "010-1234-5678",
   "department": "컴퓨터공학과",
   "grade": 3,
-  "studentNumber": "20240001"
+  "studentNumber": "2024001"
 }
 ```
 
@@ -36,7 +36,7 @@
   "phoneNumber": "010-1234-5678",
   "department": "컴퓨터공학과",
   "grade": 3,
-  "studentNumber": "20240001"
+  "studentNumber": "2024001"
 }
 ```
 

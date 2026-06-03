@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/calendar/events")
 @Validated
+@CrossOrigin(origins = "http://localhost:5173")
 public class CalendarEventController {
 
     private final CalendarEventService service;

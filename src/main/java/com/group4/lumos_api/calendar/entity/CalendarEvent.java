@@ -28,8 +28,9 @@ public class CalendarEvent {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @Column(name = "student_id")
-    private Long studentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private com.group4.lumos_api.user.entity.Users user;
 
     @Column(name = "is_completed", nullable = false)
     @Builder.Default

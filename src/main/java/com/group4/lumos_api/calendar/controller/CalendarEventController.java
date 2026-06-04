@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/calendar/events")
 @Validated
+@CrossOrigin(origins = "http://localhost:5173")
 public class CalendarEventController {
 
     private final CalendarEventService service;
@@ -27,12 +28,12 @@ public class CalendarEventController {
     // 일정 통합 조회 (전체, 날짜별, 검색, 유형별)
     @GetMapping
     public List<CalendarEventResponse> getEvents(
-            @RequestParam(required = false) Long studentId,
+            @RequestParam(required = false) String userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String type) {
         
-        return service.searchEvents(studentId, date, keyword, type)
+        return service.searchEvents(userId, date, keyword, type)
                 .stream().map(this::toResponse).toList();
     }
 
@@ -70,7 +71,7 @@ public class CalendarEventController {
                 .title(entity.getTitle())
                 .content(entity.getContent())
                 .date(entity.getDate())
-                .studentId(entity.getStudentId())
+                .userId(entity.getUser() != null ? entity.getUser().getUserId() : null)
                 .isCompleted(entity.isCompleted())
                 .category(entity.getCategory() != null ? entity.getCategory().name() : null)
                 .priority(entity.getPriority() != null ? entity.getPriority().name() : null)

@@ -16,18 +16,20 @@ import java.util.List;
 public class CalendarEventService {
 
     private final CalendarEventRepository repository;
+    private final com.group4.lumos_api.user.repository.UsersRepository userRepository;
 
-    public CalendarEventService(CalendarEventRepository repository) {
+    public CalendarEventService(CalendarEventRepository repository, com.group4.lumos_api.user.repository.UsersRepository userRepository) {
         this.repository = repository;
+        this.userRepository = userRepository;
     }
 
     public List<CalendarEvent> getAllEvents() {
         return repository.findAll();
     }
 
-    // 학사 일정 및 특정 학생의 일정을 함께 가져오기
-    public List<CalendarEvent> getMyAndGlobalEvents(Long studentId) {
-        return repository.findByStudentIdIsNullOrStudentId(studentId);
+    // 학사 일정 및 특정 사용자의 일정을 함께 가져오기
+    public List<CalendarEvent> getMyAndGlobalEvents(String userId) {
+        return repository.findByUserIsNullOrUser_UserId(userId);
     }
 
     public CalendarEvent getEvent(Long id) {
@@ -41,25 +43,28 @@ public class CalendarEventService {
 
     // 학사 일정만 조회
     public List<CalendarEvent> getAcademicEvents() {
-        return repository.findByStudentIdIsNull();
+        return repository.findByUserIsNull();
     }
 
     // 통합 필터 검색
-    public List<CalendarEvent> searchEvents(Long studentId, LocalDate date, String keyword, String type) {
-        return repository.findByFilters(date, keyword, studentId, type);
+    public List<CalendarEvent> searchEvents(String userId, LocalDate date, String keyword, String type) {
+        return repository.findByFilters(date, keyword, userId, type);
     }
 
     public CalendarEvent createEvent(CalendarEventRequest request) {
         // 일반 사용자가 학사 일정(null)을 생성하지 못하도록 방지
-        if (request.getStudentId() == null) {
+        if (request.getUserId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "일반 사용자는 학사 일정을 생성할 수 없습니다.");
         }
+
+        com.group4.lumos_api.user.entity.Users user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
         
         CalendarEvent event = CalendarEvent.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .date(request.getDate())
-                .studentId(request.getStudentId())
+                .user(user)
                 .isCompleted(false) // 생성 시에는 무조건 false로 고정
                 .category(request.getCategory() != null ? EventCategory.valueOf(request.getCategory()) : EventCategory.OTHER)
                 .priority(request.getPriority() != null ? EventPriority.valueOf(request.getPriority()) : EventPriority.MEDIUM)
@@ -70,20 +75,23 @@ public class CalendarEventService {
     public CalendarEvent updateEvent(Long id, CalendarEventRequest request) {
         CalendarEvent event = getEvent(id);
         
-        // 학사 일정(studentId가 null)은 수정할 수 없도록 제한
-        if (event.getStudentId() == null) {
+        // 학사 일정(user가 null)은 수정할 수 없도록 제한
+        if (event.getUser() == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "학사 일정은 수정할 수 없습니다.");
         }
 
         // 수정한 결과가 학사 일정(null)이 되지 않도록 방지
-        if (request.getStudentId() == null) {
+        if (request.getUserId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "일정을 학사 일정으로 변경할 수 없습니다.");
         }
+
+        com.group4.lumos_api.user.entity.Users user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
         event.setTitle(request.getTitle());
         event.setContent(request.getContent());
         event.setDate(request.getDate());
-        event.setStudentId(request.getStudentId());
+        event.setUser(user);
         event.setCompleted(request.isCompleted());
         
         if (request.getCategory() != null) {
@@ -100,7 +108,7 @@ public class CalendarEventService {
     public CalendarEvent toggleCompletion(Long id) {
         CalendarEvent event = getEvent(id);
         
-        if (event.getStudentId() == null) {
+        if (event.getUser() == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "학사 일정의 상태는 변경할 수 없습니다.");
         }
         
@@ -111,8 +119,8 @@ public class CalendarEventService {
     public void deleteEvent(Long id) {
         CalendarEvent event = getEvent(id);
         
-        // 학사 일정(studentId가 null)은 삭제할 수 없도록 제한
-        if (event.getStudentId() == null) {
+        // 학사 일정(user가 null)은 삭제할 수 없도록 제한
+        if (event.getUser() == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "학사 일정은 삭제할 수 없습니다.");
         }
         

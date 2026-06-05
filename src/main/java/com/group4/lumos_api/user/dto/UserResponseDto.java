@@ -1,6 +1,7 @@
 package com.group4.lumos_api.user.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore; // 💡 무시 처리를 위한 임포트 추가
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.group4.lumos_api.user.entity.Users;
 import lombok.*;
 import java.time.LocalDateTime;
 
@@ -21,17 +22,24 @@ public class UserResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Compatibility methods for Auth module
-    @JsonIgnore // 💡 Jackson이 이 Getter를 감지해서 JSON 필드로 만드는 것을 원천 차단합니다.
-    public String getDepartment() {
-        return major;
+    // 💡 엔티티를 받아서 초기화하는 생성자 추가
+    public UserResponseDto(Users user) {
+        this.userId = user.getUserId();
+        this.email = user.getEmail();
+        this.name = user.getName();
+        this.phoneNumber = user.getPhoneNumber();
+        this.major = user.getMajor();
+        this.grade = user.getGrade();
+        this.studentNumber = user.getStudentNumber();
+        this.profileImageUrl = user.getProfileImageUrl();
+        this.createdAt = user.getCreatedAt();
+        this.updatedAt = user.getUpdatedAt();
     }
 
-    public void setDepartment(String department) {
-        this.major = department;
-    }
+    @JsonIgnore
+    public String getDepartment() { return major; }
+    public void setDepartment(String department) { this.major = department; }
 
-    // Custom builder method for compatibility
     public static class UserResponseDtoBuilder {
         public UserResponseDtoBuilder department(String department) {
             this.major = department;

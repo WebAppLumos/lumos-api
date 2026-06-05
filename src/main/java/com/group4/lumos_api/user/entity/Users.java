@@ -18,7 +18,7 @@ public class Users {
     @Column(name = "name", length = 100, nullable = false)
     private String name;
 
-    @Column(name = "phone_number", length = 30, nullable = false)
+    @Column(name = "phone_number", length = 30, unique = true, nullable = false)
     private String phoneNumber;
 
     @Column(name = "major", length = 100, nullable = false)
@@ -39,16 +39,9 @@ public class Users {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // Compatibility methods for Auth module (mapping 'department' to 'major')
-    public String getDepartment() {
-        return major;
-    }
+    public String getDepartment() { return major; }
+    public void setDepartment(String department) { this.major = department; }
 
-    public void setDepartment(String department) {
-        this.major = department;
-    }
-
-    // Custom builder method for compatibility
     public static class UsersBuilder {
         public UsersBuilder department(String department) {
             this.major = department;

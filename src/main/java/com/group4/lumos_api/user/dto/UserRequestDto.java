@@ -8,7 +8,8 @@ public class UserRequestDto {
     private String email;
     private String name;
     private String phoneNumber;
-    private String department;
+    private String major;
     private Integer grade;
     private String studentNumber;
+    private String profileImageUrl;
 }

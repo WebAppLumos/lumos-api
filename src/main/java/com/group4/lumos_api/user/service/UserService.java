@@ -39,9 +39,10 @@ public class UserService {
                 .email(dto.getEmail())
                 .name(dto.getName())
                 .phoneNumber(dto.getPhoneNumber())
-                .department(dto.getDepartment())
+                .major(dto.getMajor())
                 .grade(dto.getGrade())
                 .studentNumber(dto.getStudentNumber())
+                .profileImageUrl(dto.getProfileImageUrl())
                 .build();
         return convertToDto(usersRepository.save(user));
     }
@@ -54,10 +55,19 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setName(dto.getName());
         user.setPhoneNumber(dto.getPhoneNumber());
-        user.setDepartment(dto.getDepartment());
+        user.setMajor(dto.getMajor());
         user.setGrade(dto.getGrade());
         user.setStudentNumber(dto.getStudentNumber());
+        user.setProfileImageUrl(dto.getProfileImageUrl());
 
+        return convertToDto(user);
+    }
+
+    @Transactional
+    public UserResponseDto updateProfileImage(String userId, String profileImageUrl) {
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+        user.setProfileImageUrl(profileImageUrl);
         return convertToDto(user);
     }
 
@@ -75,9 +85,10 @@ public class UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .phoneNumber(user.getPhoneNumber())
-                .department(user.getDepartment())
+                .major(user.getMajor())
                 .grade(user.getGrade())
                 .studentNumber(user.getStudentNumber())
+                .profileImageUrl(user.getProfileImageUrl())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

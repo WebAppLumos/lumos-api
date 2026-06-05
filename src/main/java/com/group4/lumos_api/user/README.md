@@ -21,9 +21,10 @@
   "email": "student@example.com",
   "name": "홍길동",
   "phoneNumber": "010-1234-5678",
-  "department": "컴퓨터공학과",
+  "major": "컴퓨터공학과",
   "grade": 3,
-  "studentNumber": "2024001"
+  "studentNumber": "2024001",
+  "profileImageUrl": "https://example.com/profile.jpg"
 }
 ```
 
@@ -34,9 +35,10 @@
   "email": "student@example.com",
   "name": "홍길동",
   "phoneNumber": "010-1234-5678",
-  "department": "컴퓨터공학과",
+  "major": "컴퓨터공학과",
   "grade": 3,
-  "studentNumber": "2024001"
+  "studentNumber": "2024001",
+  "profileImageUrl": "https://example.com/profile.jpg"
 }
 ```
 

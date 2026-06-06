@@ -51,6 +51,15 @@ public class CalendarDataInitializer implements CommandLineRunner {
             adminUser = usersRepository.save(newAdmin);
         }
 
+        System.out.println(">>> CalendarDataInitializer: DB 스키마 정합성을 체크합니다...");
+        try {
+            // profile_image_url 컬럼을 TEXT 타입으로 강제 변경 (Base64 대응)
+            entityManager.createNativeQuery("ALTER TABLE users ALTER COLUMN profile_image_url TYPE TEXT").executeUpdate();
+            System.out.println(">>> CalendarDataInitializer: users 테이블의 profile_image_url 타입을 TEXT로 변경했습니다.");
+        } catch (Exception e) {
+            System.out.println(">>> CalendarDataInitializer: 스키마 변경 중 참고 (이미 TEXT일 수 있음): " + e.getMessage());
+        }
+
         System.out.println(">>> CalendarDataInitializer: 계명대학교 2026-2027 전체 상세 일정을 초기화합니다...");
         
         try {

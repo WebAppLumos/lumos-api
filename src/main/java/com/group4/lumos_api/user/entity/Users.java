@@ -30,7 +30,7 @@ public class Users {
     @Column(name = "student_number", length = 7, unique = true, nullable = false)
     private String studentNumber;
 
-    @Column(name = "profile_image_url", length = 500)
+    @Column(name = "profile_image_url", columnDefinition = "TEXT")
     private String profileImageUrl;
 
     @Column(name = "created_at", updatable = false, nullable = false)

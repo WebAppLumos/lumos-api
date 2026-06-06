@@ -87,7 +87,17 @@ public class UserService {
     public UserResponseDto updateProfileImage(String userId, String imageUrl) {
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        user.setProfileImageUrl(imageUrl);
-        return new UserResponseDto(usersRepository.save(user));
+        
+        System.out.println(">>> UserService: 프로필 이미지 업데이트 시도 (길이: " + (imageUrl != null ? imageUrl.length() : 0) + ")");
+        
+        try {
+            user.setProfileImageUrl(imageUrl);
+            Users saved = usersRepository.save(user);
+            System.out.println(">>> UserService: 프로필 이미지 업데이트 성공");
+            return new UserResponseDto(saved);
+        } catch (Exception e) {
+            System.err.println(">>> UserService: 프로필 이미지 업데이트 실패! 에러: " + e.getMessage());
+            throw e;
+        }
     }
 }

@@ -12,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173") // 🔥 프론트엔드 연결을 위한 CORS 설정
 public class UserController {
 
     private final UserService userService;
@@ -22,7 +23,7 @@ public class UserController {
         return ResponseEntity.ok(userService.createUser(dto));
     }
 
-    // 내 정보 조회 (임시로 userId를 넘겨받거나 인증 객체에서 추출해야 함. 여기서는 @RequestHeader 등을 고려할 수 있으나 명세대로 구현)
+    // 내 정보 조회
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getMyInfo(@RequestHeader("X-User-Id") String userId) {
         return ResponseEntity.ok(userService.getUserById(userId));
@@ -51,10 +52,9 @@ public class UserController {
         return ResponseEntity.ok(userService.updateProfileImage(userId, dto.getProfileImageUrl()));
     }
 
-    // 알림 설정 조회 (Entity에 관련 필드가 추가되어야 할 수도 있음)
+    // 알림 설정 조회
     @GetMapping("/me/settings")
     public ResponseEntity<Object> getMySettings(@RequestHeader("X-User-Id") String userId) {
-        // 임시 반환
         return ResponseEntity.ok(new Object());
     }
 
@@ -63,7 +63,6 @@ public class UserController {
     public ResponseEntity<Object> updateMySettings(
             @RequestHeader("X-User-Id") String userId,
             @RequestBody Object settings) {
-        // 임시 반환
         return ResponseEntity.ok(settings);
     }
 

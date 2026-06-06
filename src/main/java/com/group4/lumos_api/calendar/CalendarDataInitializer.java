@@ -59,8 +59,8 @@ public class CalendarDataInitializer implements CommandLineRunner {
             System.out.println(">>> CalendarDataInitializer: 제약 조건 삭제 중 참고 사항 (무시 가능): " + e.getMessage());
         }
 
-        // PostgreSQL에서 테이블을 비우고 ID를 1로 리셋하는 명령
-        entityManager.createNativeQuery("TRUNCATE TABLE calendar RESTART IDENTITY CASCADE").executeUpdate();
+        // 학사 일정(admin)만 삭제하고 사용자 일정은 보존 (TRUNCATE 대신 DELETE 사용)
+        entityManager.createNativeQuery("DELETE FROM calendar WHERE user_id = 'admin'").executeUpdate();
 
         List<CalendarEvent> events = new ArrayList<>();
 

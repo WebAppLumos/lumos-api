@@ -116,10 +116,7 @@ public class CalendarEventService {
     public CalendarEvent toggleCompletion(Long id) {
         CalendarEvent event = getEvent(id);
         
-        if (event.getUser() != null && "admin".equals(event.getUser().getUserId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "학사 일정의 상태는 변경할 수 없습니다.");
-        }
-        
+        // 학사 일정이라도 완료 여부 체크는 가능하도록 제한 해제
         event.setIsCompleted(!event.getIsCompleted());
         return repository.save(event);
     }

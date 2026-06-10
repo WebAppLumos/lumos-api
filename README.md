@@ -187,8 +187,13 @@ lumos-api/
 
 | 기능 | 메서드 | 엔드포인트 |
 |---|---|---|
+| 사용자 등록(관리/직접) | POST | `/api/users` |
+| 전체 사용자 조회(관리자) | GET | `/api/users` |
 | 내 정보 조회 | GET | `/api/users/me` |
 | 내 정보 수정 | PATCH | `/api/users/me` |
+| 프로필 이미지 수정 | PATCH | `/api/users/me/profile-image` |
+| 알림 설정 조회(미구현) | GET | `/api/users/me/settings` |
+| 알림 설정 수정(미구현) | PATCH | `/api/users/me/settings` |
 | 회원 탈퇴 | DELETE | `/api/users/me` |
 
 ### Semester

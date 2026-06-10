@@ -25,15 +25,16 @@ public class CalendarEventController {
         this.service = service;
     }
 
-    // 일정 통합 조회 (전체, 날짜별, 검색, 유형별)
+    // 💡 카테고리 필터까지 정상 지원하는 일정 조회 API
     @GetMapping
     public List<CalendarEventResponse> getEvents(
             @RequestParam(required = false) String userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String type) {
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String category) { 
         
-        return service.searchEvents(userId, date, keyword, type)
+        return service.searchEvents(userId, date, keyword, type, category)
                 .stream().map(this::toResponse).toList();
     }
 
@@ -72,9 +73,11 @@ public class CalendarEventController {
                 .content(entity.getContent())
                 .date(entity.getDate())
                 .userId(entity.getUser() != null ? entity.getUser().getUserId() : null)
-                .isCompleted(entity.isCompleted())
+                .isCompleted(entity.getIsCompleted())
                 .category(entity.getCategory() != null ? entity.getCategory().name() : null)
                 .priority(entity.getPriority() != null ? entity.getPriority().name() : null)
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 }

@@ -18,23 +18,36 @@ public class Users {
     @Column(name = "name", length = 100, nullable = false)
     private String name;
 
-    @Column(name = "phone_number", length = 30)
+    @Column(name = "phone_number", length = 30, unique = true, nullable = false)
     private String phoneNumber;
 
-    @Column(name = "department", length = 100)
-    private String department;
+    @Column(name = "major", length = 100, nullable = false)
+    private String major;
 
-    @Column(name = "grade")
+    @Column(name = "grade", nullable = false)
     private Integer grade;
 
-    @Column(name = "student_number", length = 7, unique = true)
+    @Column(name = "student_number", length = 7, unique = true, nullable = false)
     private String studentNumber;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "profile_image_url", columnDefinition = "TEXT")
+    private String profileImageUrl;
+
+    @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public String getDepartment() { return major; }
+    public void setDepartment(String department) { this.major = department; }
+
+    public static class UsersBuilder {
+        public UsersBuilder department(String department) {
+            this.major = department;
+            return this;
+        }
+    }
 
     @PrePersist
     protected void onCreate() {

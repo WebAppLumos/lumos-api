@@ -36,6 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
+### Firebase ###
+firebase-service-account.json
+
 ### macOS ###
 .DS_Store
 .AppleDouble

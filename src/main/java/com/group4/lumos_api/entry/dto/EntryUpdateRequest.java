@@ -8,10 +8,7 @@ import lombok.Data;
 import java.time.LocalTime;
 
 @Data
-public class EntryCreateRequest {
-
-    @NotNull
-    private Long courseId;
+public class EntryUpdateRequest {
 
     @NotNull
     @Min(1)

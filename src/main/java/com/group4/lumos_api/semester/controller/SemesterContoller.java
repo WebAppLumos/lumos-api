@@ -1,5 +1,6 @@
 package com.group4.lumos_api.semester.controller;
 
+import com.group4.lumos_api.common.security.CurrentUser;
 import com.group4.lumos_api.semester.dto.SemesterRequest;
 import com.group4.lumos_api.semester.dto.SemesterResponse;
 import com.group4.lumos_api.semester.service.SemesterService;
@@ -23,8 +24,10 @@ public class SemesterContoller {
      * POST /api/semesters
      */
     @PostMapping
-    public ResponseEntity<SemesterResponse> createSemester(@RequestBody SemesterRequest request) {
-        SemesterResponse response = semesterService.createSemester(request);
+    public ResponseEntity<SemesterResponse> createSemester(
+            @CurrentUser String userId,
+            @RequestBody SemesterRequest request) {
+        SemesterResponse response = semesterService.createSemester(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -33,8 +36,8 @@ public class SemesterContoller {
      * GET /api/semesters
      */
     @GetMapping
-    public ResponseEntity<List<SemesterResponse>> getAllSemesters() {
-        List<SemesterResponse> semesters = semesterService.getAllSemesters();
+    public ResponseEntity<List<SemesterResponse>> getAllSemesters(@CurrentUser String userId) {
+        List<SemesterResponse> semesters = semesterService.getAllSemesters(userId);
         return ResponseEntity.ok(semesters);
     }
     
@@ -43,8 +46,10 @@ public class SemesterContoller {
      * GET /api/semesters/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<SemesterResponse> getSemesterById(@PathVariable Long id) {
-        SemesterResponse response = semesterService.getSemesterById(id);
+    public ResponseEntity<SemesterResponse> getSemesterById(
+            @CurrentUser String userId,
+            @PathVariable Long id) {
+        SemesterResponse response = semesterService.getSemesterById(userId, id);
         return ResponseEntity.ok(response);
     }
     
@@ -54,9 +59,10 @@ public class SemesterContoller {
      */
     @PatchMapping("/{id}")
     public ResponseEntity<SemesterResponse> updateSemester(
+            @CurrentUser String userId,
             @PathVariable Long id,
             @RequestBody SemesterRequest request) {
-        SemesterResponse response = semesterService.updateSemester(id, request);
+        SemesterResponse response = semesterService.updateSemester(userId, id, request);
         return ResponseEntity.ok(response);
     }
     
@@ -65,8 +71,10 @@ public class SemesterContoller {
      * DELETE /api/semesters/{id}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSemester(@PathVariable Long id) {
-        semesterService.deleteSemester(id);
+    public ResponseEntity<Void> deleteSemester(
+            @CurrentUser String userId,
+            @PathVariable Long id) {
+        semesterService.deleteSemester(userId, id);
         return ResponseEntity.noContent().build();
     }
 }

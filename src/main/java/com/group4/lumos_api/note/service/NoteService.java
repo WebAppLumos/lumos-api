@@ -1,5 +1,6 @@
 package com.group4.lumos_api.note.service;
 
+import com.group4.lumos_api.common.exception.NotFoundException;
 import com.group4.lumos_api.course.entity.Course;
 import com.group4.lumos_api.course.repository.CourseRepository;
 import com.group4.lumos_api.note.dto.NotePinRequest;
@@ -22,8 +23,8 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final CourseRepository courseRepository;
 
-    public NoteResponse createNote(Long semesterId, Long courseId, NoteRequest request) {
-        Course course = getCourse(semesterId, courseId);
+    public NoteResponse createNote(String userId, Long courseId, NoteRequest request) {
+        Course course = getOwnedCourse(userId, courseId);
 
         Note note = new Note();
         note.setCourse(course);
@@ -34,8 +35,8 @@ public class NoteService {
     }
 
     @Transactional(readOnly = true)
-    public List<NoteResponse> getNotes(Long semesterId, Long courseId, String keyword) {
-        getCourse(semesterId, courseId);
+    public List<NoteResponse> getNotes(String userId, Long courseId, String keyword) {
+        getOwnedCourse(userId, courseId);
         List<Note> notes = keyword == null || keyword.isBlank()
                 ? noteRepository.findAllByCourse_IdOrderByIsPinnedDescUpdatedAtDesc(courseId)
                 : noteRepository.findAllByCourse_IdAndTitleContainingIgnoreCaseOrderByIsPinnedDescUpdatedAtDesc(courseId, keyword);
@@ -43,14 +44,12 @@ public class NoteService {
     }
 
     @Transactional(readOnly = true)
-    public NoteResponse getNote(Long semesterId, Long courseId, Long noteId) {
-        getCourse(semesterId, courseId);
-        return toResponse(getNoteEntity(courseId, noteId));
+    public NoteResponse getNote(String userId, Long noteId) {
+        return toResponse(getOwnedNote(userId, noteId));
     }
 
-    public NoteResponse updateNote(Long semesterId, Long courseId, Long noteId, NoteRequest request) {
-        getCourse(semesterId, courseId);
-        Note note = getNoteEntity(courseId, noteId);
+    public NoteResponse updateNote(String userId, Long noteId, NoteRequest request) {
+        Note note = getOwnedNote(userId, noteId);
         if (request.getTitle() != null) {
             note.setTitle(request.getTitle());
         }
@@ -60,26 +59,24 @@ public class NoteService {
         return toResponse(noteRepository.save(note));
     }
 
-    public void deleteNote(Long semesterId, Long courseId, Long noteId) {
-        getCourse(semesterId, courseId);
-        noteRepository.delete(getNoteEntity(courseId, noteId));
+    public void deleteNote(String userId, Long noteId) {
+        noteRepository.delete(getOwnedNote(userId, noteId));
     }
 
-    public NoteResponse setPinned(Long semesterId, Long courseId, Long noteId, NotePinRequest request) {
-        getCourse(semesterId, courseId);
-        Note note = getNoteEntity(courseId, noteId);
+    public NoteResponse setPinned(String userId, Long noteId, NotePinRequest request) {
+        Note note = getOwnedNote(userId, noteId);
         note.setIsPinned(request.getIsPinned() != null ? request.getIsPinned() : !note.getIsPinned());
         return toResponse(noteRepository.save(note));
     }
 
-    private Course getCourse(Long semesterId, Long courseId) {
-        return courseRepository.findByIdAndSemester_Id(courseId, semesterId)
-                .orElseThrow(() -> new RuntimeException("수업을 찾을 수 없습니다. ID: " + courseId));
+    private Course getOwnedCourse(String userId, Long courseId) {
+        return courseRepository.findByIdAndSemester_User_Id(courseId, userId)
+                .orElseThrow(() -> new NotFoundException("수업을 찾을 수 없습니다. ID: " + courseId));
     }
 
-    private Note getNoteEntity(Long courseId, Long noteId) {
-        return noteRepository.findByIdAndCourse_Id(noteId, courseId)
-                .orElseThrow(() -> new RuntimeException("노트를 찾을 수 없습니다. ID: " + noteId));
+    private Note getOwnedNote(String userId, Long noteId) {
+        return noteRepository.findByIdAndCourse_Semester_User_Id(noteId, userId)
+                .orElseThrow(() -> new NotFoundException("노트를 찾을 수 없습니다. ID: " + noteId));
     }
 
     private NoteResponse toResponse(Note note) {

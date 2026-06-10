@@ -1,7 +1,9 @@
 package com.group4.lumos_api.entry.controller;
 
+import com.group4.lumos_api.common.security.CurrentUser;
 import com.group4.lumos_api.entry.dto.EntryCreateRequest;
 import com.group4.lumos_api.entry.dto.EntryResponse;
+import com.group4.lumos_api.entry.dto.EntryUpdateRequest;
 import com.group4.lumos_api.entry.service.TimetableEntryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,33 +14,39 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/semesters/{semesterId}/timetables/{timetableId}/entries")
 @RequiredArgsConstructor
 public class TimetableEntryController {
 
     private final TimetableEntryService entryService;
 
-    @PostMapping
+    @PostMapping("/api/timetables/{timetableId}/entries")
     public ResponseEntity<EntryResponse> createEntry(
-            @PathVariable Long semesterId,
+            @CurrentUser String userId,
             @PathVariable Long timetableId,
             @Valid @RequestBody EntryCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(entryService.createEntry(semesterId, timetableId, request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(entryService.createEntry(userId, timetableId, request));
     }
 
-    @GetMapping
+    @GetMapping("/api/timetables/{timetableId}/entries")
     public ResponseEntity<List<EntryResponse>> getEntries(
-            @PathVariable Long semesterId,
+            @CurrentUser String userId,
             @PathVariable Long timetableId) {
-        return ResponseEntity.ok(entryService.getEntries(semesterId, timetableId));
+        return ResponseEntity.ok(entryService.getEntries(userId, timetableId));
     }
 
-    @DeleteMapping("/{entryId}")
+    @PatchMapping("/api/entries/{entryId}")
+    public ResponseEntity<EntryResponse> updateEntry(
+            @CurrentUser String userId,
+            @PathVariable Long entryId,
+            @Valid @RequestBody EntryUpdateRequest request) {
+        return ResponseEntity.ok(entryService.updateEntry(userId, entryId, request));
+    }
+
+    @DeleteMapping("/api/entries/{entryId}")
     public ResponseEntity<Void> deleteEntry(
-            @PathVariable Long semesterId,
-            @PathVariable Long timetableId,
+            @CurrentUser String userId,
             @PathVariable Long entryId) {
-        entryService.deleteEntry(semesterId, timetableId, entryId);
+        entryService.deleteEntry(userId, entryId);
         return ResponseEntity.noContent().build();
     }
 }

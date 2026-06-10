@@ -1,6 +1,6 @@
 # 📅 Lumos API - Calendar & To-Do Module
 
-이 모듈은 학사 일정(공통) 및 학생 개인의 To-Do 일정을 통합 관리하는 기능을 제공합니다.
+이 모듈은 파이어베이스 인증(Firebase Auth) 기반의 학사 일정(공통) 및 학생 개인의 To-Do 일정을 통합 관리하는 기능을 제공합니다.
 
 ---
 
@@ -8,35 +8,30 @@
 
 터미널에서 프로젝트 루트 폴더로 이동한 뒤 아래 명령어를 입력하여 서버를 실행합니다:
 
-```bash
 # Windows (PowerShell)
 .\gradlew bootRun
 
 # macOS / Linux
 ./gradlew bootRun
-```
 
-서버가 실행되면 `http://localhost:8080`에서 API를 호출할 수 있습니다.
+서버가 실행되면 http://localhost:8080에서 API를 호출할 수 있습니다.
 
 ---
 
 ## 📂 패키지 구조
 
-```text
 com.group4.lumos_api.calendar/
 ├── controller/
-│   └── CalendarEventController    # REST API 엔드포인트 처리
+│   └── CalendarEventController    # REST API 엔드포인트 처리 (CORS 완료)
 ├── service/
-│   └── CalendarEventService       # 비즈니스 로직 및 권한 검증
+│   └── CalendarEventService       # 비즈니스 로직 및 admin 학사일정 방어벽
 ├── repository/
-│   └── CalendarEventRepository    # DB 접근 및 복합 필터 쿼리
+│   └── CalendarEventRepository    # DB 접근 및 Native Query 복합 필터
 ├── entity/
-│   └── CalendarEvent              # DB 엔티티 (isCompleted, Category 등 포함)
-├── dto/
-│   ├── CalendarEventRequest       # 요청 데이터 규격
-│   └── CalendarEventResponse      # 응답 데이터 규격
-└── CalendarDataInitializer.java   # 초기 테스트 데이터 생성기
-```
+│   └── CalendarEvent              # DB 엔티티 (user_id 매핑 완료)
+└── dto/
+    ├── CalendarEventRequest       # 요청 데이터 규격
+    └── CalendarEventResponse      # 응답 데이터 규격
 
 ---
 
@@ -44,20 +39,20 @@ com.group4.lumos_api.calendar/
 
 | 기능명 | 엔드포인트 | Method | 설명 |
 | :--- | :--- | :--- | :--- |
-| **일정 통합 조회/검색** | `/api/calendar/events` | `GET` | 필터(studentId, date, keyword, type) 기반 조회 |
-| **일정 상세 조회** | `/api/calendar/events/{scheduleId}` | `GET` | 특정 일정 1개 상세 조회 |
-| **개인 일정 등록** | `/api/calendar/events` | `POST` | 새로운 일정 생성 |
-| **일정 내용 수정** | `/api/calendar/events/{scheduleId}` | `PATCH` | 기존 일정 정보 수정 |
-| **완료 상태 토글** | `/api/calendar/events/{scheduleId}/toggle` | `PATCH` | 완료/미완료 상태 즉시 반전 |
-| **일정 삭제** | `/api/calendar/events/{scheduleId}` | `DELETE` | 일정 삭제 (학사 일정은 불가) |
+| 일정 통합 조회/검색 | /api/calendar/events | GET | 필터(date, keyword, category, priority) 기반 복합 조회 |
+| 일정 상세 조회 | /api/calendar/events/{scheduleId} | GET | 특정 일정 1개 상세 조회 |
+| 개인 일정 등록 | /api/calendar/events | POST | 새로운 개인 일정 생성 |
+| 일정 내용 수정 | /api/calendar/events/{scheduleId} | PATCH | 기존 일정 정보 수정 |
+| 완료 상태 토글 | /api/calendar/events/{scheduleId}/toggle | PATCH | 완료/미완료 상태 토글 |
+| 일정 삭제 | /api/calendar/events/{scheduleId} | DELETE | 일정 삭제 (학사 일정은 삭제 불가) |
 
 ---
 
-## 🔒 데이터 정책 및 보안
+## 🔒 데이터 정책 및 보안 격리
 
-- **학사 일정 (`studentId` is NULL)**: 모든 사용자가 읽을 수만 있으며, API를 통한 생성/수정/삭제/상태변경이 **절대 불가**합니다.
-- **개인 일정 (`studentId` is NOT NULL)**: 해당 학생 본인만 모든 권한(CRUD)을 가집니다.
-- **조회 제한**: `studentId` 파라미터를 사용하면 해당 학생의 일정과 학사 일정만 노출되며, **타인의 개인 일정은 노출되지 않습니다.**
+- 학사 일정 (user_id = 'admin'): 시스템 공통 일정으로 보호됩니다. 일반 학생 계정으로 수정/삭제 시 백엔드에서 원천 차단됩니다.
+- 개인 일정: 고유 UID를 기반으로 매핑되며, 등록한 본인만 모든 권한(CRUD)을 가집니다.
+- 조회 메커니즘: API 호출 시 로그인한 사용자의 정보를 바탕으로 [개인 일정 + 전체 학사 일정]을 자동으로 결합하여 반환합니다.
 
 ---
 
@@ -66,83 +61,52 @@ com.group4.lumos_api.calendar/
 ### 1. 필드 설명
 | 필드명 | 타입 | 필수여부 | 설명 |
 | :--- | :--- | :--- | :--- |
-| **scheduleId** | Long | 자동생성 | 일정 고유 ID (DB PK) |
-| **title** | String | **필수** | 일정 제목 |
-| **content** | String | 선택 | 일정 상세 내용 |
-| **date** | LocalDate | **필수** | 일정 날짜 (YYYY-MM-DD) |
-| **studentId** | Long | **필수** | 학생 ID (개인 일정 생성 시 필수) |
-| **isCompleted** | boolean | 선택 | 완료 여부 (기본값: `false`) |
-| **category** | String | 선택 | 일정 분류 (대문자 필수: `STUDY`, `WORK`, `PRIVATE`, `ACADEMIC`, `OTHER`) |
-| **priority** | String | 선택 | 중요도 (대문자 필수: `HIGH`, `MEDIUM`, `LOW`) |
+| scheduleId | Long | 자동생성 | 일정 고유 ID |
+| userId | String | 필수 | 파이어베이스 고유 UID |
+| title | String | 필수 | 일정 제목 |
+| content | String | 선택 | 일정 상세 내용 |
+| date | LocalDate | 필수 | 일정 날짜 (YYYY-MM-DD) |
+| isCompleted | boolean | 선택 | 완료 여부 (기본값: false) |
+| category | String | 선택 | 분류 (STUDY, WORK, PRIVATE, ACADEMIC, OTHER) |
+| priority | String | 선택 | 중요도 (HIGH, MEDIUM, LOW) |
 
 ---
 
 ## 🧪 테스트 시나리오 (Test Flow)
 
-아래 순서대로 API를 호출하며 기능을 검증하십시오. (모든 주소는 `http://localhost:8080` 기준)
-**※ 주의: `{scheduleId}` 부분은 1단계 응답에서 받은 실제 ID 숫자로 바꿔서 테스트하세요.**
+Postman 등을 활용해 아래 순서대로 호출하며 기능을 검증하십시오.
 
 ### 1단계: 개인 일정 생성 (POST)
-`isCompleted`는 서버에서 무조건 `false`로 시작하므로 생략 가능합니다.
-- **Endpoint**: `POST /api/calendar/events`
-- **Body**:
-  ```json
-  {
-    "title": "기말고사 공부",
-    "content": "도서관에서 알고리즘 공부",
-    "date": "2026-06-15",
-    "studentId": 1,
-    "category": "STUDY",
-    "priority": "HIGH"
-  }
-  ```
-- **확인**: 응답 Body에서 생성된 **`scheduleId`**를 확인하세요. (예: 5)
+- Endpoint: POST /api/calendar/events
+- Body: {"title": "알고리즘 공부", "content": "도서관", "date": "2026-06-15", "category": "STUDY", "priority": "HIGH"}
 
-### 2단계: 내 일정 목록 조회 및 검색 (GET)
-방금 생성한 일정이 잘 나오는지, 검색이 잘 되는지 확인합니다.
-- **통합 조회**: `GET /api/calendar/events?studentId=1`
-- **키워드 검색**: `GET /api/calendar/events?studentId=1&keyword=알고리즘`
+### 2단계: 일정 통합 조회 및 검색/필터 기능 검증 (GET)
+- **전체 조회**: GET /api/calendar/events
+- **키워드 검색**: GET /api/calendar/events?keyword=알고리즘
+- **카테고리 필터**: GET /api/calendar/events?category=STUDY
+- **날짜 필터**: GET /api/calendar/events?date=2026-06-15
+- **복합 필터링**: GET /api/calendar/events?category=STUDY&priority=HIGH&keyword=알고리즘
 
-### 3단계: 완료 상태로 변경 (PATCH - Toggle)
-체크박스를 클릭하여 "완료" 처리하는 시나리오입니다.
-- **Endpoint**: `PATCH /api/calendar/events/{scheduleId}/toggle`
-- **확인**: `isCompleted`가 `true`로 바뀌었는지 확인하세요.
+### 3단계: 완료 상태 토글 (PATCH - Toggle)
+- Endpoint: PATCH /api/calendar/events/{scheduleId}/toggle
 
 ### 4단계: 일정 내용 수정 (PATCH)
-상세 내용을 업데이트합니다. (날짜는 6월 15일로 동일하게 유지)
-- **Endpoint**: `PATCH /api/calendar/events/{scheduleId}`
-- **Body**:
-  ```json
-  {
-    "title": "수정된 공부 일정",
-    "content": "장소를 카페로 변경",
-    "date": "2026-06-15",
-    "studentId": 1,
-    "isCompleted": true,
-    "category": "STUDY",
-    "priority": "MEDIUM"
-  }
-  ```
-- **설명**: To-Do 수정 폼에서 내용을 고치고 저장하는 시나리오입니다.
+- Endpoint: PATCH /api/calendar/events/{scheduleId}
+- Body: {"content": "장소를 카페로 변경", "priority": "MEDIUM"}
 
 ### 5단계: 일정 삭제 (DELETE)
-테스트가 끝난 일정을 삭제합니다.
-- **Endpoint**: `DELETE /api/calendar/events/{scheduleId}`
-- **확인**: `204 No Content` 응답 확인 후 다시 조회했을 때 데이터가 없어야 합니다.
+- Endpoint: DELETE /api/calendar/events/{scheduleId}
 
 ---
 
-## ⚠️ 주의사항 (자주 발생하는 오류)
+## ⚠️ 주의사항
 
-1. **Enum 대소문자**: `category`, `priority`는 반드시 **대문자**여야 합니다. (`study` ❌ -> `STUDY` ✅)
-2. **학생 ID**: 현재 `Long` 타입이므로 숫자로 입력하십시오.
-3. **날짜**: 반드시 `YYYY-MM-DD` 형식을 사용하십시오.
-4. **학사 일정 보호**: `studentId`가 `null`인 일정은 `PATCH`, `DELETE` 요청 시 `403 Forbidden` 에러가 발생합니다.
+1. Enum 대소문자 규격: category, priority는 반드시 대문자(예: STUDY)여야 합니다.
+2. 학사 일정 보호: 'admin'으로 등록된 일정은 수정/삭제 요청 시 403 Forbidden 에러가 발생합니다.
 
 ---
 
 ## 💡 Frontend (React) 통합 가이드
 
-1. **로그인 연동**: 사용자가 로그인하면 학생 ID를 기억했다가, 모든 `GET` 요청 시 `?studentId={ID}`를 반드시 포함하십시오.
-2. **UI 구분**: `studentId`가 `null`인 데이터는 수정/삭제 버튼을 숨기고, 달력에서 강조색을 다르게 표시하십시오.
-3. **완료 처리**: 체크박스 클릭 시 `PATCH /api/calendar/events/{scheduleId}/toggle`을 호출하면 간단하게 상태를 동기화할 수 있습니다.
+1. 로그인 연동: 파이어베이스 로그인 후 획득한 UID를 모든 요청의 헤더(X-User-Id)에 포함하여 전송하십시오.
+2. UI 권한 구분: 응답 JSON의 userId가 'admin'인 경우, 프론트엔드에서 수정/삭제 버튼을 숨기고 공통 공지로 렌더링하십시오.

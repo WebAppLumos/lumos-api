@@ -1,23 +1,24 @@
 # User API
 
-사용자 기본 정보를 관리하는 API입니다.
+인증된 사용자 본인의 정보를 관리하는 API입니다. 대상 사용자는 경로가 아니라 `Authorization: Bearer <Firebase ID Token>` 헤더에서 식별합니다.
+
+> 신규 사용자 등록은 `POST /api/auth/login`(로그인 시 자동 등록/동기화)에서 처리합니다. User API는 본인(`/me`) 전용입니다.
 
 ## 엔드포인트 요약
 
+모든 요청에 `Authorization: Bearer <Firebase ID Token>` 헤더가 필요합니다.
+
 | 기능 | 메서드 | 엔드포인트 | 설명 |
 |---|---|---|---|
-| 사용자 생성 | POST | `/api/users` | 새로운 사용자를 등록합니다. |
-| 사용자 목록 조회 | GET | `/api/users` | 등록된 모든 사용자 목록을 조회합니다. |
-| 사용자 상세 조회 | GET | `/api/users/{userId}` | 특정 사용자의 상세 정보를 조회합니다. |
-| 사용자 정보 수정 | PATCH | `/api/users/{userId}` | 특정 사용자의 정보를 일부 수정합니다. |
-| 사용자 삭제 | DELETE | `/api/users/{userId}` | 특정 사용자 정보를 삭제합니다. |
+| 내 정보 조회 | GET | `/api/users/me` | 현재 로그인한 사용자 정보를 조회합니다. |
+| 내 정보 수정 | PATCH | `/api/users/me` | 현재 로그인한 사용자 정보를 수정합니다. |
+| 회원 탈퇴 | DELETE | `/api/users/me` | 현재 로그인한 사용자 계정을 삭제합니다. |
 
 ## 데이터 모델 (JSON)
 
-### 사용자 생성/수정 요청 (Request)
+### 내 정보 수정 요청 (Request)
 ```json
 {
-  "userId": "student_01",
   "email": "student@example.com",
   "name": "홍길동",
   "phoneNumber": "010-1234-5678",
@@ -27,10 +28,10 @@
 }
 ```
 
-### 사용자 상세 응답 (Response)
+### 내 정보 응답 (Response)
 ```json
 {
-  "userId": "student_01",
+  "userId": "firebase-uid",
   "email": "student@example.com",
   "name": "홍길동",
   "phoneNumber": "010-1234-5678",
@@ -42,9 +43,11 @@
 
 ## 테스트 가이드
 
-### 1. 사용자 생성 (POST)
-- URL: `http://localhost:8080/api/users`
-- Body: 위 Request JSON 예시 참고
+### 1. 내 정보 조회 (GET)
+- URL: `http://localhost:8080/api/users/me`
+- Header: `Authorization: Bearer <Firebase ID Token>`
 
-### 2. 사용자 상세 조회 (GET)
-- URL: `http://localhost:8080/api/users/student_01`
+### 2. 내 정보 수정 (PATCH)
+- URL: `http://localhost:8080/api/users/me`
+- Header: `Authorization: Bearer <Firebase ID Token>`
+- Body: 위 Request JSON 예시 참고

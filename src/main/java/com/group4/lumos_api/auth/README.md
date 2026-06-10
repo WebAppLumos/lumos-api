@@ -7,7 +7,17 @@ Firebase Authentication ID token을 검증한 뒤 Lumos `users` 테이블에 사
 - `config/FirebaseConfig.java`: Firebase Admin SDK 초기화
 - `controller/AuthController.java`: `/api/auth` 엔드포인트
 - `dto/*`: 인증 요청/응답 DTO
-- `service/AuthService.java`: Firebase 토큰 검증, 사용자 등록/갱신, 토큰 폐기/재발급 처리
+- `service/AuthService.java`: Firebase 토큰 검증, 사용자 등록/갱신, 토큰 폐기 처리
+
+## 인증 모델
+
+이 API는 서버가 자체 토큰을 발급하지 않습니다. 클라이언트는 Firebase 클라이언트 SDK로 발급받은 **ID 토큰**을 보호된 엔드포인트(`/api/auth/**` 외 전체)의 요청 헤더에 그대로 사용합니다.
+
+```http
+Authorization: Bearer <Firebase ID Token>
+```
+
+서버 필터가 매 요청마다 ID 토큰을 검증하여 사용자(uid)를 식별합니다. ID 토큰 만료 시 갱신은 Firebase 클라이언트 SDK가 담당합니다.
 
 ## Firebase Setup
 
@@ -69,10 +79,10 @@ Firebase ID token을 검증하고, Firebase UID 기준으로 사용자를 등록
 
 #### Response
 
+서버는 별도 토큰을 발급하지 않습니다. 클라이언트는 로그인에 사용한 Firebase ID 토큰을 이후 요청의 `Authorization: Bearer` 헤더에 그대로 사용합니다.
+
 ```json
 {
-  "accessToken": "firebase-custom-token",
-  "tokenType": "FirebaseCustomToken",
   "user": {
     "userId": "firebase-uid",
     "email": "user@example.com",
@@ -119,7 +129,7 @@ POST /api/auth/refresh
 Content-Type: application/json
 ```
 
-Firebase ID token을 검증하고 새 Firebase custom token을 발급합니다.
+Firebase ID token의 유효성(폐기 여부 포함)을 재검증하고 현재 사용자 정보를 반환합니다. 새 토큰을 발급하지 않으며, 세션 유효성 확인/프로필 동기화 용도입니다. (실제 ID 토큰 갱신은 클라이언트 SDK가 담당)
 
 #### Request
 
@@ -133,8 +143,6 @@ Firebase ID token을 검증하고 새 Firebase custom token을 발급합니다.
 
 ```json
 {
-  "accessToken": "firebase-custom-token",
-  "tokenType": "FirebaseCustomToken",
   "user": {
     "userId": "firebase-uid",
     "email": "user@example.com",
@@ -153,6 +161,6 @@ Firebase ID token을 검증하고 새 Firebase custom token을 발급합니다.
 
 - `users.user_id`에는 Firebase UID가 저장됩니다.
 - Firebase token에 이메일이 없으면 로그인 요청은 `400 Bad Request`로 실패합니다.
-- 잘못된 ID token은 `401 Unauthorized`로 실패합니다.
+- 잘못된/누락된 ID token으로 보호된 엔드포인트에 접근하면 `401 Unauthorized`로 실패합니다.
 - `logout`은 Firebase Admin SDK의 `revokeRefreshTokens(uid)`를 사용합니다.
-- Firebase ID token 자체의 갱신은 일반적으로 클라이언트 Firebase SDK가 담당합니다. 이 API의 `refresh`는 서버에서 Firebase custom token을 새로 발급하는 용도입니다.
+- 서버는 자체 액세스 토큰을 발급하지 않습니다. 인증에는 클라이언트가 보유한 Firebase ID 토큰을 그대로 사용하며, 만료 시 갱신은 클라이언트 Firebase SDK가 담당합니다.

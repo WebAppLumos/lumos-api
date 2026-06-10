@@ -111,7 +111,7 @@ public class CourseService {
      * 현재 사용자가 소유한 학기를 반환한다. 없거나 타인 소유면 404.
      */
     private Semester getOwnedSemester(String userId, Long semesterId) {
-        return semesterRepository.findByIdAndUser_Id(semesterId, userId)
+        return semesterRepository.findByIdAndUser_UserId(semesterId, userId)
                 .orElseThrow(() -> new NotFoundException("학기를 찾을 수 없습니다. ID: " + semesterId));
     }
 
@@ -119,7 +119,7 @@ public class CourseService {
      * 현재 사용자가 소유한 수업을 반환한다. 없거나 타인 소유면 404.
      */
     private Course getOwnedCourse(String userId, Long courseId) {
-        return courseRepository.findByIdAndSemester_User_Id(courseId, userId)
+        return courseRepository.findByIdAndSemester_User_UserId(courseId, userId)
                 .orElseThrow(() -> new NotFoundException("수업을 찾을 수 없습니다. ID: " + courseId));
     }
 

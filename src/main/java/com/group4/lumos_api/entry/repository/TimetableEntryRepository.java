@@ -12,7 +12,7 @@ public interface TimetableEntryRepository extends JpaRepository<TimetableEntry, 
 
     List<TimetableEntry> findAllByTimetable_IdOrderByIdAsc(Long timetableId);
 
-    Optional<TimetableEntry> findByIdAndTimetable_Semester_User_Id(Long entryId, String userId);
+    Optional<TimetableEntry> findByIdAndTimetable_Semester_User_UserId(Long entryId, String userId);
 
     boolean existsByTimetable_IdAndCourse_Id(Long timetableId, Long courseId);
 

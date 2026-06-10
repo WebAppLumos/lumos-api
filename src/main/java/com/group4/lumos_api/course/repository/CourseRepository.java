@@ -12,5 +12,5 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     List<Course> findAllBySemester_IdOrderByIdAsc(Long semesterId);
 
-    Optional<Course> findByIdAndSemester_User_Id(Long courseId, String userId);
+    Optional<Course> findByIdAndSemester_User_UserId(Long courseId, String userId);
 }

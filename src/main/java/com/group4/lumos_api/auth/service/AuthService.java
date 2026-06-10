@@ -31,9 +31,9 @@ public class AuthService {
                 .orElseGet(() -> createUser(token, request));
 
         Users savedUser = usersRepository.save(user);
+        // 별도 토큰을 발급하지 않는다. 클라이언트는 로그인에 사용한 Firebase ID 토큰을
+        // 이후 요청의 Authorization: Bearer 헤더에 그대로 사용한다.
         return AuthResponse.builder()
-                .accessToken(createCustomToken(savedUser.getUserId()))
-                .tokenType("FirebaseCustomToken")
                 .user(toUserResponse(savedUser))
                 .build();
     }
@@ -48,6 +48,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * 전달된 Firebase ID 토큰의 유효성(폐기 여부 포함)을 재검증하고 현재 사용자 정보를 반환한다.
+     *
+     * <p>Firebase ID 토큰의 실제 갱신은 클라이언트 SDK가 담당하므로 서버는 새 토큰을 발급하지 않는다.
+     * 이 엔드포인트는 세션 유효성 확인/프로필 동기화 용도다.</p>
+     */
     @Transactional(readOnly = true)
     public AuthResponse refresh(String idToken) {
         FirebaseToken token = verifyIdToken(idToken, true);
@@ -55,8 +61,6 @@ public class AuthService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         return AuthResponse.builder()
-                .accessToken(createCustomToken(user.getUserId()))
-                .tokenType("FirebaseCustomToken")
                 .user(toUserResponse(user))
                 .build();
     }
@@ -71,17 +75,6 @@ public class AuthService {
             return FirebaseAuth.getInstance().verifyIdToken(idToken, checkRevoked);
         } catch (FirebaseAuthException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Firebase ID token", e);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Firebase credentials are not configured", e);
-        }
-    }
-
-    private String createCustomToken(String uid) {
-        try {
-            FirebaseConfig.initialize();
-            return FirebaseAuth.getInstance().createCustomToken(uid);
-        } catch (FirebaseAuthException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to create Firebase custom token", e);
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Firebase credentials are not configured", e);
         }

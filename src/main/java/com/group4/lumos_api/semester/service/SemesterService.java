@@ -45,7 +45,7 @@ public class SemesterService {
      */
     @Transactional(readOnly = true)
     public List<SemesterResponse> getAllSemesters(String userId) {
-        return semesterRepository.findAllByUser_IdOrderByIdAsc(userId)
+        return semesterRepository.findAllByUser_UserIdOrderByIdAsc(userId)
                 .stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
@@ -99,7 +99,7 @@ public class SemesterService {
      * 현재 사용자가 소유한 학기를 반환한다. 없거나 타인 소유면 404.
      */
     private Semester getOwnedSemester(String userId, Long id) {
-        return semesterRepository.findByIdAndUser_Id(id, userId)
+        return semesterRepository.findByIdAndUser_UserId(id, userId)
                 .orElseThrow(() -> new NotFoundException("학기를 찾을 수 없습니다. ID: " + id));
     }
     

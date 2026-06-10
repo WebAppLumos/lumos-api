@@ -12,5 +12,5 @@ public interface TimetableRepository extends JpaRepository<Timetable, Long> {
 
     List<Timetable> findAllBySemester_IdOrderByIdAsc(Long semesterId);
 
-    Optional<Timetable> findByIdAndSemester_User_Id(Long timetableId, String userId);
+    Optional<Timetable> findByIdAndSemester_User_UserId(Long timetableId, String userId);
 }

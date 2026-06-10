@@ -15,7 +15,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
 
     List<Note> findAllByCourse_IdAndTitleContainingIgnoreCaseOrderByIsPinnedDescUpdatedAtDesc(Long courseId, String title);
 
-    Optional<Note> findByIdAndCourse_Semester_User_Id(Long noteId, String userId);
+    Optional<Note> findByIdAndCourse_Semester_User_UserId(Long noteId, String userId);
 
     void deleteAllByCourse_Id(Long courseId);
 }

@@ -70,12 +70,12 @@ public class NoteService {
     }
 
     private Course getOwnedCourse(String userId, Long courseId) {
-        return courseRepository.findByIdAndSemester_User_Id(courseId, userId)
+        return courseRepository.findByIdAndSemester_User_UserId(courseId, userId)
                 .orElseThrow(() -> new NotFoundException("수업을 찾을 수 없습니다. ID: " + courseId));
     }
 
     private Note getOwnedNote(String userId, Long noteId) {
-        return noteRepository.findByIdAndCourse_Semester_User_Id(noteId, userId)
+        return noteRepository.findByIdAndCourse_Semester_User_UserId(noteId, userId)
                 .orElseThrow(() -> new NotFoundException("노트를 찾을 수 없습니다. ID: " + noteId));
     }
 

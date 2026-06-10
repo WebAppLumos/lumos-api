@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface SemesterRepository extends JpaRepository<Semester, Long> {
 
-    List<Semester> findAllByUser_IdOrderByIdAsc(String userId);
+    List<Semester> findAllByUser_UserIdOrderByIdAsc(String userId);
 
-    Optional<Semester> findByIdAndUser_Id(Long id, String userId);
+    Optional<Semester> findByIdAndUser_UserId(Long id, String userId);
 }

@@ -29,7 +29,7 @@ public class TimetableEntryService {
 
     public EntryResponse createEntry(String userId, Long timetableId, EntryCreateRequest request) {
         Timetable timetable = timetableService.getOwnedTimetableEntity(userId, timetableId);
-        Course course = courseRepository.findByIdAndSemester_User_Id(request.getCourseId(), userId)
+        Course course = courseRepository.findByIdAndSemester_User_UserId(request.getCourseId(), userId)
                 .orElseThrow(() -> new NotFoundException("수업을 찾을 수 없습니다. ID: " + request.getCourseId()));
 
         if (!course.getSemester().getId().equals(timetable.getSemester().getId())) {
@@ -81,7 +81,7 @@ public class TimetableEntryService {
      * 현재 사용자가 소유한 시간표 배치를 반환한다. 없거나 타인 소유면 404.
      */
     private TimetableEntry getOwnedEntry(String userId, Long entryId) {
-        return entryRepository.findByIdAndTimetable_Semester_User_Id(entryId, userId)
+        return entryRepository.findByIdAndTimetable_Semester_User_UserId(entryId, userId)
                 .orElseThrow(() -> new NotFoundException("시간표 배치를 찾을 수 없습니다. ID: " + entryId));
     }
 

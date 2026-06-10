@@ -67,12 +67,12 @@ public class TimetableService {
      * (Entry 도메인에서 소유권 검증용으로 재사용)
      */
     public Timetable getOwnedTimetableEntity(String userId, Long timetableId) {
-        return timetableRepository.findByIdAndSemester_User_Id(timetableId, userId)
+        return timetableRepository.findByIdAndSemester_User_UserId(timetableId, userId)
                 .orElseThrow(() -> new NotFoundException("시간표를 찾을 수 없습니다. ID: " + timetableId));
     }
 
     private Semester getOwnedSemester(String userId, Long semesterId) {
-        return semesterRepository.findByIdAndUser_Id(semesterId, userId)
+        return semesterRepository.findByIdAndUser_UserId(semesterId, userId)
                 .orElseThrow(() -> new NotFoundException("학기를 찾을 수 없습니다. ID: " + semesterId));
     }
 

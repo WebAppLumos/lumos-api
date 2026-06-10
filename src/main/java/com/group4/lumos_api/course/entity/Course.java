@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "course")
+@Table(name = "courses")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,6 +38,9 @@ public class Course {
 
     @Column(name = "credit")
     private Short credit;
+
+    @Column(name = "difficulty_level")
+    private Short difficultyLevel;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

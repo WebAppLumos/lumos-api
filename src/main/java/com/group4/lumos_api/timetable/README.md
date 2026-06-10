@@ -6,6 +6,8 @@
 
 시간표는 특정 학기에 속하는 시간표 묶음을 나타냅니다. 시간표 생성 시에는 반드시 학기를 지정해야 하며, 수업 배치는 Entry API를 통해 관리합니다.
 
+URL 규칙에 따라 생성/목록 조회는 상위 리소스인 학기 아래에 중첩되고, 단건 상세/수정/삭제는 `/api/timetables/{timetableId}`로 평탄화됩니다.
+
 ## 데이터 모델
 
 ```json
@@ -31,9 +33,9 @@
 |------|--------|-----------|------|
 | 생성 | POST | `/api/semesters/{semesterId}/timetables` | 학기에 속한 시간표 생성 |
 | 목록 조회 | GET | `/api/semesters/{semesterId}/timetables` | 학기별 시간표 목록 조회 |
-| 상세 조회 | GET | `/api/semesters/{semesterId}/timetables/{timetableId}` | 특정 시간표 상세 조회 |
-| 수정 | PATCH | `/api/semesters/{semesterId}/timetables/{timetableId}` | 시간표 정보 수정 |
-| 삭제 | DELETE | `/api/semesters/{semesterId}/timetables/{timetableId}` | 시간표 삭제 |
+| 상세 조회 | GET | `/api/timetables/{timetableId}` | 특정 시간표 상세 조회 |
+| 수정 | PATCH | `/api/timetables/{timetableId}` | 시간표 정보 수정 |
+| 삭제 | DELETE | `/api/timetables/{timetableId}` | 시간표 삭제 |
 
 ## Postman 테스트 데이터
 
@@ -89,7 +91,7 @@ GET http://localhost:8080/api/semesters/1/timetables
 
 ### 3. 시간표 상세 조회 (GET)
 ```bash
-GET http://localhost:8080/api/semesters/1/timetables/1
+GET http://localhost:8080/api/timetables/1
 ```
 
 **응답 예시 (200 OK)**
@@ -105,7 +107,7 @@ GET http://localhost:8080/api/semesters/1/timetables/1
 
 ### 4. 시간표 정보 수정 (PATCH)
 ```bash
-PATCH http://localhost:8080/api/semesters/1/timetables/1
+PATCH http://localhost:8080/api/timetables/1
 Content-Type: application/json
 
 {
@@ -126,7 +128,7 @@ Content-Type: application/json
 
 ### 5. 시간표 삭제 (DELETE)
 ```bash
-DELETE http://localhost:8080/api/semesters/1/timetables/1
+DELETE http://localhost:8080/api/timetables/1
 ```
 
 **응답 예시 (204 No Content)**
@@ -158,16 +160,16 @@ POST http://localhost:8080/api/semesters/1/timetables
 GET http://localhost:8080/api/semesters/1/timetables
 
 # 4. 시간표 상세 조회
-GET http://localhost:8080/api/semesters/1/timetables/1
+GET http://localhost:8080/api/timetables/1
 
 # 5. 시간표 수정
-PATCH http://localhost:8080/api/semesters/1/timetables/1
+PATCH http://localhost:8080/api/timetables/1
 {
   "title": "2026-1학기 최종 시간표"
 }
 
 # 6. 시간표 삭제
-DELETE http://localhost:8080/api/semesters/1/timetables/1
+DELETE http://localhost:8080/api/timetables/1
 ```
 
 ## 에러 응답
@@ -178,7 +180,7 @@ DELETE http://localhost:8080/api/semesters/1/timetables/1
 
 ## 주의사항
 
-- 시간표 생성 시 `semesterId`에 해당하는 학기가 존재해야 합니다.
-- 시간표 상세/수정/삭제 시 요청한 시간표가 해당 학기에 속해야 합니다.
+- 시간표 생성/목록 조회는 `semesterId`를 경로에 포함하며, 해당 학기가 존재해야 합니다.
+- 단건 상세/수정/삭제는 `timetableId`만으로 식별합니다.
 - PATCH 요청 시 null 값인 필드는 수정되지 않습니다.
 - 경로에서 `{semesterId}`와 `{timetableId}`는 각각 학기 ID와 시간표 ID로 치환해야 합니다.

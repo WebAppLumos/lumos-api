@@ -1,9 +1,11 @@
 package com.group4.lumos_api.semester.entity;
 
+import com.group4.lumos_api.user.entity.Users;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 
@@ -18,6 +20,12 @@ public class Semester {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "semester_id")
     private Long id;
+
+    // 소유자 (이 학기가 귀속된 사용자)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
+    private Users user;
     
     // 학기명 (예: "2024-1학기", "2024 Spring")
     @Column(name = "title", nullable = false, length = 100)

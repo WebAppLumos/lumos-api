@@ -1,5 +1,7 @@
 package com.group4.lumos_api.course.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,4 +20,8 @@ public class CourseUpdateRequest {
     private String classroom;
 
     private Short credit;
+
+    @Min(1)
+    @Max(5)
+    private Short difficultyLevel;
 }

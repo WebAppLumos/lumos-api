@@ -1,5 +1,6 @@
 package com.group4.lumos_api.course.controller;
 
+import com.group4.lumos_api.common.security.CurrentUser;
 import com.group4.lumos_api.course.dto.CourseCreateRequest;
 import com.group4.lumos_api.course.dto.CourseResponse;
 import com.group4.lumos_api.course.dto.CourseUpdateRequest;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/semesters/{semesterId}/courses")
 @RequiredArgsConstructor
 public class CourseController {
 
@@ -23,11 +23,12 @@ public class CourseController {
      * 학기에 종속된 수업 생성
      * POST /api/semesters/{semesterId}/courses
      */
-    @PostMapping
+    @PostMapping("/api/semesters/{semesterId}/courses")
     public ResponseEntity<CourseResponse> createCourse(
+            @CurrentUser String userId,
             @PathVariable Long semesterId,
             @Valid @RequestBody CourseCreateRequest request) {
-        CourseResponse response = courseService.createCourse(semesterId, request);
+        CourseResponse response = courseService.createCourse(userId, semesterId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -35,43 +36,45 @@ public class CourseController {
      * 학기별 수업 목록 조회
      * GET /api/semesters/{semesterId}/courses
      */
-    @GetMapping
-    public ResponseEntity<List<CourseResponse>> getCoursesBySemesterId(@PathVariable Long semesterId) {
-        return ResponseEntity.ok(courseService.getCoursesBySemesterId(semesterId));
+    @GetMapping("/api/semesters/{semesterId}/courses")
+    public ResponseEntity<List<CourseResponse>> getCoursesBySemesterId(
+            @CurrentUser String userId,
+            @PathVariable Long semesterId) {
+        return ResponseEntity.ok(courseService.getCoursesBySemesterId(userId, semesterId));
     }
 
     /**
      * 특정 수업 정보 조회
-     * GET /api/semesters/{semesterId}/courses/{courseId}
+     * GET /api/courses/{courseId}
      */
-    @GetMapping("/{courseId}")
+    @GetMapping("/api/courses/{courseId}")
     public ResponseEntity<CourseResponse> getCourseById(
-            @PathVariable Long semesterId,
+            @CurrentUser String userId,
             @PathVariable Long courseId) {
-        return ResponseEntity.ok(courseService.getCourseById(semesterId, courseId));
+        return ResponseEntity.ok(courseService.getCourseById(userId, courseId));
     }
 
     /**
      * 수업 정보 수정
-     * PATCH /api/semesters/{semesterId}/courses/{courseId}
+     * PATCH /api/courses/{courseId}
      */
-    @PatchMapping("/{courseId}")
+    @PatchMapping("/api/courses/{courseId}")
     public ResponseEntity<CourseResponse> updateCourse(
-            @PathVariable Long semesterId,
+            @CurrentUser String userId,
             @PathVariable Long courseId,
-            @RequestBody CourseUpdateRequest request) {
-        return ResponseEntity.ok(courseService.updateCourse(semesterId, courseId, request));
+            @Valid @RequestBody CourseUpdateRequest request) {
+        return ResponseEntity.ok(courseService.updateCourse(userId, courseId, request));
     }
 
     /**
      * 수업 삭제
-     * DELETE /api/semesters/{semesterId}/courses/{courseId}
+     * DELETE /api/courses/{courseId}
      */
-    @DeleteMapping("/{courseId}")
+    @DeleteMapping("/api/courses/{courseId}")
     public ResponseEntity<Void> deleteCourse(
-            @PathVariable Long semesterId,
+            @CurrentUser String userId,
             @PathVariable Long courseId) {
-        courseService.deleteCourse(semesterId, courseId);
+        courseService.deleteCourse(userId, courseId);
         return ResponseEntity.noContent().build();
     }
 }

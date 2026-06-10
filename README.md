@@ -1,30 +1,58 @@
 # Lumos API
 
-Lumos의 학기, 수업, 시간표, 노트, 난이도 정보를 관리하는 Spring Boot 기반 REST API입니다.
+Lumos의 학기, 수업, 시간표, 노트 정보를 관리하는 Spring Boot 기반 REST API입니다.
 
 ## 개요
 
-이 API는 학기를 최상위 기준으로 두고, 학기에 종속된 수업과 시간표를 관리합니다. 노트와 난이도는 수업에 종속되며, 수업 배치(Entry)는 시간표와 수업을 연결합니다.
+이 API는 학기를 최상위 기준으로 두고, 학기에 종속된 수업과 시간표를 관리합니다. 노트는 수업에 종속되며, 수업 배치(Entry)는 시간표와 수업을 연결합니다. 수업 난이도는 별도 도메인이 아니라 수업(Course)의 속성(`difficultyLevel`)으로, 수업 생성/수정으로 설정하고 수업 조회 응답에 포함됩니다.
+
+### URL 규칙
+
+컬렉션(생성/목록)은 상위 리소스 아래에 중첩하고, 특정 단건(상세/수정/삭제)은 최상위 경로로 평탄화합니다.
+
+- 예) 생성·목록: `POST /api/semesters/{semesterId}/courses`, 단건: `GET /api/courses/{courseId}`
+- 예) 생성·목록: `POST /api/courses/{courseId}/notes`, 단건: `GET /api/notes/{noteId}`
 
 ## 기술 스택
 
 - Java 21
 - Spring Boot 4.x
 - Spring MVC
+- Spring Security (Firebase ID 토큰 기반 인증)
 - Spring Data JPA
 - Jakarta Validation
 - PostgreSQL
 - Lombok
 - Gradle Wrapper
 
+## 인증
+
+`/api/auth/**`를 제외한 모든 엔드포인트는 인증이 필요합니다. 클라이언트는 Firebase 클라이언트 SDK로 발급받은 **ID 토큰**을 모든 요청 헤더에 담아 보냅니다.
+
+```http
+Authorization: Bearer <Firebase ID Token>
+```
+
+- 서버는 매 요청마다 ID 토큰을 검증하고, 토큰의 사용자(uid)를 기준으로 **본인 소유 데이터만** 접근하도록 강제합니다(학기·수업·시간표·노트·배치).
+- 서버는 별도의 액세스 토큰을 발급하지 않습니다. ID 토큰이 만료(기본 1시간)되면 Firebase 클라이언트 SDK가 자동으로 새 ID 토큰을 갱신하며, 클라이언트는 갱신된 ID 토큰을 그대로 사용합니다.
+- 토큰이 없거나 유효하지 않으면 `401 Unauthorized`, 타인 소유 리소스 접근 시 `404 Not Found`로 응답합니다.
+
+클라이언트 인증 흐름:
+
+```text
+1. Firebase 클라이언트 SDK 로그인 → ID 토큰 획득
+2. POST /api/auth/login  { idToken, (프로필) }   → 사용자 등록/동기화
+3. 이후 모든 요청에 Authorization: Bearer <ID 토큰>
+4. ID 토큰 만료 시 SDK가 자동 갱신 → 새 ID 토큰으로 교체
+```
+
 ## 도메인 관계
 
 ```text
 User (Student)
   ├─ Semester
-  │   ├─ Course
-  │   │   ├─ Note
-  │   │   └─ Difficulty
+  │   ├─ Course  (difficultyLevel 속성 포함)
+  │   │   └─ Note
   │   └─ Timetable
   │       └─ Entry -> Course
   ├─ Certifications
@@ -34,10 +62,9 @@ User (Student)
 
 - `user`: 시스템 사용자 (학생) 정보
 - `semester`: 독립 실행 가능 (논리적으로 `user`에 귀속)
-- `course`: `semester`에 종속
+- `course`: `semester`에 종속 (난이도 `difficultyLevel`을 속성으로 보유)
 - `timetable`: `semester`에 종속
 - `note`: `course`에 종속
-- `difficulty`: `course`에 종속
 - `entry`: `timetable`과 `course`에 종속
 - `certifications`: 학생의 자격증 취득 정보
 - `language_exams`: 학생의 어학 시험 성적 정보
@@ -91,13 +118,6 @@ lumos-api/
 │   │   ├── repository/
 │   │   ├── service/
 │   │   └── README.md
-│   ├── difficulty/            # 난이도 관리
-│   │   ├── controller/
-│   │   ├── dto/
-│   │   ├── entity/
-│   │   ├── repository/
-│   │   ├── service/
-│   │   └── README.md
 │   ├── calendar/              # 캘린더 및 To-Do 관리
 │   │   ├── controller/
 │   │   ├── dto/
@@ -141,27 +161,40 @@ lumos-api/
 
 | 도메인 | 문서 | 설명 |
 |---|---|---|
-| User | [user/README.md](src/main/java/com/group4/lumos_api/user/README.md) | 사용자(학생) 생성, 조회, 수정, 삭제 |
+| Auth | [auth/README.md](src/main/java/com/group4/lumos_api/auth/README.md) | Firebase ID 토큰 검증, 로그인(등록/동기화), 로그아웃 |
+| User | [user/README.md](src/main/java/com/group4/lumos_api/user/README.md) | 내 정보(`/me`) 조회, 수정, 탈퇴 |
 | Semester | [semester/README.md](src/main/java/com/group4/lumos_api/semester/README.md) | 학기 생성, 목록 조회, 상세 조회, 수정, 삭제 |
 | Course | [course/README.md](src/main/java/com/group4/lumos_api/course/README.md) | 학기에 종속된 수업 생성, 조회, 수정, 삭제 |
 | Timetable | [timetable/README.md](src/main/java/com/group4/lumos_api/timetable/README.md) | 학기에 종속된 시간표 생성, 조회, 수정, 삭제 |
-| Entry | [entry/README.md](src/main/java/com/group4/lumos_api/entry/README.md) | 시간표에 수업 배치, 배치 목록 조회, 삭제 |
+| Entry | [entry/README.md](src/main/java/com/group4/lumos_api/entry/README.md) | 시간표에 수업 배치, 배치 목록 조회, 수정, 삭제 |
 | Note | [note/README.md](src/main/java/com/group4/lumos_api/note/README.md) | 수업별 노트 생성, 조회, 검색, 수정, 삭제, 고정 |
-| Difficulty | [difficulty/README.md](src/main/java/com/group4/lumos_api/difficulty/README.md) | 수업 난이도 설정/조회, 시간표 평균 난이도 조회 |
 | Certifications | [Certifications/README.md](src/main/java/com/group4/lumos_api/Certifications/README.md) | 학생별 자격증 취득 정보 관리 |
 | Language Exams | [Language_Exams/README.md](src/main/java/com/group4/lumos_api/Language_Exams/README.md) | 어학 시험(TOEIC 등) 성적 관리 |
 
 ## 주요 엔드포인트
 
+> `/api/auth/**`를 제외한 모든 엔드포인트는 `Authorization: Bearer <Firebase ID Token>` 헤더가 필요합니다.
+
+### Auth (인증 불필요)
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 로그인(등록/동기화) | POST | `/api/auth/login` |
+| 로그아웃 | POST | `/api/auth/logout` |
+| 토큰 검증/프로필 동기화 | POST | `/api/auth/refresh` |
+
 ### User
 
 | 기능 | 메서드 | 엔드포인트 |
 |---|---|---|
-| 사용자 생성 | POST | `/api/users` |
-| 사용자 목록 조회 | GET | `/api/users` |
-| 사용자 상세 조회 | GET | `/api/users/{userId}` |
-| 사용자 수정 | PATCH | `/api/users/{userId}` |
-| 사용자 삭제 | DELETE | `/api/users/{userId}` |
+| 사용자 등록(관리/직접) | POST | `/api/users` |
+| 전체 사용자 조회(관리자) | GET | `/api/users` |
+| 내 정보 조회 | GET | `/api/users/me` |
+| 내 정보 수정 | PATCH | `/api/users/me` |
+| 프로필 이미지 수정 | PATCH | `/api/users/me/profile-image` |
+| 알림 설정 조회(미구현) | GET | `/api/users/me/settings` |
+| 알림 설정 수정(미구현) | PATCH | `/api/users/me/settings` |
+| 회원 탈퇴 | DELETE | `/api/users/me` |
 
 ### Semester
 
@@ -179,9 +212,11 @@ lumos-api/
 |---|---|---|
 | 수업 생성 | POST | `/api/semesters/{semesterId}/courses` |
 | 수업 목록 조회 | GET | `/api/semesters/{semesterId}/courses` |
-| 수업 상세 조회 | GET | `/api/semesters/{semesterId}/courses/{courseId}` |
-| 수업 수정 | PATCH | `/api/semesters/{semesterId}/courses/{courseId}` |
-| 수업 삭제 | DELETE | `/api/semesters/{semesterId}/courses/{courseId}` |
+| 수업 상세 조회 | GET | `/api/courses/{courseId}` |
+| 수업 수정 | PATCH | `/api/courses/{courseId}` |
+| 수업 삭제 | DELETE | `/api/courses/{courseId}` |
+
+> 수업 난이도(`difficultyLevel`, 1~5)는 수업 생성/수정 요청 본문으로 설정하고, 수업 조회 응답에 포함됩니다. 별도 난이도 엔드포인트는 없습니다.
 
 ### Timetable
 
@@ -189,37 +224,32 @@ lumos-api/
 |---|---|---|
 | 시간표 생성 | POST | `/api/semesters/{semesterId}/timetables` |
 | 시간표 목록 조회 | GET | `/api/semesters/{semesterId}/timetables` |
-| 시간표 상세 조회 | GET | `/api/semesters/{semesterId}/timetables/{timetableId}` |
-| 시간표 수정 | PATCH | `/api/semesters/{semesterId}/timetables/{timetableId}` |
-| 시간표 삭제 | DELETE | `/api/semesters/{semesterId}/timetables/{timetableId}` |
+| 시간표 상세 조회 | GET | `/api/timetables/{timetableId}` |
+| 시간표 수정 | PATCH | `/api/timetables/{timetableId}` |
+| 시간표 삭제 | DELETE | `/api/timetables/{timetableId}` |
 
 ### Entry
 
 | 기능 | 메서드 | 엔드포인트 |
 |---|---|---|
-| 수업 배치 | POST | `/api/semesters/{semesterId}/timetables/{timetableId}/entries` |
-| 수업 배치 목록 조회 | GET | `/api/semesters/{semesterId}/timetables/{timetableId}/entries` |
-| 수업 배치 삭제 | DELETE | `/api/semesters/{semesterId}/timetables/{timetableId}/entries/{entryId}` |
+| 수업 배치 | POST | `/api/timetables/{timetableId}/entries` |
+| 수업 배치 목록 조회 | GET | `/api/timetables/{timetableId}/entries` |
+| 수업 배치 수정 | PATCH | `/api/entries/{entryId}` |
+| 수업 배치 삭제 | DELETE | `/api/entries/{entryId}` |
+
+> 수업 배치 요청 본문: `courseId`, `dayOfWeek`(1~7), `startTime`, `endTime` (모두 필수). 같은 시간표의 동일 요일에 시간이 겹치는 배치는 거부됩니다.
 
 ### Note
 
 | 기능 | 메서드 | 엔드포인트 |
 |---|---|---|
-| 노트 생성 | POST | `/api/semesters/{semesterId}/courses/{courseId}/notes` |
-| 노트 목록 조회 | GET | `/api/semesters/{semesterId}/courses/{courseId}/notes` |
-| 노트 검색 | GET | `/api/semesters/{semesterId}/courses/{courseId}/notes?q={keyword}` |
-| 노트 상세 조회 | GET | `/api/semesters/{semesterId}/courses/{courseId}/notes/{noteId}` |
-| 노트 수정 | PATCH | `/api/semesters/{semesterId}/courses/{courseId}/notes/{noteId}` |
-| 노트 삭제 | DELETE | `/api/semesters/{semesterId}/courses/{courseId}/notes/{noteId}` |
-| 노트 고정 설정/해제 | PATCH | `/api/semesters/{semesterId}/courses/{courseId}/notes/{noteId}/pin` |
-
-### Difficulty
-
-| 기능 | 메서드 | 엔드포인트 |
-|---|---|---|
-| 난이도 설정 | POST | `/api/semesters/{semesterId}/courses/{courseId}/difficulty` |
-| 난이도 조회 | GET | `/api/semesters/{semesterId}/courses/{courseId}/difficulty` |
-| 시간표 평균 난이도 조회 | GET | `/api/semesters/{semesterId}/timetables/{timetableId}/difficulty` |
+| 노트 생성 | POST | `/api/courses/{courseId}/notes` |
+| 노트 목록 조회 | GET | `/api/courses/{courseId}/notes` |
+| 노트 검색 | GET | `/api/courses/{courseId}/notes?q={keyword}` |
+| 노트 상세 조회 | GET | `/api/notes/{noteId}` |
+| 노트 수정 | PATCH | `/api/notes/{noteId}` |
+| 노트 삭제 | DELETE | `/api/notes/{noteId}` |
+| 노트 고정 설정/해제 | PATCH | `/api/notes/{noteId}/pin` |
 
 ### Certifications
 
@@ -256,11 +286,10 @@ PostgreSQL을 사용합니다. JPA 엔티티는 ERD의 물리 테이블명과 �
 |---|---|
 | `users` | 사용자(학생) |
 | `semester` | 학기 |
-| `course` | 수업 |
+| `course` | 수업 (난이도 `difficulty_level` 컬럼 포함) |
 | `timetable` | 시간표 |
 | `entry` | 시간표 수업 배치 |
 | `note` | 수업 노트 |
-| `difficulty` | 수업 난이도 |
 | `certifications` | 자격증 정보 |
 | `language_exams` | 어학 시험 성적 |
 | `previous_semester_scores` | 지난 학기 성적 |
@@ -329,12 +358,15 @@ macOS/Linux:
 
 ```text
 baseUrl=http://localhost:8080
+idToken=<Firebase ID Token>
 ```
+
+컬렉션은 Bearer 인증(`{{idToken}}`)이 설정되어 있어 모든 요청에 `Authorization: Bearer {{idToken}}`가 자동으로 적용됩니다. 테스트 전에 `idToken` 변수에 유효한 Firebase ID 토큰을 넣어야 합니다.
 
 권장 실행 순서:
 
 ```text
-Semester -> Course -> Timetable -> Entry -> Note -> Difficulty
+Semester -> Course -> Timetable -> Entry -> Note
 ```
 
 ## 검증

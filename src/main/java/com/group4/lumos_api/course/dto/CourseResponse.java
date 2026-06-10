@@ -25,6 +25,8 @@ public class CourseResponse {
 
     private Short credit;
 
+    private Short difficultyLevel;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

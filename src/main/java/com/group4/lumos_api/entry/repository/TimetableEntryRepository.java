@@ -12,7 +12,13 @@ public interface TimetableEntryRepository extends JpaRepository<TimetableEntry, 
 
     List<TimetableEntry> findAllByTimetable_IdOrderByIdAsc(Long timetableId);
 
-    Optional<TimetableEntry> findByIdAndTimetable_Id(Long id, Long timetableId);
+    Optional<TimetableEntry> findByIdAndTimetable_Semester_User_Id(Long entryId, String userId);
 
     boolean existsByTimetable_IdAndCourse_Id(Long timetableId, Long courseId);
+
+    List<TimetableEntry> findAllByTimetable_IdAndDayOfWeek(Long timetableId, Short dayOfWeek);
+
+    void deleteAllByTimetable_Id(Long timetableId);
+
+    void deleteAllByCourse_Id(Long courseId);
 }

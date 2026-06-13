@@ -12,8 +12,12 @@ import lombok.Setter;
 @Setter
 public class TimetableImportRequest {
 
-    @NotBlank
     private String mml;
+
+    /**
+     * 브라우저 확장이 EDWARD SSV 응답(DS_COUR530M01)을 직접 전달할 때 사용한다.
+     */
+    private String ssv;
 
     @NotBlank
     @Pattern(regexp = "\\d{7}")

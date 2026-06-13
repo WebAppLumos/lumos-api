@@ -1,5 +1,6 @@
 package com.group4.lumos_api.semester.service;
 
+import com.group4.lumos_api.common.exception.BadRequestException;
 import com.group4.lumos_api.common.exception.NotFoundException;
 import com.group4.lumos_api.course.service.CourseService;
 import com.group4.lumos_api.semester.dto.SemesterRequest;
@@ -13,6 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,9 +39,31 @@ public class SemesterService {
         semester.setStartDate(request.getStartDate());
         semester.setEndDate(request.getEndDate());
         semester.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
+        semester.setSortOrder(nextSortOrder(userId));
         
         Semester saved = semesterRepository.save(semester);
         return convertToResponse(saved);
+    }
+
+    public List<SemesterResponse> reorderSemesters(String userId, List<Long> semesterIds) {
+        List<Semester> semesters = semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(userId);
+        Set<Long> ownedIds = semesters.stream().map(Semester::getId).collect(Collectors.toSet());
+
+        if (semesterIds.size() != ownedIds.size() || !ownedIds.containsAll(semesterIds)) {
+            throw new BadRequestException("학기 순서 변경 요청이 올바르지 않습니다.");
+        }
+
+        Map<Long, Semester> byId = semesters.stream()
+                .collect(Collectors.toMap(Semester::getId, Function.identity()));
+
+        for (int i = 0; i < semesterIds.size(); i++) {
+            byId.get(semesterIds.get(i)).setSortOrder(i);
+        }
+
+        return semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(userId)
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
     
     /**
@@ -45,7 +71,7 @@ public class SemesterService {
      */
     @Transactional(readOnly = true)
     public List<SemesterResponse> getAllSemesters(String userId) {
-        return semesterRepository.findAllByUser_UserIdOrderByIdAsc(userId)
+        return semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(userId)
                 .stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
@@ -103,6 +129,14 @@ public class SemesterService {
                 .orElseThrow(() -> new NotFoundException("학기를 찾을 수 없습니다. ID: " + id));
     }
     
+    private int nextSortOrder(String userId) {
+        return semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(userId)
+                .stream()
+                .mapToInt(Semester::getSortOrder)
+                .max()
+                .orElse(-1) + 1;
+    }
+
     /**
      * Entity를 Response DTO로 변환
      */
@@ -113,6 +147,7 @@ public class SemesterService {
                 semester.getStartDate(),
                 semester.getEndDate(),
                 semester.getIsActive(),
+                semester.getSortOrder(),
                 semester.getCreatedAt(),
                 semester.getUpdatedAt()
         );

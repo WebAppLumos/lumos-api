@@ -12,9 +12,12 @@ import com.group4.lumos_api.sync.client.EdwardSessionClient;
 import com.group4.lumos_api.sync.dto.TimetableImportRequest;
 import com.group4.lumos_api.sync.dto.TimetableSyncRequest;
 import com.group4.lumos_api.sync.dto.TimetableSyncResponse;
+import com.group4.lumos_api.sync.exception.ExternalSyncException;
 import com.group4.lumos_api.sync.model.AcademicTerm;
 import com.group4.lumos_api.sync.model.EdwardSession;
 import com.group4.lumos_api.sync.model.ParsedTimetableSlot;
+import com.group4.lumos_api.sync.parser.ConfirmationMmlParser;
+import com.group4.lumos_api.sync.parser.CourseRegistrationParser;
 import com.group4.lumos_api.sync.parser.MmlTimetableParser;
 import com.group4.lumos_api.sync.source.ExternalSyncSource;
 import com.group4.lumos_api.timetable.entity.Timetable;
@@ -26,7 +29,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,6 +46,8 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
     private static final String TIMETABLE_TITLE = "EDWARD 동기화";
 
     private final EdwardSessionClient edwardSessionClient;
+    private final CourseRegistrationParser courseRegistrationParser;
+    private final ConfirmationMmlParser confirmationMmlParser;
     private final MmlTimetableParser mmlTimetableParser;
     private final UsersRepository usersRepository;
     private final SemesterRepository semesterRepository;
@@ -73,18 +81,15 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
                     request.getEdwardLoginName(),
                     yearTerm.termLabel()
             );
-            String logNo = edwardSessionClient.fetchLogNo(session);
 
-            String mml = edwardSessionClient.fetchTimetableMml(
+            var rows = edwardSessionClient.fetchCourseRegistrationList(
                     session,
                     yearTerm.year(),
                     yearTerm.termCode(),
-                    request.getEdwardLoginName(),
-                    yearTerm.termLabel(),
-                    logNo
+                    request.getEdwardLoginName()
             );
 
-            List<ParsedTimetableSlot> slots = mmlTimetableParser.parse(mml);
+            List<ParsedTimetableSlot> slots = courseRegistrationParser.parseRows(rows);
             return upsertTimetable(user, toAcademicTerm(yearTerm), slots);
         } finally {
             java.util.Arrays.fill(password, '\0');
@@ -99,11 +104,21 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
             throw new BadRequestException("EDWARD 학번과 내 학번이 일치해야 합니다.");
         }
 
-        if (!request.getMml().contains("<MML") && !request.getMml().contains("<DOCUMENT")) {
-            throw new BadRequestException("유효한 시간표 데이터가 아닙니다.");
+        if ((request.getMml() == null || request.getMml().isBlank())
+                && (request.getSsv() == null || request.getSsv().isBlank())) {
+            throw new BadRequestException("시간표 데이터가 비어 있습니다.");
         }
 
-        List<ParsedTimetableSlot> slots = mmlTimetableParser.parse(request.getMml());
+        List<ParsedTimetableSlot> slots;
+        if (request.getSsv() != null && !request.getSsv().isBlank()) {
+            slots = courseRegistrationParser.parseRows(
+                    com.group4.lumos_api.sync.client.SsvCodec.parseDatasetAllRows(
+                            request.getSsv(), "DS_COUR530M01"));
+        } else if (!request.getMml().contains("<MML") && !request.getMml().contains("<DOCUMENT")) {
+            throw new BadRequestException("유효한 시간표 데이터가 아닙니다.");
+        } else {
+            slots = parseImportedMml(request.getMml());
+        }
 
         int year = request.getYear() != null
                 ? request.getYear()
@@ -132,10 +147,12 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
 
         entryRepository.deleteAllByTimetable_Id(timetable.getId());
 
+        List<ParsedTimetableSlot> mergedSlots = mergeSlotsByCourseAndDay(slots);
+
         Map<String, Course> courseCache = new HashMap<>();
         int entryCount = 0;
 
-        for (ParsedTimetableSlot slot : slots) {
+        for (ParsedTimetableSlot slot : mergedSlots) {
             Course course = courseCache.computeIfAbsent(
                     courseKey(slot.title(), slot.professor()),
                     key -> findOrCreateCourse(semester, slot)
@@ -161,7 +178,7 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
     }
 
     private Semester findOrCreateSemester(Users user, String title, int year, String termCode) {
-        Optional<Semester> existing = semesterRepository.findAllByUser_UserIdOrderByIdAsc(user.getUserId()).stream()
+        Optional<Semester> existing = semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(user.getUserId()).stream()
                 .filter(semester -> title.equals(semester.getTitle()))
                 .findFirst();
         if (existing.isPresent()) {
@@ -181,17 +198,29 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
         semester.setStartDate(startDate);
         semester.setEndDate(endDate);
         semester.setIsActive(true);
+        int nextOrder = semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(user.getUserId())
+                .stream()
+                .mapToInt(Semester::getSortOrder)
+                .max()
+                .orElse(-1) + 1;
+        semester.setSortOrder(nextOrder);
         return semesterRepository.save(semester);
     }
 
     private Timetable findOrCreateTimetable(Semester semester) {
-        return timetableRepository.findAllBySemester_IdOrderByIdAsc(semester.getId()).stream()
+        return timetableRepository.findAllBySemester_IdOrderBySortOrderAscIdAsc(semester.getId()).stream()
                 .filter(t -> TIMETABLE_TITLE.equals(t.getTitle()))
                 .findFirst()
                 .orElseGet(() -> {
                     Timetable timetable = new Timetable();
                     timetable.setSemester(semester);
                     timetable.setTitle(TIMETABLE_TITLE);
+                    int nextOrder = timetableRepository.findAllBySemester_IdOrderBySortOrderAscIdAsc(semester.getId())
+                            .stream()
+                            .mapToInt(Timetable::getSortOrder)
+                            .max()
+                            .orElse(-1) + 1;
+                    timetable.setSortOrder(nextOrder);
                     return timetableRepository.save(timetable);
                 });
     }
@@ -221,5 +250,52 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
 
     private static String courseKey(String title, String professor) {
         return title + "||" + professor;
+    }
+
+    private List<ParsedTimetableSlot> parseImportedMml(String mml) {
+        if (isConfirmationMml(mml)) {
+            try {
+                return confirmationMmlParser.parse(mml);
+            } catch (ExternalSyncException confirmationError) {
+                try {
+                    return mmlTimetableParser.parse(mml);
+                } catch (ExternalSyncException ignored) {
+                    throw confirmationError;
+                }
+            }
+        }
+        return mmlTimetableParser.parse(mml);
+    }
+
+    private static boolean isConfirmationMml(String mml) {
+        String compact = mml.replace(" ", "");
+        return compact.contains("수강신청확인")
+                || compact.contains("과목코드")
+                || mml.contains("unst0040");
+    }
+
+    private static List<ParsedTimetableSlot> mergeSlotsByCourseAndDay(List<ParsedTimetableSlot> slots) {
+        record CourseDayKey(String courseKey, short dayOfWeek) {
+        }
+
+        Map<CourseDayKey, ParsedTimetableSlot> merged = new LinkedHashMap<>();
+        for (ParsedTimetableSlot slot : slots) {
+            CourseDayKey key = new CourseDayKey(courseKey(slot.title(), slot.professor()), slot.dayOfWeek());
+            merged.merge(key, slot, TimetableSyncService::mergeTwoSlots);
+        }
+
+        return merged.values().stream()
+                .sorted(Comparator
+                        .comparing(ParsedTimetableSlot::dayOfWeek)
+                        .thenComparing(ParsedTimetableSlot::startTime)
+                        .thenComparing(ParsedTimetableSlot::title))
+                .toList();
+    }
+
+    private static ParsedTimetableSlot mergeTwoSlots(ParsedTimetableSlot left, ParsedTimetableSlot right) {
+        LocalTime start = left.startTime().isBefore(right.startTime()) ? left.startTime() : right.startTime();
+        LocalTime end = left.endTime().isAfter(right.endTime()) ? left.endTime() : right.endTime();
+        String classroom = !left.classroom().isBlank() ? left.classroom() : right.classroom();
+        return new ParsedTimetableSlot(left.title(), left.professor(), classroom, left.dayOfWeek(), start, end);
     }
 }

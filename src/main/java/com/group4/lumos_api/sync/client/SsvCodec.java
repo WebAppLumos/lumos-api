@@ -1,5 +1,6 @@
 package com.group4.lumos_api.sync.client;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -123,6 +124,55 @@ public final class SsvCodec {
     /**
      * Dataset 첫 데이터 행을 컬럼명-값 맵으로 반환한다.
      */
+    public static List<Map<String, String>> parseDatasetAllRows(String body, String datasetName) {
+        int datasetStart = body.indexOf("Dataset:" + datasetName);
+        if (datasetStart < 0) {
+            return List.of();
+        }
+
+        String[] records = body.substring(datasetStart).split(String.valueOf(RS));
+        String[] columnNames = null;
+        List<Map<String, String>> rows = new ArrayList<>();
+
+        for (String record : records) {
+            if (record.isBlank() || record.startsWith("Dataset:")) {
+                continue;
+            }
+
+            if (record.startsWith("_RowType_")) {
+                String columnPart = record.substring("_RowType_".length());
+                if (!columnPart.isEmpty() && columnPart.charAt(0) == US) {
+                    columnPart = columnPart.substring(1);
+                }
+                if (containsColumnDefinition(columnPart)) {
+                    columnNames = parseColumnNames(columnPart);
+                }
+                continue;
+            }
+
+            if (containsColumnDefinition(record)) {
+                columnNames = parseColumnNames(record);
+                continue;
+            }
+
+            if (columnNames == null || record.isEmpty()) {
+                continue;
+            }
+
+            char rowType = record.charAt(0);
+            if (rowType == 'N' || rowType == 'U' || rowType == 'D') {
+                String[] values = record.split(String.valueOf(US));
+                Map<String, String> row = new LinkedHashMap<>();
+                for (int i = 1; i < values.length && i - 1 < columnNames.length; i++) {
+                    row.put(columnNames[i - 1], values[i]);
+                }
+                rows.add(row);
+            }
+        }
+
+        return rows;
+    }
+
     public static Map<String, String> parseDatasetFirstRowMap(String body, String datasetName) {
         int datasetStart = body.indexOf("Dataset:" + datasetName);
         if (datasetStart < 0) {

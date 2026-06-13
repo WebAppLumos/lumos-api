@@ -24,6 +24,8 @@ public class SemesterResponse {
     
     // 활성 여부
     private Boolean isActive;
+
+    private int sortOrder;
     
     // 생성 일시
     private LocalDateTime createdAt;

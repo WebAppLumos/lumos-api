@@ -42,6 +42,9 @@ public class Semester {
     // 활성 여부
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
+
+    @Column(name = "sort_order", nullable = false)
+    private int sortOrder;
     
     // 생성 일시
     @Column(name = "created_at", nullable = false, updatable = false)

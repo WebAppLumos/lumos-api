@@ -66,9 +66,9 @@ public class EdwardSessionClient {
 
 
 
-    private static final String MENU_ID = "M505719";
+    private static final String MENU_ID = "M505718";
 
-    private static final String PGM_ID = "P505748";
+    private static final String PGM_ID = "P505747";
 
     private static final String BOOTSTRAP_MENU_ID = "edward";
 
@@ -318,7 +318,7 @@ public class EdwardSessionClient {
 
                                          String studentNumber, String termLabel) {
 
-        String qryNm = "unst0050_prn(/rhwpfixsize[1]/rxlsxdefault[1]/rp[" + year + "][" + termCode + "]["
+        String qryNm = "unst0040_prn(/rhwpfixsize[1]/rxlsxdefault[1]/rp[" + year + "][" + termCode + "]["
 
                 + studentNumber + "][" + termLabel + "])";
 
@@ -332,13 +332,101 @@ public class EdwardSessionClient {
 
                 "qryCnt", "1",
 
-                "qryFileUrl", "/rd/uni/cour/unst/unst0050_prn.mrd",
+                "qryFileUrl", "/rd/uni/cour/unst/unst0040_prn.mrd",
 
                 "findResn", "",
 
                 "excelDownResn", ""
 
         ));
+
+    }
+
+
+
+    public List<Map<String, String>> fetchCourseRegistrationList(EdwardSession session, int year,
+
+                                                                 String termCode, String studentNumber) {
+
+        Map<String, String> cond = new LinkedHashMap<>();
+
+        cond.put("yy", String.valueOf(year));
+
+        cond.put("tmGbn", termCode);
+
+        cond.put("stuno", studentNumber);
+
+        cond.put("tmGbnNm", termLabel(termCode));
+
+        String body = postSsvWithDataset(
+
+                session,
+
+                "/uni/cour/UnstCtr/findTlsnGvupAplyList.do",
+
+                "DS_COND",
+
+                List.of("yy", "tmGbn", "stuno", "tmGbnNm"),
+
+                cond,
+
+                MENU_ID,
+
+                PGM_ID
+
+        );
+
+        return SsvCodec.parseDatasetAllRows(body, "DS_COUR530M01");
+
+    }
+
+
+
+    private String postSsvWithDataset(EdwardSession session, String path, String datasetName,
+
+                                      List<String> columnNames, Map<String, String> rowValues,
+
+                                      String menuId, String pgmId) {
+
+        try {
+
+            ensureSessionIds(session);
+
+            Map<String, String> headers = new LinkedHashMap<>();
+
+            headers.put("WMONID", session.wmonId());
+
+            headers.put("IBMID", session.ibmId());
+
+            headers.put("requestTimeStr", String.valueOf(System.currentTimeMillis()));
+
+            String body = SsvCodec.buildRequestWithDataset(headers, datasetName, columnNames, rowValues);
+
+            String url = EDWARD_BASE + path;
+
+            if (menuId != null && pgmId != null) {
+
+                url += "?menuId=" + menuId + "&pgmId=" + pgmId;
+
+            }
+
+            return postRawSsv(session, url, body);
+
+        } catch (ExternalSyncException e) {
+
+            throw e;
+
+        } catch (InterruptedException e) {
+
+            Thread.currentThread().interrupt();
+
+            throw new ExternalSyncException("EDWARD API 호출이 중단되었습니다.", e);
+
+        } catch (IOException e) {
+
+            throw new ExternalSyncException("EDWARD API 호출 중 네트워크 오류가 발생했습니다.", e);
+
+        }
 
     }
 

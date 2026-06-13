@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface TimetableRepository extends JpaRepository<Timetable, Long> {
 
-    List<Timetable> findAllBySemester_IdOrderByIdAsc(Long semesterId);
+    List<Timetable> findAllBySemester_IdOrderBySortOrderAscIdAsc(Long semesterId);
 
     Optional<Timetable> findByIdAndSemester_User_UserId(Long timetableId, String userId);
 }

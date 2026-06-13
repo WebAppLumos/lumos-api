@@ -1,5 +1,6 @@
 package com.group4.lumos_api.timetable.service;
 
+import com.group4.lumos_api.common.exception.BadRequestException;
 import com.group4.lumos_api.common.exception.NotFoundException;
 import com.group4.lumos_api.entry.repository.TimetableEntryRepository;
 import com.group4.lumos_api.semester.entity.Semester;
@@ -13,6 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,14 +34,37 @@ public class TimetableService {
         Timetable timetable = new Timetable();
         timetable.setSemester(semester);
         timetable.setTitle(request.getTitle());
+        timetable.setSortOrder(nextSortOrder(semesterId));
 
         return toResponse(timetableRepository.save(timetable));
+    }
+
+    public List<TimetableResponse> reorderTimetables(String userId, Long semesterId, List<Long> timetableIds) {
+        getOwnedSemester(userId, semesterId);
+        List<Timetable> timetables = timetableRepository.findAllBySemester_IdOrderBySortOrderAscIdAsc(semesterId);
+        Set<Long> ownedIds = timetables.stream().map(Timetable::getId).collect(Collectors.toSet());
+
+        if (timetableIds.size() != ownedIds.size() || !ownedIds.containsAll(timetableIds)) {
+            throw new BadRequestException("시간표 순서 변경 요청이 올바르지 않습니다.");
+        }
+
+        Map<Long, Timetable> byId = timetables.stream()
+                .collect(Collectors.toMap(Timetable::getId, Function.identity()));
+
+        for (int i = 0; i < timetableIds.size(); i++) {
+            byId.get(timetableIds.get(i)).setSortOrder(i);
+        }
+
+        return timetableRepository.findAllBySemester_IdOrderBySortOrderAscIdAsc(semesterId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<TimetableResponse> getTimetables(String userId, Long semesterId) {
         getOwnedSemester(userId, semesterId);
-        return timetableRepository.findAllBySemester_IdOrderByIdAsc(semesterId)
+        return timetableRepository.findAllBySemester_IdOrderBySortOrderAscIdAsc(semesterId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -76,11 +104,20 @@ public class TimetableService {
                 .orElseThrow(() -> new NotFoundException("학기를 찾을 수 없습니다. ID: " + semesterId));
     }
 
+    private int nextSortOrder(Long semesterId) {
+        return timetableRepository.findAllBySemester_IdOrderBySortOrderAscIdAsc(semesterId)
+                .stream()
+                .mapToInt(Timetable::getSortOrder)
+                .max()
+                .orElse(-1) + 1;
+    }
+
     private TimetableResponse toResponse(Timetable timetable) {
         return new TimetableResponse(
                 timetable.getId(),
                 timetable.getSemester().getId(),
                 timetable.getTitle(),
+                timetable.getSortOrder(),
                 timetable.getCreatedAt(),
                 timetable.getUpdatedAt()
         );

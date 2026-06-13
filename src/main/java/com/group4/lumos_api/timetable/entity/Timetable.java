@@ -27,6 +27,9 @@ public class Timetable {
     @Column(name = "title", length = 100)
     private String title;
 
+    @Column(name = "sort_order", nullable = false)
+    private int sortOrder;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

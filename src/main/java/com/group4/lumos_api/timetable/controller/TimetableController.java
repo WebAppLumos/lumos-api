@@ -1,6 +1,7 @@
 package com.group4.lumos_api.timetable.controller;
 
 import com.group4.lumos_api.common.security.CurrentUser;
+import com.group4.lumos_api.timetable.dto.TimetableReorderRequest;
 import com.group4.lumos_api.timetable.dto.TimetableRequest;
 import com.group4.lumos_api.timetable.dto.TimetableResponse;
 import com.group4.lumos_api.timetable.service.TimetableService;
@@ -31,6 +32,15 @@ public class TimetableController {
             @CurrentUser String userId,
             @PathVariable Long semesterId) {
         return ResponseEntity.ok(timetableService.getTimetables(userId, semesterId));
+    }
+
+    @PutMapping("/api/semesters/{semesterId}/timetables/reorder")
+    public ResponseEntity<List<TimetableResponse>> reorderTimetables(
+            @CurrentUser String userId,
+            @PathVariable Long semesterId,
+            @Valid @RequestBody TimetableReorderRequest request) {
+        return ResponseEntity.ok(
+                timetableService.reorderTimetables(userId, semesterId, request.getTimetableIds()));
     }
 
     @GetMapping("/api/timetables/{timetableId}")

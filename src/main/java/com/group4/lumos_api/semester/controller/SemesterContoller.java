@@ -1,9 +1,11 @@
 package com.group4.lumos_api.semester.controller;
 
 import com.group4.lumos_api.common.security.CurrentUser;
+import com.group4.lumos_api.semester.dto.SemesterReorderRequest;
 import com.group4.lumos_api.semester.dto.SemesterRequest;
 import com.group4.lumos_api.semester.dto.SemesterResponse;
 import com.group4.lumos_api.semester.service.SemesterService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +41,17 @@ public class SemesterContoller {
     public ResponseEntity<List<SemesterResponse>> getAllSemesters(@CurrentUser String userId) {
         List<SemesterResponse> semesters = semesterService.getAllSemesters(userId);
         return ResponseEntity.ok(semesters);
+    }
+
+    /**
+     * 학기 순서 변경
+     * PUT /api/semesters/reorder
+     */
+    @PutMapping("/reorder")
+    public ResponseEntity<List<SemesterResponse>> reorderSemesters(
+            @CurrentUser String userId,
+            @Valid @RequestBody SemesterReorderRequest request) {
+        return ResponseEntity.ok(semesterService.reorderSemesters(userId, request.getSemesterIds()));
     }
     
     /**

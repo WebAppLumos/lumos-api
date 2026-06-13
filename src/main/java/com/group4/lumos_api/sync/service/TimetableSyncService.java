@@ -178,7 +178,7 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
     }
 
     private Semester findOrCreateSemester(Users user, String title, int year, String termCode) {
-        Optional<Semester> existing = semesterRepository.findAllByUser_UserIdOrderByIdAsc(user.getUserId()).stream()
+        Optional<Semester> existing = semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(user.getUserId()).stream()
                 .filter(semester -> title.equals(semester.getTitle()))
                 .findFirst();
         if (existing.isPresent()) {
@@ -198,17 +198,29 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
         semester.setStartDate(startDate);
         semester.setEndDate(endDate);
         semester.setIsActive(true);
+        int nextOrder = semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(user.getUserId())
+                .stream()
+                .mapToInt(Semester::getSortOrder)
+                .max()
+                .orElse(-1) + 1;
+        semester.setSortOrder(nextOrder);
         return semesterRepository.save(semester);
     }
 
     private Timetable findOrCreateTimetable(Semester semester) {
-        return timetableRepository.findAllBySemester_IdOrderByIdAsc(semester.getId()).stream()
+        return timetableRepository.findAllBySemester_IdOrderBySortOrderAscIdAsc(semester.getId()).stream()
                 .filter(t -> TIMETABLE_TITLE.equals(t.getTitle()))
                 .findFirst()
                 .orElseGet(() -> {
                     Timetable timetable = new Timetable();
                     timetable.setSemester(semester);
                     timetable.setTitle(TIMETABLE_TITLE);
+                    int nextOrder = timetableRepository.findAllBySemester_IdOrderBySortOrderAscIdAsc(semester.getId())
+                            .stream()
+                            .mapToInt(Timetable::getSortOrder)
+                            .max()
+                            .orElse(-1) + 1;
+                    timetable.setSortOrder(nextOrder);
                     return timetableRepository.save(timetable);
                 });
     }

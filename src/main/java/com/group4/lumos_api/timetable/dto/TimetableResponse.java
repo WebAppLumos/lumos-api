@@ -11,6 +11,7 @@ public class TimetableResponse {
     private Long id;
     private Long semesterId;
     private String title;
+    private int sortOrder;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -1,4 +1,4 @@
-package com.group4.lumos_api.assignmrnt.entity;
+package com.group4.lumos_api.assignment.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

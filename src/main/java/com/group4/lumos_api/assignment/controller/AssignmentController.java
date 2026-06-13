@@ -1,8 +1,8 @@
-package com.group4.lumos_api.assignmrnt.controller;
+package com.group4.lumos_api.assignment.controller;
 
-import com.group4.lumos_api.assignmrnt.dto.AssignmentRequest;
-import com.group4.lumos_api.assignmrnt.dto.AssignmentResponse;
-import com.group4.lumos_api.assignmrnt.service.AssignmentService;
+import com.group4.lumos_api.assignment.dto.AssignmentRequest;
+import com.group4.lumos_api.assignment.dto.AssignmentResponse;
+import com.group4.lumos_api.assignment.service.AssignmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;

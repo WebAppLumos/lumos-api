@@ -1,6 +1,6 @@
-package com.group4.lumos_api.assignmrnt.dto;
+package com.group4.lumos_api.assignment.dto;
 
-import com.group4.lumos_api.assignmrnt.entity.Assignment;
+import com.group4.lumos_api.assignment.entity.Assignment;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

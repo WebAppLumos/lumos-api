@@ -1,4 +1,4 @@
-package com.group4.lumos_api.assignmrnt.dto;
+package com.group4.lumos_api.assignment.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

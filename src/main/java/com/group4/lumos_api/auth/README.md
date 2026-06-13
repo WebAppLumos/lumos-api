@@ -2,6 +2,16 @@
 
 Firebase Authentication ID token을 검증한 뒤 Lumos `users` 테이블에 사용자를 등록하거나 로그인 처리하는 API입니다.
 
+## API 엔드포인트
+
+| 기능 | 도메인 | 엔드포인트 | 메서드 | 설명 |
+|------|--------|-----------|--------|------|
+| 로그인 | auth | `/api/auth/login` | POST | Firebase ID 토큰 검증 후 회원 등록/로그인. 서버는 별도 토큰을 발급하지 않으며, 클라이언트는 동일 ID 토큰을 이후 요청에 사용 |
+| 로그아웃 | auth | `/api/auth/logout` | POST | 요청 body의 Firebase ID 토큰으로 사용자를 식별한 뒤 refresh token을 폐기하여 로그아웃 처리 |
+| 토큰 검증 | auth | `/api/auth/refresh` | POST | Firebase ID 토큰 재검증(폐기 여부 포함) 후 사용자 프로필 반환. 세션 유효성 확인/프로필 동기화 용도이며, 새 토큰을 발급하지 않음 |
+
+> `/api/auth/**` 엔드포인트는 인증 헤더 없이 호출할 수 있습니다. 보호된 API는 `Authorization: Bearer <Firebase ID Token>` 헤더가 필요합니다.
+
 ## Directory
 
 - `config/FirebaseConfig.java`: Firebase Admin SDK 초기화
@@ -41,7 +51,7 @@ $env:FIREBASE_SERVICE_ACCOUNT_PATH='C:\path\to\firebase-service-account.json'
 
 ## Endpoints
 
-### Login
+### 로그인 — `POST /api/auth/login`
 
 ```http
 POST /api/auth/login
@@ -97,7 +107,7 @@ Firebase ID token을 검증하고, Firebase UID 기준으로 사용자를 등록
 }
 ```
 
-### Logout
+### 로그아웃 — `POST /api/auth/logout`
 
 ```http
 POST /api/auth/logout
@@ -122,7 +132,7 @@ Firebase UID의 refresh token을 폐기합니다. 이후 클라이언트는 다�
 }
 ```
 
-### Refresh
+### 토큰 검증 — `POST /api/auth/refresh`
 
 ```http
 POST /api/auth/refresh

@@ -161,7 +161,7 @@ lumos-api/
 
 | 도메인 | 문서 | 설명 |
 |---|---|---|
-| Auth | [auth/README.md](src/main/java/com/group4/lumos_api/auth/README.md) | Firebase ID 토큰 검증, 로그인(등록/동기화), 로그아웃 |
+| Auth | [auth/README.md](src/main/java/com/group4/lumos_api/auth/README.md) | Firebase ID 토큰 검증, 로그인(등록/동기화), 로그아웃, 토큰 재검증(세션 확인) |
 | User | [user/README.md](src/main/java/com/group4/lumos_api/user/README.md) | 내 정보(`/me`) 조회, 수정, 탈퇴 |
 | Semester | [semester/README.md](src/main/java/com/group4/lumos_api/semester/README.md) | 학기 생성, 목록 조회, 상세 조회, 수정, 삭제 |
 | Course | [course/README.md](src/main/java/com/group4/lumos_api/course/README.md) | 학기에 종속된 수업 생성, 조회, 수정, 삭제 |
@@ -177,11 +177,11 @@ lumos-api/
 
 ### Auth (인증 불필요)
 
-| 기능 | 메서드 | 엔드포인트 |
-|---|---|---|
-| 로그인(등록/동기화) | POST | `/api/auth/login` |
-| 로그아웃 | POST | `/api/auth/logout` |
-| 토큰 검증/프로필 동기화 | POST | `/api/auth/refresh` |
+| 기능 | 도메인 | 엔드포인트 | 메서드 | 설명 |
+|---|---|---|---|---|
+| 로그인 | auth | `/api/auth/login` | POST | Firebase ID 토큰 검증 후 회원 등록/로그인 |
+| 로그아웃 | auth | `/api/auth/logout` | POST | Firebase refresh token 폐기 및 로그아웃 처리 |
+| 토큰 검증 | auth | `/api/auth/refresh` | POST | Firebase ID 토큰 재검증 및 사용자 프로필 반환 (세션 유효성 확인) |
 
 ### User
 
@@ -285,11 +285,11 @@ PostgreSQL을 사용합니다. JPA 엔티티는 ERD의 물리 테이블명과 �
 | 테이블 | 설명 |
 |---|---|
 | `users` | 사용자(학생) |
-| `semester` | 학기 |
-| `course` | 수업 (난이도 `difficulty_level` 컬럼 포함) |
-| `timetable` | 시간표 |
-| `entry` | 시간표 수업 배치 |
-| `note` | 수업 노트 |
+| `semesters` | 학기 |
+| `courses` | 수업 (난이도 `difficulty_level` 컬럼 포함) |
+| `timetables` | 시간표 |
+| `entries` | 시간표 수업 배치 |
+| `notes` | 수업 노트 |
 | `certifications` | 자격증 정보 |
 | `language_exams` | 어학 시험 성적 |
 | `previous_semester_scores` | 지난 학기 성적 |

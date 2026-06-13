@@ -39,6 +39,9 @@ public class Course {
     @Column(name = "credit")
     private Short credit;
 
+    @Column(name = "is_online", nullable = false)
+    private Boolean isOnline = false;
+
     @Column(name = "difficulty_level")
     private Short difficultyLevel;
 

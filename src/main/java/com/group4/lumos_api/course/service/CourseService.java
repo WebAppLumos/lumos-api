@@ -135,6 +135,7 @@ public class CourseService {
                 course.getProfessor(),
                 course.getClassroom(),
                 course.getCredit(),
+                course.getIsOnline(),
                 course.getDifficultyLevel(),
                 course.getCreatedAt(),
                 course.getUpdatedAt()

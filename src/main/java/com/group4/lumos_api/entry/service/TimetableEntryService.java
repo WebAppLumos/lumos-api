@@ -10,6 +10,7 @@ import com.group4.lumos_api.entry.dto.EntryResponse;
 import com.group4.lumos_api.entry.dto.EntryUpdateRequest;
 import com.group4.lumos_api.entry.entity.TimetableEntry;
 import com.group4.lumos_api.entry.repository.TimetableEntryRepository;
+import com.group4.lumos_api.note.repository.NoteRepository;
 import com.group4.lumos_api.timetable.entity.Timetable;
 import com.group4.lumos_api.timetable.service.TimetableService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class TimetableEntryService {
 
     private final TimetableEntryRepository entryRepository;
     private final CourseRepository courseRepository;
+    private final NoteRepository noteRepository;
     private final TimetableService timetableService;
 
     public EntryResponse createEntry(String userId, Long timetableId, EntryCreateRequest request) {
@@ -74,7 +76,12 @@ public class TimetableEntryService {
     }
 
     public void deleteEntry(String userId, Long entryId) {
-        entryRepository.delete(getOwnedEntry(userId, entryId));
+        TimetableEntry entry = getOwnedEntry(userId, entryId);
+        Long courseId = entry.getCourse().getId();
+        entryRepository.delete(entry);
+        if (!entryRepository.existsByCourse_Id(courseId)) {
+            noteRepository.deleteAllByCourse_Id(courseId);
+        }
     }
 
     /**

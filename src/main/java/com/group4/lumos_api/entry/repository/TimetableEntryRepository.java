@@ -21,4 +21,6 @@ public interface TimetableEntryRepository extends JpaRepository<TimetableEntry, 
     void deleteAllByTimetable_Id(Long timetableId);
 
     void deleteAllByCourse_Id(Long courseId);
+
+    boolean existsByCourse_Id(Long courseId);
 }

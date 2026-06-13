@@ -1,6 +1,7 @@
 package com.group4.lumos_api.user.service;
 
 import com.group4.lumos_api.calendar.repository.CalendarEventRepository;
+import com.group4.lumos_api.dashboard.service.DashboardWidgetService;
 import com.group4.lumos_api.user.dto.UserRequestDto;
 import com.group4.lumos_api.user.dto.UserResponseDto;
 import com.group4.lumos_api.user.entity.Users;
@@ -19,6 +20,7 @@ public class UserService {
 
     private final UsersRepository usersRepository;
     private final CalendarEventRepository calendarEventRepository;
+    private final DashboardWidgetService dashboardWidgetService;
     private final EntityManager entityManager;
 
     // 1. 회원가입 (중복 방어 로직)
@@ -90,6 +92,7 @@ public class UserService {
 
         // 사용자의 일정 먼저 삭제
         calendarEventRepository.deleteByUser_UserId(userId);
+        dashboardWidgetService.deleteWidgetsByUserId(userId);
 
         // 사용자 삭제
         usersRepository.deleteById(userId);

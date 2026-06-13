@@ -1,5 +1,6 @@
 package com.group4.lumos_api.common.exception;
 
+import com.group4.lumos_api.sync.exception.ExternalSyncException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -31,6 +32,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException e) {
         return build(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(ExternalSyncException.class)
+    public ResponseEntity<ErrorResponse> handleExternalSync(ExternalSyncException e) {
+        return build(HttpStatus.BAD_GATEWAY, e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

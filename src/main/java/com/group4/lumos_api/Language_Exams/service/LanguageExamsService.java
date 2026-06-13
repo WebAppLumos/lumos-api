@@ -1,9 +1,9 @@
-package com.group4.lumos_api.Language_Exams.service;
+package com.group4.lumos_api.language_exams.service;
 
-import com.group4.lumos_api.Language_Exams.dto.LanguageExamsRequestDto;
-import com.group4.lumos_api.Language_Exams.dto.LanguageExamsResponseDto;
-import com.group4.lumos_api.Language_Exams.entity.LanguageExams;
-import com.group4.lumos_api.Language_Exams.repository.LanguageExamsRepository;
+import com.group4.lumos_api.language_exams.dto.LanguageExamsRequestDto;
+import com.group4.lumos_api.language_exams.dto.LanguageExamsResponseDto;
+import com.group4.lumos_api.language_exams.entity.LanguageExams;
+import com.group4.lumos_api.language_exams.repository.LanguageExamsRepository;
 import com.group4.lumos_api.user.entity.Users;
 import com.group4.lumos_api.user.repository.UsersRepository;
 import jakarta.persistence.EntityNotFoundException;

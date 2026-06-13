@@ -1,4 +1,4 @@
-package com.group4.lumos_api.Language_Exams.entity;
+package com.group4.lumos_api.language_exams.entity;
 
 import com.group4.lumos_api.user.entity.Users;
 import jakarta.persistence.*;

@@ -1,4 +1,4 @@
-package com.group4.lumos_api.Language_Exams.dto;
+package com.group4.lumos_api.language_exams.dto;
 
 import lombok.*;
 import java.time.LocalDate;

@@ -34,6 +34,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException e) {
+        return build(HttpStatus.FORBIDDEN, e.getMessage());
+    }
+
     @ExceptionHandler(ExternalSyncException.class)
     public ResponseEntity<ErrorResponse> handleExternalSync(ExternalSyncException e) {
         return build(HttpStatus.BAD_GATEWAY, e.getMessage());

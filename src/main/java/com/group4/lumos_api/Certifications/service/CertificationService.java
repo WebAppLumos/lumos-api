@@ -1,9 +1,9 @@
-package com.group4.lumos_api.Certifications.service;
+package com.group4.lumos_api.certifications.service;
 
-import com.group4.lumos_api.Certifications.dto.CertificationRequestDto;
-import com.group4.lumos_api.Certifications.dto.CertificationResponseDto;
-import com.group4.lumos_api.Certifications.entity.Certifications;
-import com.group4.lumos_api.Certifications.repository.CertificationRepository;
+import com.group4.lumos_api.certifications.dto.CertificationRequestDto;
+import com.group4.lumos_api.certifications.dto.CertificationResponseDto;
+import com.group4.lumos_api.certifications.entity.Certifications;
+import com.group4.lumos_api.certifications.repository.CertificationRepository;
 import com.group4.lumos_api.user.entity.Users;
 import com.group4.lumos_api.user.repository.UsersRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -45,16 +45,19 @@ public class CertificationService {
     public CertificationResponseDto updateCertification(Long certId, CertificationRequestDto dto) {
         Certifications cert = certificationRepository.findById(certId)
                 .orElseThrow(() -> new EntityNotFoundException("Certification not found"));
-        
+
         cert.setCertName(dto.getCertName());
         cert.setIssueDate(dto.getIssueDate());
-        
+
         return convertToDto(cert);
     }
 
     @Transactional
     public void deleteCertification(Long certId) {
-        certificationRepository.deleteById(certId);
+        Certifications cert = certificationRepository.findById(certId)
+                .orElseThrow(() -> new EntityNotFoundException("Certification not found"));
+
+        certificationRepository.delete(cert);
     }
 
     private CertificationResponseDto convertToDto(Certifications cert) {

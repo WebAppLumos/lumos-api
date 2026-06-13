@@ -1,9 +1,9 @@
-package com.group4.lumos_api.assignmrnt.service;
+package com.group4.lumos_api.assignment.service;
 
-import com.group4.lumos_api.assignmrnt.dto.AssignmentRequest;
-import com.group4.lumos_api.assignmrnt.dto.AssignmentResponse;
-import com.group4.lumos_api.assignmrnt.entity.Assignment;
-import com.group4.lumos_api.assignmrnt.repository.AssignmentRepository;
+import com.group4.lumos_api.assignment.dto.AssignmentRequest;
+import com.group4.lumos_api.assignment.dto.AssignmentResponse;
+import com.group4.lumos_api.assignment.entity.Assignment;
+import com.group4.lumos_api.assignment.repository.AssignmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

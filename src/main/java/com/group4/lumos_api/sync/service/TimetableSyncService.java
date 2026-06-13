@@ -18,6 +18,7 @@ import com.group4.lumos_api.sync.model.EdwardSession;
 import com.group4.lumos_api.sync.model.ParsedTimetableSlot;
 import com.group4.lumos_api.sync.parser.ConfirmationMmlParser;
 import com.group4.lumos_api.sync.parser.CourseRegistrationParser;
+import com.group4.lumos_api.sync.parser.EdwardScheduleParser;
 import com.group4.lumos_api.sync.parser.MmlTimetableParser;
 import com.group4.lumos_api.sync.source.ExternalSyncSource;
 import com.group4.lumos_api.timetable.entity.Timetable;
@@ -105,19 +106,28 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
         }
 
         if ((request.getMml() == null || request.getMml().isBlank())
-                && (request.getSsv() == null || request.getSsv().isBlank())) {
+                && (request.getSsv() == null || request.getSsv().isBlank())
+                && (request.getConfirmationMml() == null || request.getConfirmationMml().isBlank())) {
             throw new BadRequestException("시간표 데이터가 비어 있습니다.");
         }
 
+        ConfirmationMetadata confirmationMetadata = mergeExtensionCredits(
+                buildConfirmationMetadata(request.getConfirmationMml()),
+                request.getCreditByTitle());
+
         List<ParsedTimetableSlot> slots;
         if (request.getSsv() != null && !request.getSsv().isBlank()) {
-            slots = courseRegistrationParser.parseRows(
-                    com.group4.lumos_api.sync.client.SsvCodec.parseDatasetAllRows(
-                            request.getSsv(), "DS_COUR530M01"));
-        } else if (!request.getMml().contains("<MML") && !request.getMml().contains("<DOCUMENT")) {
-            throw new BadRequestException("유효한 시간표 데이터가 아닙니다.");
+            slots = applyConfirmationMetadata(
+                    courseRegistrationParser.parseRows(
+                            com.group4.lumos_api.sync.client.SsvCodec.parseDatasetAllRows(
+                                    request.getSsv(), "DS_COUR530M01")),
+                    confirmationMetadata);
         } else {
-            slots = parseImportedMml(request.getMml());
+            String mml = firstNonBlankMml(request.getConfirmationMml(), request.getMml());
+            if (!mml.contains("<MML") && !mml.contains("<DOCUMENT")) {
+                throw new BadRequestException("유효한 시간표 데이터가 아닙니다.");
+            }
+            slots = applyConfirmationMetadata(parseImportedMml(mml), confirmationMetadata);
         }
 
         int year = request.getYear() != null
@@ -161,9 +171,15 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
             TimetableEntry entry = new TimetableEntry();
             entry.setTimetable(timetable);
             entry.setCourse(course);
-            entry.setDayOfWeek(slot.dayOfWeek());
-            entry.setStartTime(slot.startTime());
-            entry.setEndTime(slot.endTime());
+            if (slot.isOnline()) {
+                entry.setDayOfWeek(null);
+                entry.setStartTime(null);
+                entry.setEndTime(null);
+            } else {
+                entry.setDayOfWeek(slot.dayOfWeek());
+                entry.setStartTime(slot.startTime());
+                entry.setEndTime(slot.endTime());
+            }
             entryRepository.save(entry);
             entryCount++;
         }
@@ -232,7 +248,11 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
                 .findFirst();
         if (existing.isPresent()) {
             Course course = existing.get();
-            course.setClassroom(slot.classroom());
+            course.setClassroom(slot.isOnline() ? "온라인" : slot.classroom());
+            course.setIsOnline(slot.isOnline());
+            if (slot.credit() != null) {
+                course.setCredit(slot.credit());
+            }
             return courseRepository.save(course);
         }
 
@@ -240,7 +260,9 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
         course.setSemester(semester);
         course.setTitle(slot.title());
         course.setProfessor(slot.professor());
-        course.setClassroom(slot.classroom());
+        course.setClassroom(slot.isOnline() ? "온라인" : slot.classroom());
+        course.setCredit(slot.credit());
+        course.setIsOnline(slot.isOnline());
         return courseRepository.save(course);
     }
 
@@ -250,6 +272,119 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
 
     private static String courseKey(String title, String professor) {
         return title + "||" + professor;
+    }
+
+    private static String firstNonBlankMml(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return "";
+    }
+
+    private record ConfirmationMetadata(
+            Map<String, Short> creditByCourseKey,
+            Map<String, Short> creditByTitle,
+            Map<String, String> professorByTitle
+    ) {
+        private static ConfirmationMetadata empty() {
+            return new ConfirmationMetadata(Map.of(), Map.of(), Map.of());
+        }
+    }
+
+    private ConfirmationMetadata mergeExtensionCredits(ConfirmationMetadata metadata,
+                                                      Map<String, Short> extensionCredits) {
+        if (extensionCredits == null || extensionCredits.isEmpty()) {
+            return metadata;
+        }
+
+        Map<String, Short> creditByTitle = new LinkedHashMap<>(metadata.creditByTitle());
+        for (Map.Entry<String, Short> entry : extensionCredits.entrySet()) {
+            if (entry.getKey() == null || entry.getKey().isBlank() || entry.getValue() == null) {
+                continue;
+            }
+            creditByTitle.putIfAbsent(normalizeTitle(entry.getKey()), entry.getValue());
+        }
+
+        return new ConfirmationMetadata(metadata.creditByCourseKey(), creditByTitle, metadata.professorByTitle());
+    }
+
+    private ConfirmationMetadata buildConfirmationMetadata(String confirmationMml) {
+        if (confirmationMml == null || confirmationMml.isBlank()) {
+            return ConfirmationMetadata.empty();
+        }
+
+        try {
+            Map<String, Short> creditByCourseKey = new LinkedHashMap<>();
+            Map<String, Short> creditByTitle = new LinkedHashMap<>();
+            Map<String, String> professorByTitle = new LinkedHashMap<>();
+
+            for (ParsedTimetableSlot slot : confirmationMmlParser.parse(confirmationMml)) {
+                String normalizedTitle = normalizeTitle(slot.title());
+
+                if (slot.credit() != null) {
+                    creditByCourseKey.putIfAbsent(courseKey(slot.title(), slot.professor()), slot.credit());
+                    creditByTitle.putIfAbsent(normalizedTitle, slot.credit());
+                }
+                if (slot.professor() != null && !slot.professor().isBlank()) {
+                    professorByTitle.putIfAbsent(normalizedTitle, slot.professor());
+                }
+            }
+
+            return new ConfirmationMetadata(creditByCourseKey, creditByTitle, professorByTitle);
+        } catch (ExternalSyncException ignored) {
+            return ConfirmationMetadata.empty();
+        }
+    }
+
+    private List<ParsedTimetableSlot> applyConfirmationMetadata(List<ParsedTimetableSlot> slots,
+                                                                ConfirmationMetadata metadata) {
+        if (metadata.creditByCourseKey().isEmpty()
+                && metadata.creditByTitle().isEmpty()
+                && metadata.professorByTitle().isEmpty()) {
+            return slots;
+        }
+
+        return slots.stream()
+                .map(slot -> enrichSlotFromConfirmation(slot, metadata))
+                .toList();
+    }
+
+    private ParsedTimetableSlot enrichSlotFromConfirmation(ParsedTimetableSlot slot,
+                                                           ConfirmationMetadata metadata) {
+        Short credit = slot.credit();
+        if (credit == null) {
+            credit = metadata.creditByCourseKey().get(courseKey(slot.title(), slot.professor()));
+            if (credit == null) {
+                credit = metadata.creditByTitle().get(normalizeTitle(slot.title()));
+            }
+        }
+
+        String professor = slot.professor();
+        if (professor == null || professor.isBlank()) {
+            professor = metadata.professorByTitle().getOrDefault(normalizeTitle(slot.title()), "");
+        }
+
+        if (java.util.Objects.equals(credit, slot.credit())
+                && java.util.Objects.equals(professor, slot.professor())) {
+            return slot;
+        }
+
+        return new ParsedTimetableSlot(
+                slot.title(),
+                professor,
+                slot.classroom(),
+                credit,
+                slot.isOnline(),
+                slot.dayOfWeek(),
+                slot.startTime(),
+                slot.endTime()
+        );
+    }
+
+    private static String normalizeTitle(String title) {
+        return title == null ? "" : title.trim();
     }
 
     private List<ParsedTimetableSlot> parseImportedMml(String mml) {
@@ -293,9 +428,24 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
     }
 
     private static ParsedTimetableSlot mergeTwoSlots(ParsedTimetableSlot left, ParsedTimetableSlot right) {
+        if (left.isOnline() || right.isOnline()) {
+            Short credit = left.credit() != null ? left.credit() : right.credit();
+            return EdwardScheduleParser.onlineCourse(left.title(), left.professor(), credit);
+        }
+
         LocalTime start = left.startTime().isBefore(right.startTime()) ? left.startTime() : right.startTime();
         LocalTime end = left.endTime().isAfter(right.endTime()) ? left.endTime() : right.endTime();
         String classroom = !left.classroom().isBlank() ? left.classroom() : right.classroom();
-        return new ParsedTimetableSlot(left.title(), left.professor(), classroom, left.dayOfWeek(), start, end);
+        Short credit = left.credit() != null ? left.credit() : right.credit();
+        return new ParsedTimetableSlot(
+                left.title(),
+                left.professor(),
+                classroom,
+                credit,
+                false,
+                left.dayOfWeek(),
+                start,
+                end
+        );
     }
 }

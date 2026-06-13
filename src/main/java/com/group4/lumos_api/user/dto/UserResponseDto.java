@@ -18,7 +18,7 @@ public class UserResponseDto {
     private String major;
     private Integer grade;
     private String studentNumber;
-    private String profileImageUrl;
+    private String profileImage;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -31,7 +31,7 @@ public class UserResponseDto {
         this.major = user.getMajor();
         this.grade = user.getGrade();
         this.studentNumber = user.getStudentNumber();
-        this.profileImageUrl = user.getProfileImageUrl();
+        this.profileImage = user.getProfileImage();
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
     }

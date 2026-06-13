@@ -49,7 +49,7 @@ public class UserController {
     public ResponseEntity<UserResponseDto> updateProfileImage(
             @CurrentUser String userId,
             @RequestBody UserRequestDto dto) {
-        return ResponseEntity.ok(userService.updateProfileImage(userId, dto.getProfileImageUrl()));
+        return ResponseEntity.ok(userService.updateProfileImage(userId, dto.getProfileImage()));
     }
 
     // 알림 설정 조회

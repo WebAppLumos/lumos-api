@@ -11,5 +11,5 @@ public class UserRequestDto {
     private String major;
     private Integer grade;
     private String studentNumber;
-    private String profileImageUrl;
+    private String profileImage;
 }

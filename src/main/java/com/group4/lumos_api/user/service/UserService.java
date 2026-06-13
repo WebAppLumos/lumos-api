@@ -5,6 +5,7 @@ import com.group4.lumos_api.user.dto.UserRequestDto;
 import com.group4.lumos_api.user.dto.UserResponseDto;
 import com.group4.lumos_api.user.entity.Users;
 import com.group4.lumos_api.user.repository.UsersRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class UserService {
 
     private final UsersRepository usersRepository;
     private final CalendarEventRepository calendarEventRepository;
+    private final EntityManager entityManager;
 
     // 1. 회원가입 (중복 방어 로직)
     @Transactional
@@ -40,12 +42,12 @@ public class UserService {
                 .major(dto.getMajor())
                 .grade(dto.getGrade())
                 .studentNumber(dto.getStudentNumber())
-                .profileImageUrl(dto.getProfileImageUrl() != null
-                        ? dto.getProfileImageUrl()
-                        : "https://lumos.com/default.jpg")
+                .profileImage(dto.getProfileImage())
                 .build();
 
-        return new UserResponseDto(usersRepository.save(user));
+        Users saved = usersRepository.saveAndFlush(user);
+        entityManager.refresh(saved);
+        return new UserResponseDto(saved);
     }
 
     // 2. 전체 사용자 조회
@@ -103,7 +105,7 @@ public class UserService {
                 + (imageUrl != null ? imageUrl.length() : 0) + ")");
 
         try {
-            user.setProfileImageUrl(imageUrl);
+            user.setProfileImage(imageUrl);
             Users saved = usersRepository.save(user);
 
             System.out.println(">>> UserService: 프로필 이미지 업데이트 성공");

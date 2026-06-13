@@ -2,10 +2,12 @@ package com.group4.lumos_api.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
+@DynamicInsert
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Users {
     @Id
@@ -30,8 +32,8 @@ public class Users {
     @Column(name = "student_number", length = 7, unique = true, nullable = false)
     private String studentNumber;
 
-    @Column(name = "profile_image_url", columnDefinition = "TEXT")
-    private String profileImageUrl;
+    @Column(name = "profile_image", columnDefinition = "TEXT")
+    private String profileImage;
 
     @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;

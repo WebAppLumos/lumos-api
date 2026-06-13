@@ -82,6 +82,8 @@ public class MmlTimetableParser {
                         cell.title,
                         matcher.group(1).trim(),
                         matcher.group(2).trim(),
+                        null,
+                        false,
                         cell.dayOfWeek,
                         times[0],
                         times[1]

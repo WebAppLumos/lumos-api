@@ -20,7 +20,8 @@ public class CourseRegistrationParser {
 
         for (Map<String, String> row : rows) {
             String title = firstNonBlank(row, "scNm", "sc_nm");
-            String professor = firstNonBlank(row, "respProfEmpNm");
+            String professor = firstNonBlank(row, "respProfEmpNm", "respProfNm", "profNm", "profEmpNm");
+            Short credit = parseCredit(row);
             String schedule = firstNonBlank(
                     row,
                     "lsnTmtablFormaSmryCtnt",
@@ -28,10 +29,17 @@ public class CourseRegistrationParser {
                     "openHp",
                     "scSmryCtnt"
             );
+            if (schedule.isBlank()) {
+                schedule = firstOnlineHint(row);
+            }
             if (title.isBlank()) {
                 continue;
             }
-            slots.addAll(EdwardScheduleParser.parse(title, professor, schedule));
+            List<ParsedTimetableSlot> rowSlots = EdwardScheduleParser.parse(title, professor, schedule, credit);
+            if (rowSlots.isEmpty()) {
+                continue;
+            }
+            slots.addAll(rowSlots);
         }
 
         slots.sort(Comparator
@@ -53,5 +61,66 @@ public class CourseRegistrationParser {
             }
         }
         return "";
+    }
+
+    private static String firstOnlineHint(Map<String, String> row) {
+        for (String value : row.values()) {
+            if (EdwardScheduleParser.isOnlineSchedule(value)) {
+                return value.trim();
+            }
+        }
+        return "";
+    }
+
+    private static Short parseCredit(Map<String, String> row) {
+        String raw = firstNonBlank(
+                row,
+                "pnt",
+                "scPnt",
+                "cmpsPnt",
+                "cptnPnt",
+                "lsnPnt",
+                "cmpsScCnt",
+                "cptnScCnt",
+                "credit"
+        );
+        if (raw.isBlank()) {
+            raw = row.entrySet().stream()
+                    .filter(entry -> looksLikeCreditColumn(entry.getKey()))
+                    .map(Map.Entry::getValue)
+                    .map(String::trim)
+                    .filter(value -> !value.isBlank())
+                    .findFirst()
+                    .orElse("");
+        }
+        if (raw.isBlank()) {
+            return null;
+        }
+
+        try {
+            return Short.parseShort(raw.replaceAll("[^0-9]", ""));
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+    }
+
+    private static boolean looksLikeCreditColumn(String key) {
+        if (key == null || key.isBlank()) {
+            return false;
+        }
+
+        String normalized = key.toLowerCase();
+        if (normalized.contains("prof")
+                || normalized.contains("tmtabl")
+                || normalized.contains("openhp")
+                || normalized.contains("smry")
+                || normalized.contains("scnm")
+                || normalized.contains("stuno")
+                || normalized.contains("yy")
+                || normalized.contains("tmgbn")) {
+            return false;
+        }
+
+        return normalized.contains("pnt") || normalized.contains("credit");
     }
 }

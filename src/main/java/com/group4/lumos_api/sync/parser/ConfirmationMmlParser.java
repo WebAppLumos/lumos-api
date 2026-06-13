@@ -82,11 +82,13 @@ public class ConfirmationMmlParser {
                     professor = "";
                 }
 
+                Short credit = parseCredit(cells, columns.creditCol());
+
                 String schedule = collectScheduleText(rows, rowTops, rowTop, columns.timeCol());
                 if (schedule.isBlank()) {
                     schedule = collectScheduleTextLoose(rows, rowTops, rowTop);
                 }
-                slots.addAll(EdwardScheduleParser.parse(title, professor, schedule));
+                slots.addAll(EdwardScheduleParser.parse(title, professor, schedule, credit));
             }
 
             slots.sort(Comparator
@@ -113,6 +115,7 @@ public class ConfirmationMmlParser {
                 switch (text) {
                     case "과목코드" -> layout = layout.withCodeCol(cell.getKey());
                     case "과목명" -> layout = layout.withNameCol(cell.getKey());
+                    case "학점" -> layout = layout.withCreditCol(cell.getKey());
                     case "담당교수" -> layout = layout.withProfCol(cell.getKey());
                     case "강의시간" -> layout = layout.withTimeCol(cell.getKey());
                     default -> {
@@ -178,6 +181,19 @@ public class ConfirmationMmlParser {
             return false;
         }
         return text.contains("~");
+    }
+
+    private static Short parseCredit(Map<Integer, String> cells, int creditColumn) {
+        String creditText = findClosestMatching(cells, creditColumn, Pattern.compile("^\\d+$"));
+        if (creditText == null) {
+            return null;
+        }
+
+        try {
+            return Short.parseShort(creditText);
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
     }
 
     private static String findClosestMatching(Map<Integer, String> cells, int targetColumn, Pattern pattern) {
@@ -259,25 +275,29 @@ public class ConfirmationMmlParser {
         return Integer.parseInt(value);
     }
 
-    private record ColumnLayout(int codeCol, int nameCol, int profCol, int timeCol) {
+    private record ColumnLayout(int codeCol, int nameCol, int creditCol, int profCol, int timeCol) {
         private static ColumnLayout defaults() {
-            return new ColumnLayout(1311, 1958, 4356, 5813);
+            return new ColumnLayout(1311, 1958, 4027, 4356, 5813);
         }
 
         private ColumnLayout withCodeCol(int codeCol) {
-            return new ColumnLayout(codeCol, nameCol, profCol, timeCol);
+            return new ColumnLayout(codeCol, nameCol, creditCol, profCol, timeCol);
         }
 
         private ColumnLayout withNameCol(int nameCol) {
-            return new ColumnLayout(codeCol, nameCol, profCol, timeCol);
+            return new ColumnLayout(codeCol, nameCol, creditCol, profCol, timeCol);
+        }
+
+        private ColumnLayout withCreditCol(int creditCol) {
+            return new ColumnLayout(codeCol, nameCol, creditCol, profCol, timeCol);
         }
 
         private ColumnLayout withProfCol(int profCol) {
-            return new ColumnLayout(codeCol, nameCol, profCol, timeCol);
+            return new ColumnLayout(codeCol, nameCol, creditCol, profCol, timeCol);
         }
 
         private ColumnLayout withTimeCol(int timeCol) {
-            return new ColumnLayout(codeCol, nameCol, profCol, timeCol);
+            return new ColumnLayout(codeCol, nameCol, creditCol, profCol, timeCol);
         }
     }
 }

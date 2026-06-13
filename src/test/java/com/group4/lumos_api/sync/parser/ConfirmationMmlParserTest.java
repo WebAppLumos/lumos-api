@@ -40,6 +40,19 @@ class ConfirmationMmlParserTest {
                 Path.of("src/test/resources/har-confirmation.mml"));
         List<ParsedTimetableSlot> slots = parser.parse(mml);
         assertTrue(slots.size() >= 10);
+
+        ParsedTimetableSlot os = slots.stream()
+                .filter(slot -> "운영체제".equals(slot.title()) && slot.dayOfWeek() == 2)
+                .findFirst()
+                .orElseThrow();
+        assertEquals((short) 3, os.credit());
+
+        ParsedTimetableSlot career = slots.stream()
+                .filter(slot -> "진로선택과자기계발".equals(slot.title()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals((short) 3, career.credit());
+        assertTrue(career.isOnline());
     }
 
     @Test

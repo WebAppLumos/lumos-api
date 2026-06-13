@@ -31,8 +31,17 @@ public final class EdwardScheduleParser {
     }
 
     public static List<ParsedTimetableSlot> parse(String title, String professor, String scheduleText) {
+        return parse(title, professor, scheduleText, null);
+    }
+
+    public static List<ParsedTimetableSlot> parse(String title, String professor, String scheduleText,
+                                                  Short credit) {
         if (scheduleText == null || scheduleText.isBlank()) {
             return List.of();
+        }
+
+        if (isOnlineSchedule(scheduleText) && !containsDayTime(scheduleText)) {
+            return List.of(onlineCourse(title, professor, credit));
         }
 
         String room = extractTrailingRoom(scheduleText);
@@ -52,12 +61,45 @@ public final class EdwardScheduleParser {
                     title,
                     professor,
                     room != null ? room : "",
+                    credit,
+                    false,
                     dayOfWeek,
                     parseTime(matcher.group(2)),
                     parseTime(matcher.group(3))
             ));
         }
+
+        if (slots.isEmpty() && isOnlineSchedule(scheduleText)) {
+            return List.of(onlineCourse(title, professor, credit));
+        }
+
         return slots;
+    }
+
+    public static boolean isOnlineSchedule(String scheduleText) {
+        if (scheduleText == null || scheduleText.isBlank()) {
+            return false;
+        }
+
+        String text = scheduleText.replace(" ", "");
+        return text.contains("원격")
+                || text.contains("온라인")
+                || text.contains("비대면")
+                || text.contains("e-learning")
+                || text.contains("elearning");
+    }
+
+    public static ParsedTimetableSlot onlineCourse(String title, String professor, Short credit) {
+        return new ParsedTimetableSlot(
+                title,
+                professor,
+                "온라인",
+                credit,
+                true,
+                (short) 0,
+                null,
+                null
+        );
     }
 
     public static String extractTrailingRoom(String scheduleText) {
@@ -66,6 +108,10 @@ public final class EdwardScheduleParser {
             return matcher.group(1);
         }
         return null;
+    }
+
+    private static boolean containsDayTime(String scheduleText) {
+        return DAY_TIME.matcher(scheduleText).find();
     }
 
     private static LocalTime parseTime(String raw) {

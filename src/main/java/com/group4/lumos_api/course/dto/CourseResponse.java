@@ -25,6 +25,8 @@ public class CourseResponse {
 
     private Short credit;
 
+    private Boolean isOnline;
+
     private Short difficultyLevel;
 
     private LocalDateTime createdAt;

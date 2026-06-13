@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EdwardScheduleParserTest {
 
@@ -60,5 +61,20 @@ class EdwardScheduleParserTest {
         assertEquals(LocalTime.of(13, 30), slot.startTime());
         assertEquals(LocalTime.of(14, 20), slot.endTime());
         assertEquals("영354", slot.classroom());
+    }
+
+    @Test
+    void parsesOnlineCourseWithoutScheduleTimes() {
+        List<ParsedTimetableSlot> slots = EdwardScheduleParser.parse(
+                "진로선택과자기계발",
+                "",
+                "원격수업(중복선택가능)",
+                (short) 3
+        );
+
+        assertEquals(1, slots.size());
+        assertTrue(slots.get(0).isOnline());
+        assertEquals((short) 3, slots.get(0).credit());
+        assertEquals("진로선택과자기계발", slots.get(0).title());
     }
 }

@@ -46,7 +46,7 @@ public class CalendarDataInitializer implements CommandLineRunner {
                     .major("교무처")
                     .grade(1)
                     .studentNumber("0000000") // 이제 중복 에러 안 남
-                    .profileImageUrl(null)
+                    .profileImage(null)
                     .build();
             adminUser = usersRepository.save(newAdmin);
         }

@@ -90,7 +90,7 @@ com.group4.lumos_api.user/
 ### 3단계: 내 정보 조회/수정/이미지변경 (GET/PATCH)
 - 조회: `GET /api/users/me`
 - 정보 수정: `PATCH /api/users/me` — Body: `{"phoneNumber": "010-9999-9999", "grade": 4}`
-- 이미지 수정: `PATCH /api/users/me/profile-image` — Body: `{"profileImageUrl": "https://url.jpg"}`
+- 이미지 수정: `PATCH /api/users/me/profile-image` — Body: `{"profileImage": "https://url.jpg"}`
 
 ### 4단계: 알림 설정 조회/수정 (GET/PATCH - 미구현)
 - 조회: `GET /api/users/me/settings`

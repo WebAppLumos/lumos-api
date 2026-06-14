@@ -39,7 +39,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                        .requestMatchers("/api/places/**").permitAll() 
                         .anyRequest().authenticated())
                 .addFilterBefore(firebaseAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(handling -> handling
@@ -56,10 +55,6 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
-
-                "http://localhost:5174",
-                "http://127.0.0.1:5174",
-
                 "https://edward.kmu.ac.kr",
                 "chrome-extension://*"
         ));

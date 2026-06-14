@@ -15,9 +15,9 @@ public class FirebaseBootstrap {
 
     @PostConstruct
     public void init() throws IOException {
-        // if (serviceAccountPath != null && !serviceAccountPath.isBlank()) {
-        //     FirebaseConfig.setServiceAccountPath(serviceAccountPath);
-        // }
-        // FirebaseConfig.initialize();
+        if (serviceAccountPath != null && !serviceAccountPath.isBlank()) {
+            FirebaseConfig.setServiceAccountPath(serviceAccountPath);
+        }
+        FirebaseConfig.initialize();
     }
 }

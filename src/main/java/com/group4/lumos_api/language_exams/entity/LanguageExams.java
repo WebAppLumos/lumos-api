@@ -6,7 +6,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "Language_Exams")
+@Table(name = "language_exams")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class LanguageExams {
     @Id

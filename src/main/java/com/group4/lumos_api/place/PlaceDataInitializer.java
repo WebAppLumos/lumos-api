@@ -17,6 +17,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        // 카페
         Place p1 = new Place();
         p1.setName("블루포트 공학관점");
         p1.setBuilding("공학관,공대");
@@ -53,7 +54,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
         p5.setName("붐카페&코너베이커리");
         p5.setBuilding("구바우어관");
         p5.setType("카페");
-        p5.setTime("09:00 - 19:00");
+        p5.setTime("08:00 - 20:00");
         p5.setLat(35.85423022055133);
         p5.setLng(128.4861118722504);
 
@@ -73,6 +74,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
         p7.setLat(35.85705832685428);
         p7.setLng(128.4802146357763);
 
+        // 서점
         Place p8 = new Place();
         p8.setName("계명대 구내서점");
         p8.setBuilding("구바우어관");
@@ -80,7 +82,8 @@ public class PlaceDataInitializer implements CommandLineRunner {
         p8.setTime("09:00 - 19:00");
         p8.setLat(35.85423022055133);
         p8.setLng(128.4861118722504);
-
+        
+        //도서관
         Place p9 = new Place();
         p9.setName("동산도서관");
         p9.setBuilding("도서관");
@@ -106,6 +109,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
         p11.setLat(35.85640495369977);
         p11.setLng(128.48714874254276);
 
+        // 프린트
         Place p12 = new Place();
         p12.setName("공대 1호관 2F");
         p12.setBuilding("공학관,공대");
@@ -138,6 +142,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
         p15.setLat(35.85829876580757);
         p15.setLng(128.4904912789133);
 
+        // 학식당
         Place p16 = new Place();
         p16.setName("구바우어관 지하 1층");
         p16.setBuilding("구바우어관");
@@ -147,8 +152,8 @@ public class PlaceDataInitializer implements CommandLineRunner {
         p16.setLng(128.4861118722504);
 
         Place p17 = new Place();
-        p17.setName("신바우어관 2F");
-        p17.setBuilding("신바우어관");
+        p17.setName("우어관 2F");
+        p17.setBuilding("우어관");
         p17.setType("학식당");
         p17.setTime("09:00 - 19:00");
         p17.setLat(35.85393360912969);
@@ -170,6 +175,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
         p19.setLat(35.853956594358515);
         p19.setLng(128.48291324663953);
 
+        // 편의점
         Place p20 = new Place();
         p20.setName("CU 계명대명교생활관점");
         p20.setBuilding("명교생활관,기숙사");
@@ -202,6 +208,48 @@ public class PlaceDataInitializer implements CommandLineRunner {
         p23.setLat(35.85423022055133);
         p23.setLng(128.4861118722504);
 
+        // 기타
+        Place p24 = new Place();
+        p24.setName("계명항공여행사");
+        p24.setBuilding("구바우어관");
+        p24.setType("기타");
+        p24.setTime("10:00 - 17:00");
+        p24.setLat(35.85423022055133);
+        p24.setLng(128.4861118722504);
+
+        Place p25 = new Place();
+        p25.setName("신바우어관 북카페");
+        p25.setBuilding("신바우어관, 북카페");
+        p25.setType("기타");
+        p25.setTime("10:00 - 18:00");
+        p25.setLat(35.85393360912969);
+        p25.setLng(128.48550305451363);
+
+        Place p26 = new Place();
+        p26.setName("문구점 (구바 B1F)");
+        p26.setBuilding("구바우어관, 문구점");
+        p26.setType("기타");
+        p26.setTime("08:30 - 18:30");
+        p26.setLat(35.85423022055133);
+        p26.setLng(128.4861118722504);
+
+        Place p27 = new Place();
+        p27.setName("우편 취급국 (구바 1F)");
+        p27.setBuilding("구바우어관, 우체국, 우편집중국");
+        p27.setType("기타");
+        p27.setTime("09:00 - 18:00");
+        p27.setLat(35.85423022055133);
+        p27.setLng(128.4861118722504);
+
+        Place p28 = new Place();
+        p28.setName("안경점 (구바 B1F)");
+        p28.setBuilding("구바우어관, 안경점");
+        p28.setType("기타");
+        p28.setTime("10:00 - 16:00");
+        p28.setLat(35.85423022055133);
+        p28.setLng(128.4861118722504);
+
+        // 검색용 건물
         Place p101 = new Place();
         p101.setName("영암관");
         p101.setBuilding("영암관,인문국제학대학,인국대,사범대");
@@ -260,7 +308,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
 
         Place p108 = new Place();
         p108.setName("공학 1호관");
-        p108.setBuilding("공학 1호관,공과대학");
+        p108.setBuilding("공대 1호관, 공과대학, 공학 1호관");
         p108.setType("건물");
         p108.setTime("");
         p108.setLat(35.859143003990205);
@@ -268,7 +316,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
 
         Place p109 = new Place();
         p109.setName("공학 2호관");
-        p109.setBuilding("공학 2호관,공과대학");
+        p109.setBuilding("공대 2호관, 공과대학, 공학 2호관");
         p109.setType("건물");
         p109.setTime("");
         p109.setLat(35.85924712716237);
@@ -276,7 +324,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
 
         Place p110 = new Place();
         p110.setName("공학 3호관");
-        p110.setBuilding("공학 3호관,공과대학");
+        p110.setBuilding("공대 3호관, 공과대학, 공학 3호관");
         p110.setType("건물");
         p110.setTime("");
         p110.setLat(35.85981413554627);
@@ -284,7 +332,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
 
         Place p111 = new Place();
         p111.setName("공학 4호관");
-        p111.setBuilding("공학 4호관,공과대학");
+        p111.setBuilding("공대 4호관, 공과대학, 공학 4호관");
         p111.setType("건물");
         p111.setTime("");
         p111.setLat(35.859716674456436);
@@ -292,7 +340,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
 
         Place p114 = new Place();
         p114.setName("공학 7호관");
-        p114.setBuilding("공학 7호관,공과대학,덕래관");
+        p114.setBuilding("공대 7호관, 공과대학, 덕래관, 공학 7호관");
         p114.setType("건물");
         p114.setTime("");
         p114.setLat(35.859458496725146);
@@ -347,8 +395,8 @@ public class PlaceDataInitializer implements CommandLineRunner {
         p120.setLng(128.48616494439423);
 
         Place p121 = new Place();
-        p121.setName("신바우어관");
-        p121.setBuilding("신바우어관");
+        p121.setName("우어관");
+        p121.setBuilding("우어관");
         p121.setType("건물");
         p121.setTime("");
         p121.setLat(35.853896173955235);
@@ -376,7 +424,7 @@ public class PlaceDataInitializer implements CommandLineRunner {
             p6,p7,p8,p9,p10,
             p11,p12,p13,p14,p15,
             p16,p17,p18,p19,
-            p20,p21,p22,p23,
+            p20,p21,p22,p23,p24,p25, p26, p27, p28,
             p101,p102,p103,p104,p105,p106,
             p107,p108,p109,p110,p111,p114,
             p115,p116,p117,p118,p119,p120,

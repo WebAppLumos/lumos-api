@@ -1,7 +1,14 @@
 package com.group4.lumos_api.user.service;
 
+import com.group4.lumos_api.assignment.repository.AssignmentRepository;
 import com.group4.lumos_api.calendar.repository.CalendarEventRepository;
+import com.group4.lumos_api.certifications.repository.CertificationRepository;
 import com.group4.lumos_api.dashboard.service.DashboardWidgetService;
+import com.group4.lumos_api.language_exams.repository.LanguageExamsRepository;
+import com.group4.lumos_api.previous_semester_scores.repository.PreviousSemesterScoresRepository;
+import com.group4.lumos_api.semester.repository.SemesterRepository;
+import com.group4.lumos_api.semester.service.SemesterService;
+import com.group4.lumos_api.semester_grades.repository.SemesterGradeRepository;
 import com.group4.lumos_api.user.dto.UserRequestDto;
 import com.group4.lumos_api.user.dto.UserResponseDto;
 import com.group4.lumos_api.user.entity.Users;
@@ -21,6 +28,13 @@ public class UserService {
     private final UsersRepository usersRepository;
     private final CalendarEventRepository calendarEventRepository;
     private final DashboardWidgetService dashboardWidgetService;
+    private final SemesterRepository semesterRepository;
+    private final SemesterService semesterService;
+    private final SemesterGradeRepository semesterGradeRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final LanguageExamsRepository languageExamsRepository;
+    private final CertificationRepository certificationRepository;
+    private final PreviousSemesterScoresRepository previousSemesterScoresRepository;
     private final EntityManager entityManager;
 
     // 1. 회원가입 (중복 방어 로직)
@@ -90,11 +104,23 @@ public class UserService {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         }
 
-        // 사용자의 일정 먼저 삭제
+        List<Long> semesterIds = semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(userId)
+                .stream()
+                .map(semester -> semester.getId())
+                .toList();
+        for (Long semesterId : semesterIds) {
+            semesterService.deleteSemester(userId, semesterId);
+        }
+
+        semesterGradeRepository.deleteAllByUser_UserId(userId);
         calendarEventRepository.deleteByUser_UserId(userId);
         dashboardWidgetService.deleteWidgetsByUserId(userId);
+        assignmentRepository.deleteAll(assignmentRepository.findAllByUserId(userId));
+        languageExamsRepository.deleteAll(languageExamsRepository.findByUserUserId(userId));
+        certificationRepository.deleteAll(certificationRepository.findByUserUserId(userId));
+        previousSemesterScoresRepository.deleteAll(
+                previousSemesterScoresRepository.findByUserUserId(userId));
 
-        // 사용자 삭제
         usersRepository.deleteById(userId);
     }
 

@@ -1,11 +1,12 @@
-package com.group4.lumos_api.Language_Exams.controller;
+package com.group4.lumos_api.language_exams.controller;
 
-import com.group4.lumos_api.Language_Exams.dto.LanguageExamsRequestDto;
-import com.group4.lumos_api.Language_Exams.dto.LanguageExamsResponseDto;
-import com.group4.lumos_api.Language_Exams.service.LanguageExamsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.group4.lumos_api.language_exams.dto.LanguageExamsRequestDto;
+import com.group4.lumos_api.language_exams.dto.LanguageExamsResponseDto;
+import com.group4.lumos_api.language_exams.service.LanguageExamsService;
 
 import java.util.List;
 

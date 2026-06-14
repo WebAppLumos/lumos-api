@@ -132,7 +132,7 @@ lumos-api/
 │   │   ├── repository/
 │   │   ├── service/
 │   │   └── README.md
-│   ├── Language_Exams/         # 어학 시험 관리
+│   ├── language_exams/         # 어학 시험 관리
 │   │   ├── controller/
 │   │   ├── dto/
 │   │   ├── entity/
@@ -169,7 +169,7 @@ lumos-api/
 | Entry | [entry/README.md](src/main/java/com/group4/lumos_api/entry/README.md) | 시간표에 수업 배치, 배치 목록 조회, 수정, 삭제 |
 | Note | [note/README.md](src/main/java/com/group4/lumos_api/note/README.md) | 수업별 노트 생성, 조회, 검색, 수정, 삭제, 고정 |
 | Certifications | [certifications/README.md](src/main/java/com/group4/lumos_api/certifications/README.md) | 학생별 자격증 취득 정보 관리 |
-| Language Exams | [Language_Exams/README.md](src/main/java/com/group4/lumos_api/Language_Exams/README.md) | 어학 시험(TOEIC 등) 성적 관리 |
+| Language Exams | [language_exams/README.md](src/main/java/com/group4/lumos_api/language_exams/README.md) | 어학 시험(TOEIC 등) 성적 관리 |
 
 ## 주요 엔드포인트
 
@@ -255,18 +255,18 @@ lumos-api/
 
 | 기능 | 메서드 | 엔드포인트 |
 |---|---|---|
-| 자격증 등록 | POST | `/api/certifications` |
-| 자격증 목록 조회 | GET | `/api/certifications/student/{studentId}` |
-| 자격증 수정 | PUT | `/api/certifications/{certId}` |
+| 자격증 등록 | POST | `/api/users/{userId}/certifications` |
+| 자격증 목록 조회 | GET | `/api/users/{userId}/certifications` |
+| 자격증 수정 | PATCH | `/api/certifications/{certId}` |
 | 자격증 삭제 | DELETE | `/api/certifications/{certId}` |
 
 ### Language Exams
 
 | 기능 | 메서드 | 엔드포인트 |
 |---|---|---|
-| 성적 등록 | POST | `/api/language-exams` |
-| 성적 목록 조회 | GET | `/api/language-exams/student/{studentId}` |
-| 성적 수정 | PUT | `/api/language-exams/{examId}` |
+| 성적 등록 | POST | `/api/users/{userId}/language-exams` |
+| 성적 목록 조회 | GET | `/api/users/{userId}/language-exams` |
+| 성적 수정 | PATCH | `/api/language-exams/{examId}` |
 | 성적 삭제 | DELETE | `/api/language-exams/{examId}` |
 
 ### Previous Semester Scores

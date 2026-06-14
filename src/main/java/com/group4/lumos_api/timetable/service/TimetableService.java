@@ -3,6 +3,7 @@ package com.group4.lumos_api.timetable.service;
 import com.group4.lumos_api.common.exception.BadRequestException;
 import com.group4.lumos_api.common.exception.NotFoundException;
 import com.group4.lumos_api.entry.repository.TimetableEntryRepository;
+import com.group4.lumos_api.note.repository.NoteRepository;
 import com.group4.lumos_api.semester.entity.Semester;
 import com.group4.lumos_api.semester.repository.SemesterRepository;
 import com.group4.lumos_api.timetable.dto.TimetableRequest;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import com.group4.lumos_api.entry.entity.TimetableEntry;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class TimetableService {
     private final TimetableRepository timetableRepository;
     private final SemesterRepository semesterRepository;
     private final TimetableEntryRepository entryRepository;
+    private final NoteRepository noteRepository;
 
     public TimetableResponse createTimetable(String userId, Long semesterId, TimetableRequest request) {
         Semester semester = getOwnedSemester(userId, semesterId);
@@ -84,10 +87,22 @@ public class TimetableService {
     }
 
     public void deleteTimetable(String userId, Long timetableId) {
-        Timetable timetable = getOwnedTimetableEntity(userId, timetableId);
-        // 시간표에 배치된 수업(Entry)을 먼저 제거한 뒤 시간표를 삭제한다.
+        getOwnedTimetableEntity(userId, timetableId);
+        List<TimetableEntry> entries = entryRepository.findAllByTimetable_IdOrderByIdAsc(timetableId);
+        Set<Long> courseIds = entries.stream()
+                .map(entry -> entry.getCourse().getId())
+                .collect(Collectors.toSet());
+
         entryRepository.deleteAllByTimetable_Id(timetableId);
-        timetableRepository.delete(timetable);
+        timetableRepository.deleteById(timetableId);
+
+        courseIds.forEach(this::deleteNotesIfCourseHasNoEntries);
+    }
+
+    private void deleteNotesIfCourseHasNoEntries(Long courseId) {
+        if (!entryRepository.existsByCourse_Id(courseId)) {
+            noteRepository.deleteAllByCourse_Id(courseId);
+        }
     }
 
     /**

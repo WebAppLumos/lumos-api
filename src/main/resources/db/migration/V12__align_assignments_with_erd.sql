@@ -1,0 +1,5 @@
+ALTER TABLE assignments
+ALTER COLUMN title TYPE VARCHAR(100),
+ALTER COLUMN course TYPE VARCHAR(100),
+ALTER COLUMN deadline TYPE TIMESTAMP
+USING deadline::timestamp;

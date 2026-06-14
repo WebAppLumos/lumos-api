@@ -45,10 +45,10 @@ public class CertificationsService {
     public CertificationsResponseDto updateCertification(Long certId, CertificationsRequestDto dto) {
         Certifications cert = certificationsRepository.findById(certId)
                 .orElseThrow(() -> new EntityNotFoundException("Certification not found"));
-        
+
         cert.setCertName(dto.getCertName());
         cert.setIssueDate(dto.getIssueDate());
-        
+
         return convertToDto(cert);
     }
 

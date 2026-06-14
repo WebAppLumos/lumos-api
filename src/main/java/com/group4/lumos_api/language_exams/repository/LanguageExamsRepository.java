@@ -1,6 +1,6 @@
-package com.group4.lumos_api.Language_Exams.repository;
+package com.group4.lumos_api.language_exams.repository;
 
-import com.group4.lumos_api.Language_Exams.entity.LanguageExams;
+import com.group4.lumos_api.language_exams.entity.LanguageExams;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

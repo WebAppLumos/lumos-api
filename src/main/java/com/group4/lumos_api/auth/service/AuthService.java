@@ -8,6 +8,7 @@ import com.group4.lumos_api.auth.dto.AuthLoginRequest;
 import com.group4.lumos_api.auth.dto.AuthResponse;
 import com.group4.lumos_api.common.exception.BadRequestException;
 import com.group4.lumos_api.common.exception.ConflictException;
+import com.group4.lumos_api.common.exception.NotFoundException;
 import com.group4.lumos_api.user.dto.UserResponseDto;
 import com.group4.lumos_api.user.entity.Users;
 import com.group4.lumos_api.user.repository.UsersRepository;
@@ -32,7 +33,7 @@ public class AuthService {
         FirebaseToken token = verifyIdToken(request.getIdToken());
         Users user = usersRepository.findById(token.getUid())
                 .map(existingUser -> updateUser(existingUser, token, request))
-                .orElseGet(() -> createUser(token, request));
+                .orElseGet(() -> createUserForSignup(token, request));
 
         Users savedUser = usersRepository.saveAndFlush(user);
         entityManager.refresh(savedUser);
@@ -83,6 +84,21 @@ public class AuthService {
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Firebase credentials are not configured", e);
         }
+    }
+
+    private Users createUserForSignup(FirebaseToken token, AuthLoginRequest request) {
+        if (!hasSignupProfile(request)) {
+            throw new NotFoundException("등록된 회원 정보가 없습니다. 회원가입을 진행해 주세요.");
+        }
+
+        return createUser(token, request);
+    }
+
+    private boolean hasSignupProfile(AuthLoginRequest request) {
+        return trimToNull(request.getPhoneNumber()) != null
+                && trimToNull(request.getDepartment()) != null
+                && request.getGrade() != null
+                && trimToNull(request.getStudentNumber()) != null;
     }
 
     private Users createUser(FirebaseToken token, AuthLoginRequest request) {

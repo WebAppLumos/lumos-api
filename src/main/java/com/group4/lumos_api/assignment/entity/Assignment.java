@@ -1,10 +1,11 @@
-package com.group4.lumos_api.assignmrnt.entity;
+package com.group4.lumos_api.assignment.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "assignments")
+@Table(name = "assignments", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "course", "title"}))
 @Getter @Setter
 @NoArgsConstructor 
 @AllArgsConstructor
@@ -14,14 +15,17 @@ public class Assignment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
+    private String userId;
+
+    @Column(nullable = false, length = 100)
     private String course;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String title;
 
     @Column(nullable = false)
-    private String deadline;
+    private LocalDateTime deadline;
 
     @Column(name = "is_completed", nullable = false)
     private boolean isCompleted;

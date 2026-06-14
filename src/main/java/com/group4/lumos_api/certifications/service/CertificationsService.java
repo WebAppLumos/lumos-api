@@ -4,9 +4,9 @@ import com.group4.lumos_api.certifications.dto.CertificationsRequestDto;
 import com.group4.lumos_api.certifications.dto.CertificationsResponseDto;
 import com.group4.lumos_api.certifications.entity.Certifications;
 import com.group4.lumos_api.certifications.repository.CertificationsRepository;
+import com.group4.lumos_api.common.exception.NotFoundException;
 import com.group4.lumos_api.user.entity.Users;
 import com.group4.lumos_api.user.repository.UsersRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +31,7 @@ public class CertificationsService {
     @Transactional
     public CertificationsResponseDto addCertification(CertificationsRequestDto dto) {
         Users user = usersRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         Certifications cert = Certifications.builder()
                 .certName(dto.getCertName())
@@ -44,10 +44,14 @@ public class CertificationsService {
     @Transactional
     public CertificationsResponseDto updateCertification(Long certId, CertificationsRequestDto dto) {
         Certifications cert = certificationsRepository.findById(certId)
-                .orElseThrow(() -> new EntityNotFoundException("Certification not found"));
+                .orElseThrow(() -> new NotFoundException("Certification not found"));
 
-        cert.setCertName(dto.getCertName());
-        cert.setIssueDate(dto.getIssueDate());
+        if (dto.getCertName() != null) {
+            cert.setCertName(dto.getCertName());
+        }
+        if (dto.getIssueDate() != null) {
+            cert.setIssueDate(dto.getIssueDate());
+        }
 
         return convertToDto(cert);
     }

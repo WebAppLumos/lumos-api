@@ -117,7 +117,10 @@ public class AuthService {
 
     private Users updateUser(Users user, FirebaseToken token, AuthLoginRequest request) {
         user.setEmail(resolveEmail(token));
-        user.setName(resolveName(token, request));
+        String requestName = trimToNull(request.getName());
+        if (requestName != null) {
+            user.setName(requestName);
+        }
         if (trimToNull(request.getPhoneNumber()) != null) {
             user.setPhoneNumber(trimToNull(request.getPhoneNumber()));
         }

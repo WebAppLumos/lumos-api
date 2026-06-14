@@ -9,6 +9,7 @@ import com.group4.lumos_api.previous_semester_scores.repository.PreviousSemester
 import com.group4.lumos_api.semester.repository.SemesterRepository;
 import com.group4.lumos_api.semester.service.SemesterService;
 import com.group4.lumos_api.semester_grades.repository.SemesterGradeRepository;
+import com.group4.lumos_api.common.exception.BadRequestException;
 import com.group4.lumos_api.common.exception.NotFoundException;
 import com.group4.lumos_api.user.dto.UserRequestDto;
 import com.group4.lumos_api.user.dto.UserResponseDto;
@@ -87,14 +88,31 @@ public class UserService {
     @Transactional
     public UserResponseDto updateUser(String userId, UserRequestDto dto) {
         Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-        user.setName(dto.getName());
-        user.setMajor(dto.getMajor());
-        user.setGrade(dto.getGrade());
-        user.setPhoneNumber(dto.getPhoneNumber());
+        if (dto.getName() != null) {
+            String name = dto.getName().trim();
+            if (name.isEmpty()) {
+                throw new BadRequestException("이름을 입력해 주세요.");
+            }
+            if (!name.matches("^[a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ]+$")) {
+                throw new BadRequestException("이름은 한글과 영문만 입력할 수 있습니다.");
+            }
+            user.setName(name);
+        }
+        if (dto.getMajor() != null) {
+            user.setMajor(dto.getMajor().trim());
+        }
+        if (dto.getGrade() != null) {
+            user.setGrade(dto.getGrade());
+        }
+        if (dto.getPhoneNumber() != null) {
+            user.setPhoneNumber(dto.getPhoneNumber().trim());
+        }
 
-        return new UserResponseDto(usersRepository.save(user));
+        Users saved = usersRepository.saveAndFlush(user);
+        entityManager.refresh(saved);
+        return new UserResponseDto(saved);
     }
 
     // 5. 회원 탈퇴

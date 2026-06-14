@@ -70,6 +70,10 @@ public class EdwardSessionClient {
 
     private static final String PGM_ID = "P505747";
 
+    private static final String GRADE_MENU_ID = "M503056";
+
+    private static final String GRADE_PGM_ID = "P503007";
+
     private static final String BOOTSTRAP_MENU_ID = "edward";
 
     private static final String BOOTSTRAP_PGM_ID = "edward";
@@ -377,6 +381,36 @@ public class EdwardSessionClient {
         );
 
         return SsvCodec.parseDatasetAllRows(body, "DS_COUR530M01");
+
+    }
+
+
+
+    public List<Map<String, String>> fetchSemesterGradeList(EdwardSession session, String studentNumber) {
+
+        Map<String, String> param = new LinkedHashMap<>();
+
+        param.put("stuno", studentNumber);
+
+        String body = postSsvWithDataset(
+
+                session,
+
+                "/uni/sreg/MastCtr/findStdTmScorList.do",
+
+                "DS_PARAM",
+
+                List.of("stuno"),
+
+                param,
+
+                GRADE_MENU_ID,
+
+                GRADE_PGM_ID
+
+        );
+
+        return SsvCodec.parseDatasetAllRows(body, "DS_SCOR210M01");
 
     }
 

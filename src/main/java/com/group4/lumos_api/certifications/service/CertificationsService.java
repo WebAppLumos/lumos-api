@@ -1,9 +1,9 @@
-package com.group4.lumos_api.Certifications.service;
+package com.group4.lumos_api.certifications.service;
 
-import com.group4.lumos_api.Certifications.dto.CertificationRequestDto;
-import com.group4.lumos_api.Certifications.dto.CertificationResponseDto;
-import com.group4.lumos_api.Certifications.entity.Certifications;
-import com.group4.lumos_api.Certifications.repository.CertificationRepository;
+import com.group4.lumos_api.certifications.dto.CertificationsRequestDto;
+import com.group4.lumos_api.certifications.dto.CertificationsResponseDto;
+import com.group4.lumos_api.certifications.entity.Certifications;
+import com.group4.lumos_api.certifications.repository.CertificationsRepository;
 import com.group4.lumos_api.user.entity.Users;
 import com.group4.lumos_api.user.repository.UsersRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,20 +16,20 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class CertificationService {
+public class CertificationsService {
 
-    private final CertificationRepository certificationRepository;
+    private final CertificationsRepository certificationsRepository;
     private final UsersRepository usersRepository;
 
     @Transactional(readOnly = true)
-    public List<CertificationResponseDto> getCertificationsByStudent(String userId) {
-        return certificationRepository.findByUserUserId(userId).stream()
+    public List<CertificationsResponseDto> getCertificationsByStudent(String userId) {
+        return certificationsRepository.findByUserUserId(userId).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public CertificationResponseDto addCertification(CertificationRequestDto dto) {
+    public CertificationsResponseDto addCertification(CertificationsRequestDto dto) {
         Users user = usersRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
@@ -38,12 +38,12 @@ public class CertificationService {
                 .issueDate(dto.getIssueDate())
                 .user(user)
                 .build();
-        return convertToDto(certificationRepository.save(cert));
+        return convertToDto(certificationsRepository.save(cert));
     }
 
     @Transactional
-    public CertificationResponseDto updateCertification(Long certId, CertificationRequestDto dto) {
-        Certifications cert = certificationRepository.findById(certId)
+    public CertificationsResponseDto updateCertification(Long certId, CertificationsRequestDto dto) {
+        Certifications cert = certificationsRepository.findById(certId)
                 .orElseThrow(() -> new EntityNotFoundException("Certification not found"));
         
         cert.setCertName(dto.getCertName());
@@ -54,11 +54,11 @@ public class CertificationService {
 
     @Transactional
     public void deleteCertification(Long certId) {
-        certificationRepository.deleteById(certId);
+        certificationsRepository.deleteById(certId);
     }
 
-    private CertificationResponseDto convertToDto(Certifications cert) {
-        return CertificationResponseDto.builder()
+    private CertificationsResponseDto convertToDto(Certifications cert) {
+        return CertificationsResponseDto.builder()
                 .certId(cert.getCertId())
                 .certName(cert.getCertName())
                 .issueDate(cert.getIssueDate())

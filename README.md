@@ -118,14 +118,14 @@ lumos-api/
 │   │   ├── repository/
 │   │   ├── service/
 │   │   └── README.md
-│   ├── calendar/              # 캘린더 및 To-Do 관리
+├── calendar/              # 캘린더 및 To-Do 관리
 │   │   ├── controller/
 │   │   ├── dto/
 │   │   ├── entity/
 │   │   ├── repository/
 │   │   ├── service/
 │   │   └── README.md
-│   ├── Certifications/         # 자격증 관리
+│   ├── certifications/         # 자격증 관리
 │   │   ├── controller/
 │   │   ├── dto/
 │   │   ├── entity/
@@ -168,7 +168,7 @@ lumos-api/
 | Timetable | [timetable/README.md](src/main/java/com/group4/lumos_api/timetable/README.md) | 학기에 종속된 시간표 생성, 조회, 수정, 삭제 |
 | Entry | [entry/README.md](src/main/java/com/group4/lumos_api/entry/README.md) | 시간표에 수업 배치, 배치 목록 조회, 수정, 삭제 |
 | Note | [note/README.md](src/main/java/com/group4/lumos_api/note/README.md) | 수업별 노트 생성, 조회, 검색, 수정, 삭제, 고정 |
-| Certifications | [Certifications/README.md](src/main/java/com/group4/lumos_api/Certifications/README.md) | 학생별 자격증 취득 정보 관리 |
+| Certifications | [certifications/README.md](src/main/java/com/group4/lumos_api/certifications/README.md) | 학생별 자격증 취득 정보 관리 |
 | Language Exams | [Language_Exams/README.md](src/main/java/com/group4/lumos_api/Language_Exams/README.md) | 어학 시험(TOEIC 등) 성적 관리 |
 
 ## 주요 엔드포인트

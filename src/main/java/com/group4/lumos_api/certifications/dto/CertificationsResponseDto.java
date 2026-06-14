@@ -1,4 +1,4 @@
-package com.group4.lumos_api.Certifications.dto;
+package com.group4.lumos_api.certifications.dto;
 
 import lombok.*;
 import java.time.LocalDate;
@@ -7,7 +7,8 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CertificationRequestDto {
+public class CertificationsResponseDto {
+    private Long certId;
     private String certName;
     private LocalDate issueDate;
     private String userId;

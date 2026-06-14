@@ -1,4 +1,4 @@
-package com.group4.lumos_api.Certifications.entity;
+package com.group4.lumos_api.certifications.entity;
 
 import com.group4.lumos_api.user.entity.Users;
 import jakarta.persistence.*;

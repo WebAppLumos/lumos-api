@@ -264,9 +264,9 @@ lumos-api/
 
 | 기능 | 메서드 | 엔드포인트 |
 |---|---|---|
-| 성적 등록 | POST | `/api/language-exams` |
-| 성적 목록 조회 | GET | `/api/language-exams/student/{studentId}` |
-| 성적 수정 | PUT | `/api/language-exams/{examId}` |
+| 성적 등록 | POST | `/api/users/{userId}/language-exams` |
+| 성적 목록 조회 | GET | `/api/users/{userId}/language-exams` |
+| 성적 수정 | PATCH | `/api/language-exams/{examId}` |
 | 성적 삭제 | DELETE | `/api/language-exams/{examId}` |
 
 ### Previous Semester Scores

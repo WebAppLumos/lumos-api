@@ -22,10 +22,57 @@
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/language-exams/student/{studentId}` | 특정 학생의 모든 성적 조회 |
-| POST | `/api/language-exams` | 새로운 성적 등록 |
-| PUT | `/api/language-exams/{examId}` | 성적 정보 수정 |
+| GET | `/api/users/{userId}/language-exams` | 특정 학생의 모든 성적 조회 |
+| POST | `/api/users/{userId}/language-exams` | 새로운 성적 등록 |
+| PATCH | `/api/language-exams/{examId}` | 성적 정보 수정 |
 | DELETE | `/api/language-exams/{examId}` | 성적 삭제 |
+
+## API 사용 예시 (Examples)
+
+### 1. 새로운 성적 등록 (POST)
+- **Endpoint**: `POST /api/users/{userId}/language-exams`
+- **Request Body**:
+```json
+{
+  "examCategory": "TOEIC",
+  "score": "950",
+  "examDate": "2024-05-10",
+  "year": 2024,
+  "semester": "1학기",
+  "expiryDate": "2026-05-10"
+}
+```
+- **Response**:
+```json
+{
+  "examId": 1,
+  "examCategory": "TOEIC",
+  "score": "950",
+  "examDate": "2024-05-10",
+  "year": 2024,
+  "semester": "1학기",
+  "expiryDate": "2026-05-10",
+  "userId": "user_id_example"
+}
+```
+
+### 2. 학생별 성적 목록 조회 (GET)
+- **Endpoint**: `GET /api/users/{userId}/language-exams`
+- **Response**:
+```json
+[
+  {
+    "examId": 1,
+    "examCategory": "TOEIC",
+    "score": "950",
+    "examDate": "2024-05-10",
+    "year": 2024,
+    "semester": "1학기",
+    "expiryDate": "2026-05-10",
+    "userId": "user_id_example"
+  }
+]
+```
 
 ## 패키지 구조
 - `controller`: REST API 엔드포인트 정의

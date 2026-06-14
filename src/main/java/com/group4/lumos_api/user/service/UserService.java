@@ -9,6 +9,7 @@ import com.group4.lumos_api.previous_semester_scores.repository.PreviousSemester
 import com.group4.lumos_api.semester.repository.SemesterRepository;
 import com.group4.lumos_api.semester.service.SemesterService;
 import com.group4.lumos_api.semester_grades.repository.SemesterGradeRepository;
+import com.group4.lumos_api.common.exception.NotFoundException;
 import com.group4.lumos_api.user.dto.UserRequestDto;
 import com.group4.lumos_api.user.dto.UserResponseDto;
 import com.group4.lumos_api.user.entity.Users;
@@ -78,7 +79,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserResponseDto getUserById(String userId) {
         Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
         return new UserResponseDto(user);
     }
 
@@ -101,7 +102,7 @@ public class UserService {
     public void deleteUser(String userId) {
 
         if (!usersRepository.existsById(userId)) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+            return;
         }
 
         List<Long> semesterIds = semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(userId)

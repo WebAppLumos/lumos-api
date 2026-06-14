@@ -152,8 +152,8 @@ public class PlaceDataInitializer implements CommandLineRunner {
         p16.setLng(128.4861118722504);
 
         Place p17 = new Place();
-        p17.setName("우어관 2F");
-        p17.setBuilding("우어관");
+        p17.setName("신바우어관 2F");
+        p17.setBuilding("신바우어관");
         p17.setType("학식당");
         p17.setTime("09:00 - 19:00");
         p17.setLat(35.85393360912969);

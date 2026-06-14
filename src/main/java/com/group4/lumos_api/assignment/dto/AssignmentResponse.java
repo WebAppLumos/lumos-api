@@ -1,9 +1,9 @@
 package com.group4.lumos_api.assignment.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.group4.lumos_api.assignment.entity.Assignment;
 import lombok.*;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -14,9 +14,11 @@ public class AssignmentResponse {
     private Long id;
     private String course;
     private String title;
-    private String deadline;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    private LocalDateTime deadline;
+    
     private Boolean isCompleted;
-    private String statusClass;
 
     public static AssignmentResponse from(Assignment assignment) {
         return AssignmentResponse.builder()
@@ -25,20 +27,6 @@ public class AssignmentResponse {
                 .title(assignment.getTitle())
                 .deadline(assignment.getDeadline())
                 .isCompleted(assignment.isCompleted())
-                .statusClass(calculateStatusClass(assignment.getDeadline()))
                 .build();
-    }
-
-    private static String calculateStatusClass(String deadlineStr) {
-        try {
-            LocalDate today = LocalDate.now();
-            LocalDate deadline = LocalDate.parse(deadlineStr);
-            long daysLeft = ChronoUnit.DAYS.between(today, deadline);
-            if (daysLeft <= 1) return "d-day-urgent";
-            else if (daysLeft <= 3) return "d-day-warning";
-            else return "d-day-info";
-        } catch (Exception e) {
-            return "d-day-info";
-        }
     }
 }

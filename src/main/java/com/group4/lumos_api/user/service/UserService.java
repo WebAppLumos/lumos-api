@@ -2,7 +2,7 @@ package com.group4.lumos_api.user.service;
 
 import com.group4.lumos_api.assignment.repository.AssignmentRepository;
 import com.group4.lumos_api.calendar.repository.CalendarEventRepository;
-import com.group4.lumos_api.certifications.repository.CertificationRepository;
+import com.group4.lumos_api.certifications.repository.CertificationsRepository;
 import com.group4.lumos_api.dashboard.service.DashboardWidgetService;
 import com.group4.lumos_api.language_exams.repository.LanguageExamsRepository;
 import com.group4.lumos_api.previous_semester_scores.repository.PreviousSemesterScoresRepository;
@@ -33,7 +33,7 @@ public class UserService {
     private final SemesterGradeRepository semesterGradeRepository;
     private final AssignmentRepository assignmentRepository;
     private final LanguageExamsRepository languageExamsRepository;
-    private final CertificationRepository certificationRepository;
+    private final CertificationsRepository certificationsRepository;
     private final PreviousSemesterScoresRepository previousSemesterScoresRepository;
     private final EntityManager entityManager;
 
@@ -117,7 +117,7 @@ public class UserService {
         dashboardWidgetService.deleteWidgetsByUserId(userId);
         assignmentRepository.deleteAll(assignmentRepository.findAllByUserId(userId));
         languageExamsRepository.deleteAll(languageExamsRepository.findByUserUserId(userId));
-        certificationRepository.deleteAll(certificationRepository.findByUserUserId(userId));
+        certificationsRepository.deleteAll(certificationsRepository.findByUserUserId(userId));
         previousSemesterScoresRepository.deleteAll(
                 previousSemesterScoresRepository.findByUserUserId(userId));
 

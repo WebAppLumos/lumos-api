@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 public class PlaceService {
 
     private final PlaceRepository placeRepository;
-
     public List<Place> getAllPlaces() {
         return placeRepository.findAll();
     }

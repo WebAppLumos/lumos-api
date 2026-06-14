@@ -23,3 +23,4 @@ public class PlaceController {
         return placeService.getAllPlaces();
     }
 }
+

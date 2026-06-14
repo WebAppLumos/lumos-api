@@ -21,14 +21,10 @@ public class Place {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "place_id")
     private Long id;
-
     private String name;
-
+    private String building;
     private String type;
-
     private String time;
-
     private Double lat;
-
     private Double lng;
 }

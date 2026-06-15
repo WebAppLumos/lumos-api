@@ -16,6 +16,7 @@ import com.group4.lumos_api.user.entity.Users;
 import com.group4.lumos_api.user.repository.UsersRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UsersRepository usersRepository;
@@ -72,6 +74,7 @@ public class AuthService {
             FirebaseAuth.getInstance().deleteUser(uid);
         } catch (FirebaseAuthException e) {
             if (e.getAuthErrorCode() == AuthErrorCode.USER_NOT_FOUND) {
+                log.warn("Firebase user not found during deletion (uid={}). Client fallback may be required.", uid);
                 return;
             }
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Firebase 계정 삭제에 실패했습니다.", e);

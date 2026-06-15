@@ -124,10 +124,10 @@ public class UserService {
         return new UserResponseDto(saved);
     }
 
-    // 5. 회원 탈퇴 (DB + Firebase Auth)
+    // 5. 회원 탈퇴 (Firebase Auth → DB 순으로 삭제해 고아 Firebase 계정 방지)
     public void deleteUser(String userId) {
-        deleteUserData(userId);
         authService.deleteFirebaseAccount(userId);
+        deleteUserData(userId);
     }
 
     @Transactional

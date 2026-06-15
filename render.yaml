@@ -2,10 +2,13 @@ services:
   - type: web
     name: lumos-api
     runtime: docker
+    repo: https://github.com/WebAppLumos/lumos-api
+    branch: main
     dockerfilePath: ./Dockerfile
     plan: free
     region: singapore
     healthCheckPath: /health
+    autoDeployTrigger: commit
     envVars:
       - key: SPRING_DATASOURCE_URL
         sync: false

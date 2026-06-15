@@ -1,11 +1,10 @@
 package com.group4.lumos_api.auth.config;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import jakarta.annotation.PostConstruct;
+import java.io.IOException;
 
 @Configuration
 public class FirebaseBootstrap {

@@ -31,9 +31,12 @@ public class FirebaseConfig {
 
     private static GoogleCredentials loadCredentials() throws IOException {
         String serviceAccountJson = System.getenv("FIREBASE_SERVICE_ACCOUNT_JSON");
-        if (serviceAccountJson != null && !serviceAccountJson.isBlank()) {
-            return GoogleCredentials.fromStream(
-                    new ByteArrayInputStream(serviceAccountJson.getBytes(StandardCharsets.UTF_8)));
+        if (looksLikeServiceAccountJson(serviceAccountJson)) {
+            try {
+                return parseCredentialsJson(serviceAccountJson);
+            } catch (IllegalArgumentException | IOException ignored) {
+                // .env에 여러 줄 JSON을 넣으면 첫 줄({)만 읽혀 실패할 수 있다.
+            }
         }
 
         File localFile = resolveLocalServiceAccountFile();
@@ -42,6 +45,22 @@ public class FirebaseConfig {
         }
 
         return GoogleCredentials.getApplicationDefault();
+    }
+
+    private static boolean looksLikeServiceAccountJson(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.startsWith("{")
+                && trimmed.contains("\"type\"")
+                && trimmed.contains("service_account");
+    }
+
+    private static GoogleCredentials parseCredentialsJson(String json) throws IOException {
+        return GoogleCredentials.fromStream(
+                new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
     }
 
     private static File resolveLocalServiceAccountFile() {

@@ -301,10 +301,53 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
             if (entry.getKey() == null || entry.getKey().isBlank() || entry.getValue() == null) {
                 continue;
             }
-            creditByTitle.putIfAbsent(normalizeTitle(entry.getKey()), entry.getValue());
+            registerCreditByTitle(creditByTitle, entry.getKey(), entry.getValue());
         }
 
         return new ConfirmationMetadata(metadata.creditByCourseKey(), creditByTitle, metadata.professorByTitle());
+    }
+
+    private static void registerCreditByTitle(Map<String, Short> creditByTitle, String title, Short credit) {
+        String normalized = normalizeTitle(title);
+        if (normalized.isBlank()) {
+            return;
+        }
+
+        creditByTitle.putIfAbsent(normalized, credit);
+
+        int programmingIndex = normalized.indexOf(" PROGRAMMING");
+        if (programmingIndex > 0) {
+            creditByTitle.putIfAbsent(normalized.substring(0, programmingIndex).trim(), credit);
+        }
+    }
+
+    static Short lookupCreditByTitle(Map<String, Short> creditByTitle, String slotTitle) {
+        if (creditByTitle.isEmpty() || slotTitle == null || slotTitle.isBlank()) {
+            return null;
+        }
+
+        String normalized = normalizeTitle(slotTitle);
+        Short direct = creditByTitle.get(normalized);
+        if (direct != null) {
+            return direct;
+        }
+
+        Short bestMatch = null;
+        int bestOverlap = -1;
+        for (Map.Entry<String, Short> entry : creditByTitle.entrySet()) {
+            String key = entry.getKey();
+            if (!key.startsWith(normalized) && !normalized.startsWith(key)) {
+                continue;
+            }
+
+            int overlap = Math.min(key.length(), normalized.length());
+            if (overlap > bestOverlap) {
+                bestOverlap = overlap;
+                bestMatch = entry.getValue();
+            }
+        }
+
+        return bestMatch;
     }
 
     private ConfirmationMetadata buildConfirmationMetadata(String confirmationMml) {
@@ -322,7 +365,7 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
 
                 if (slot.credit() != null) {
                     creditByCourseKey.putIfAbsent(courseKey(slot.title(), slot.professor()), slot.credit());
-                    creditByTitle.putIfAbsent(normalizedTitle, slot.credit());
+                    registerCreditByTitle(creditByTitle, normalizedTitle, slot.credit());
                 }
                 if (slot.professor() != null && !slot.professor().isBlank()) {
                     professorByTitle.putIfAbsent(normalizedTitle, slot.professor());
@@ -354,7 +397,7 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
         if (credit == null) {
             credit = metadata.creditByCourseKey().get(courseKey(slot.title(), slot.professor()));
             if (credit == null) {
-                credit = metadata.creditByTitle().get(normalizeTitle(slot.title()));
+                credit = lookupCreditByTitle(metadata.creditByTitle(), slot.title());
             }
         }
 

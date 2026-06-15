@@ -44,30 +44,29 @@ class RecentSemesterCreditsServiceTest {
     }
 
     @Test
-    @DisplayName("가장 최근 학기(시작일 기준)의 학점 합계를 올바르게 계산한다")
+    @DisplayName("활성 학기의 학점 합계를 올바르게 계산한다")
     void getRecentSemesterTotalCredits_Success() {
         String userId = "test-user";
 
-        // 학기 1 (과거)
-        Semester s1 = new Semester();
-        s1.setId(1L);
-        s1.setStartDate(LocalDate.of(2023, 3, 1));
+        Semester inactiveSemester = new Semester();
+        inactiveSemester.setId(1L);
+        inactiveSemester.setStartDate(LocalDate.of(2024, 3, 1));
+        inactiveSemester.setIsActive(false);
 
-        // 학기 2 (최근)
-        Semester s2 = new Semester();
-        s2.setId(2L);
-        s2.setStartDate(LocalDate.of(2024, 3, 1));
+        Semester activeSemester = new Semester();
+        activeSemester.setId(2L);
+        activeSemester.setStartDate(LocalDate.of(2023, 3, 1));
+        activeSemester.setIsActive(true);
 
         when(semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(userId))
-                .thenReturn(Arrays.asList(s1, s2));
+                .thenReturn(Arrays.asList(inactiveSemester, activeSemester));
 
-        // 학기 2의 수업들
         Course c1 = new Course();
         c1.setCredit((short) 3);
         Course c2 = new Course();
         c2.setCredit((short) 2);
         Course c3 = new Course();
-        c3.setCredit(null); // null 체크 확인용
+        c3.setCredit(null);
 
         when(courseRepository.findAllBySemester_IdOrderByIdAsc(2L))
                 .thenReturn(Arrays.asList(c1, c2, c3));

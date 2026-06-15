@@ -20,6 +20,8 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -124,15 +126,20 @@ public class UserService {
         return new UserResponseDto(saved);
     }
 
-    // 5. 회원 탈퇴 (Firebase Auth → DB 순으로 삭제해 고아 Firebase 계정 방지)
+    // 5. 회원 탈퇴 (DB를 먼저 삭제하고, 커밋 성공 후 Firebase Auth 삭제)
+    @Transactional
     public void deleteUser(String userId) {
-        authService.deleteFirebaseAccount(userId);
         deleteUserData(userId);
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                authService.deleteFirebaseAccount(userId);
+            }
+        });
     }
 
-    @Transactional
-    public void deleteUserData(String userId) {
-
+    private void deleteUserData(String userId) {
         if (!usersRepository.existsById(userId)) {
             return;
         }

@@ -56,6 +56,45 @@ class ConfirmationMmlParserTest {
     }
 
     @Test
+    void parsesMultiLineEnglishCourseTitleFromUserHarMml() throws Exception {
+        String mml = Files.readString(
+                Path.of("src/test/resources/edward-user-confirmation.mml"));
+        List<ParsedTimetableSlot> slots = parser.parse(mml);
+
+        long uniqueCourses = slots.stream()
+                .map(ParsedTimetableSlot::title)
+                .distinct()
+                .count();
+        assertEquals(6, uniqueCourses);
+
+        ParsedTimetableSlot englishCourse = slots.stream()
+                .filter(slot -> slot.title().contains("INTRODUCTION TO OBJECT ORIENTED"))
+                .findFirst()
+                .orElseThrow();
+        assertEquals((short) 3, englishCourse.credit());
+        assertTrue(englishCourse.title().contains("PROGRAMMING"));
+    }
+
+    @Test
+    void parsesDesktopHarConfirmationMmlWithEighteenTotalCredits() throws Exception {
+        String mml = Files.readString(
+                Path.of("src/test/resources/edward-user-confirmation.mml"));
+        List<ParsedTimetableSlot> slots = parser.parse(mml);
+
+        int totalCredits = slots.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        ParsedTimetableSlot::title,
+                        slot -> slot.credit() != null ? slot.credit().intValue() : 0,
+                        (left, right) -> left))
+                .values()
+                .stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+
+        assertEquals(18, totalCredits);
+    }
+
+    @Test
     void parsesCoursesFromHarMml() throws Exception {
         Path harPath = Path.of(System.getProperty("user.home"), "Desktop", "login_timetable.har");
         org.junit.jupiter.api.Assumptions.assumeTrue(Files.exists(harPath));

@@ -55,9 +55,16 @@ def loadDotEnv = { ->
 		}
 }
 
+def looksLikeServiceAccountJson = { value ->
+	value?.trim() &&
+		value.trim().startsWith('{') &&
+		value.contains('"type"') &&
+		value.contains('service_account')
+}
+
 tasks.named('bootRun') {
 	def env = new LinkedHashMap(loadDotEnv())
-	if (!env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim()) {
+	if (!looksLikeServiceAccountJson(env.FIREBASE_SERVICE_ACCOUNT_JSON)) {
 		def serviceAccountFile = file('firebase-service-account.json')
 		if (serviceAccountFile.exists()) {
 			env.FIREBASE_SERVICE_ACCOUNT_JSON = serviceAccountFile.text

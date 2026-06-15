@@ -66,7 +66,7 @@ public class AuthService {
 
     /**
      * Firebase Authentication 계정을 Admin SDK로 삭제한다.
-     * 클라이언트 deleteUser는 re-auth가 필요할 수 있어 서버에서 처리한다.
+     * DB 삭제가 커밋된 뒤 호출되어, Firebase만 삭제되고 DB가 남는 상황을 방지한다.
      */
     public void deleteFirebaseAccount(String uid) {
         try {

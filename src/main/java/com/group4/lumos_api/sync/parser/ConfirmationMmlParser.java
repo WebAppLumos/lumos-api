@@ -72,17 +72,23 @@ public class ConfirmationMmlParser {
                     continue;
                 }
 
-                String title = findClosestValidText(cells, columns.nameCol(), ConfirmationMmlParser::isCourseTitle);
+                String title = findCourseTitle(rows, rowTops, rowTop, columns.nameCol());
                 if (title == null) {
                     continue;
                 }
 
                 String professor = findClosestValidText(cells, columns.profCol(), ConfirmationMmlParser::isProfessorName);
                 if (professor == null) {
+                    professor = findCourseProfessor(rows, rowTops, rowTop, columns.profCol());
+                }
+                if (professor == null) {
                     professor = "";
                 }
 
                 Short credit = parseCredit(cells, columns.creditCol());
+                if (credit == null) {
+                    credit = findCourseCredit(rows, rowTops, rowTop, columns.creditCol());
+                }
 
                 String schedule = collectScheduleText(rows, rowTops, rowTop, columns.timeCol());
                 if (schedule.isBlank()) {
@@ -194,6 +200,78 @@ public class ConfirmationMmlParser {
         } catch (NumberFormatException ignored) {
             return null;
         }
+    }
+
+    private static Short findCourseCredit(Map<Integer, Map<Integer, String>> rows, List<Integer> rowTops,
+                                          int rowTop, int creditColumn) {
+        for (int extraTop : rowTops) {
+            if (extraTop < rowTop - TIME_ROW_BEFORE || extraTop > rowTop + TIME_ROW_OFFSET) {
+                continue;
+            }
+            Map<Integer, String> rowCells = rows.get(extraTop);
+            if (rowCells == null) {
+                continue;
+            }
+            Short credit = parseCredit(rowCells, creditColumn);
+            if (credit != null) {
+                return credit;
+            }
+        }
+        return null;
+    }
+
+    private static String findCourseTitle(Map<Integer, Map<Integer, String>> rows, List<Integer> rowTops,
+                                          int rowTop, int nameColumn) {
+        Map<Integer, String> cells = rows.get(rowTop);
+        if (cells != null) {
+            String sameRow = findClosestValidText(cells, nameColumn, ConfirmationMmlParser::isCourseTitle);
+            if (sameRow != null) {
+                return sameRow;
+            }
+        }
+
+        List<Map.Entry<Integer, String>> parts = new ArrayList<>();
+        for (int extraTop : rowTops) {
+            if (extraTop < rowTop - TIME_ROW_BEFORE || extraTop > rowTop + TIME_ROW_OFFSET) {
+                continue;
+            }
+            Map<Integer, String> rowCells = rows.get(extraTop);
+            if (rowCells == null) {
+                continue;
+            }
+            String text = findClosestValidText(rowCells, nameColumn, ConfirmationMmlParser::isCourseTitle);
+            if (text != null) {
+                parts.add(Map.entry(extraTop, text));
+            }
+        }
+
+        if (parts.isEmpty()) {
+            return null;
+        }
+
+        parts.sort(Comparator.comparingInt(Map.Entry::getKey));
+        return parts.stream()
+                .map(Map.Entry::getValue)
+                .reduce((left, right) -> left + " " + right)
+                .orElse(null);
+    }
+
+    private static String findCourseProfessor(Map<Integer, Map<Integer, String>> rows, List<Integer> rowTops,
+                                              int rowTop, int profColumn) {
+        for (int extraTop : rowTops) {
+            if (extraTop < rowTop - TIME_ROW_BEFORE || extraTop > rowTop + TIME_ROW_OFFSET) {
+                continue;
+            }
+            Map<Integer, String> rowCells = rows.get(extraTop);
+            if (rowCells == null) {
+                continue;
+            }
+            String professor = findClosestValidText(rowCells, profColumn, ConfirmationMmlParser::isProfessorName);
+            if (professor != null) {
+                return professor;
+            }
+        }
+        return null;
     }
 
     private static String findClosestMatching(Map<Integer, String> cells, int targetColumn, Pattern pattern) {

@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AssignmentService {
-    
     private final AssignmentRepository assignmentRepository;
 
     @Transactional(readOnly = true)
@@ -45,27 +44,22 @@ public class AssignmentService {
     public AssignmentResponse updateAssignment(Long id, String userId, AssignmentUpdateRequest request) {
         Assignment assignment = assignmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("해당 과제가 존재하지 않습니다. id=" + id));
-                
         if (!assignment.getUserId().equals(userId)) {
             throw new IllegalArgumentException("해당 과제에 대한 수정 권한이 없습니다.");
         }
-                
-        boolean isCourseChanged = request.getCourse() != null && !request.getCourse().equals(assignment.getCourse());
-        boolean isTitleChanged = request.getTitle() != null && !request.getTitle().equals(assignment.getTitle());
-        
+        boolean isCourseChanged = request.getCourse() != null && !request.getCourse().trim().isEmpty() && !request.getCourse().equals(assignment.getCourse());
+        boolean isTitleChanged = request.getTitle() != null && !request.getTitle().trim().isEmpty() && !request.getTitle().equals(assignment.getTitle());
         if (isCourseChanged || isTitleChanged) {
-            String targetCourse = request.getCourse() != null ? request.getCourse() : assignment.getCourse();
-            String targetTitle = request.getTitle() != null ? request.getTitle() : assignment.getTitle();
+            String targetCourse = (request.getCourse() != null && !request.getCourse().trim().isEmpty()) ? request.getCourse() : assignment.getCourse();
+            String targetTitle = (request.getTitle() != null && !request.getTitle().trim().isEmpty()) ? request.getTitle() : assignment.getTitle();
             if (assignmentRepository.existsByUserIdAndTitleAndCourse(userId, targetTitle, targetCourse)) {
                 throw new IllegalArgumentException("동일한 과제가 있습니다.");
             }
         }
-        
-        if (request.getCourse() != null) assignment.setCourse(request.getCourse());
-        if (request.getTitle() != null) assignment.setTitle(request.getTitle());
+        if (request.getCourse() != null && !request.getCourse().trim().isEmpty()) assignment.setCourse(request.getCourse());
+        if (request.getTitle() != null && !request.getTitle().trim().isEmpty()) assignment.setTitle(request.getTitle());
         if (request.getDeadline() != null) assignment.setDeadline(request.getDeadline());
         if (request.getIsCompleted() != null) assignment.setCompleted(request.getIsCompleted());
-        
         return AssignmentResponse.from(assignment);
     }
 
@@ -73,11 +67,9 @@ public class AssignmentService {
     public void deleteAssignment(Long id, String userId) {
         Assignment assignment = assignmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("해당 과제가 존재하지 않습니다. id=" + id));
-                
         if (!assignment.getUserId().equals(userId)) {
             throw new IllegalArgumentException("해당 과제에 대한 삭제 권한이 없습니다.");
         }
-        
         assignmentRepository.delete(assignment);
     }
 }

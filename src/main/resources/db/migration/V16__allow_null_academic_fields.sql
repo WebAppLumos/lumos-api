@@ -1,0 +1,4 @@
+-- 학번·학과·학년은 EDWARD 연동 후 채워지므로 회원가입 시 NULL 허용
+ALTER TABLE users ALTER COLUMN major DROP NOT NULL;
+ALTER TABLE users ALTER COLUMN grade DROP NOT NULL;
+ALTER TABLE users ALTER COLUMN student_number DROP NOT NULL;

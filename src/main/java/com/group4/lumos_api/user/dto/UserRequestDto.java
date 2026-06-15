@@ -13,4 +13,5 @@ public class UserRequestDto {
     private String studentNumber;
     private String profileImage;
     private Integer incomeBracket;
+    private Boolean scholarshipCurationCompleted;
 }

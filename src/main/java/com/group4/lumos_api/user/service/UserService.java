@@ -113,6 +113,9 @@ public class UserService {
         if (dto.getIncomeBracket() != null) {
             user.setIncomeBracket(dto.getIncomeBracket());
         }
+        if (dto.getScholarshipCurationCompleted() != null) {
+            user.setScholarshipCurationCompleted(dto.getScholarshipCurationCompleted());
+        }
 
         Users saved = usersRepository.saveAndFlush(user);
         entityManager.refresh(saved);

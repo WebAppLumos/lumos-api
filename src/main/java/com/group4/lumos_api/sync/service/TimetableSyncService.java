@@ -55,6 +55,7 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
     private final TimetableRepository timetableRepository;
     private final CourseRepository courseRepository;
     private final TimetableEntryRepository entryRepository;
+    private final EdwardStudentNumberGuard edwardStudentNumberGuard;
 
     @Override
     public String sourceId() {
@@ -65,9 +66,7 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-        if (!user.getStudentNumber().equals(request.getEdwardLoginName())) {
-            throw new BadRequestException("EDWARD 로그인 학번이 내 학번과 일치해야 합니다.");
-        }
+        edwardStudentNumberGuard.ensureMatchesOrAssign(user, request.getEdwardLoginName());
 
         char[] password = request.getEdwardPassword().toCharArray();
         try (EdwardSession session = edwardSessionClient.login(request.getEdwardLoginName(), password)) {
@@ -101,9 +100,7 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-        if (!user.getStudentNumber().equals(request.getStudentNumber())) {
-            throw new BadRequestException("EDWARD 학번과 내 학번이 일치해야 합니다.");
-        }
+        edwardStudentNumberGuard.ensureMatchesOrAssign(user, request.getStudentNumber());
 
         if ((request.getMml() == null || request.getMml().isBlank())
                 && (request.getSsv() == null || request.getSsv().isBlank())

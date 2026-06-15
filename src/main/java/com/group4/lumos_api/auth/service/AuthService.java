@@ -112,6 +112,7 @@ public class AuthService {
                 .department(trimToNull(request.getDepartment()))
                 .grade(request.getGrade())
                 .studentNumber(trimToNull(request.getStudentNumber()))
+                .incomeBracket(request.getIncomeBracket())
                 .build();
     }
 
@@ -132,6 +133,9 @@ public class AuthService {
         }
         if (trimToNull(request.getStudentNumber()) != null) {
             user.setStudentNumber(trimToNull(request.getStudentNumber()));
+        }
+        if (request.getIncomeBracket() != null) {
+            user.setIncomeBracket(request.getIncomeBracket());
         }
         return user;
     }
@@ -201,6 +205,7 @@ public class AuthService {
                 .grade(user.getGrade())
                 .studentNumber(user.getStudentNumber())
                 .profileImage(user.getProfileImage())
+                .incomeBracket(user.getIncomeBracket())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

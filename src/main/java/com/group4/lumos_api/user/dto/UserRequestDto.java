@@ -12,4 +12,5 @@ public class UserRequestDto {
     private Integer grade;
     private String studentNumber;
     private String profileImage;
+    private Integer incomeBracket;
 }

@@ -61,6 +61,7 @@ public class UserService {
                 .grade(dto.getGrade())
                 .studentNumber(dto.getStudentNumber())
                 .profileImage(dto.getProfileImage())
+                .incomeBracket(dto.getIncomeBracket())
                 .build();
 
         Users saved = usersRepository.saveAndFlush(user);
@@ -108,6 +109,9 @@ public class UserService {
         }
         if (dto.getPhoneNumber() != null) {
             user.setPhoneNumber(dto.getPhoneNumber().trim());
+        }
+        if (dto.getIncomeBracket() != null) {
+            user.setIncomeBracket(dto.getIncomeBracket());
         }
 
         Users saved = usersRepository.saveAndFlush(user);

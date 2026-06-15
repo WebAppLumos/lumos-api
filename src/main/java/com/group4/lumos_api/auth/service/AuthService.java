@@ -1,5 +1,6 @@
 package com.group4.lumos_api.auth.service;
 
+import com.google.firebase.auth.AuthErrorCode;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
@@ -58,6 +59,24 @@ public class AuthService {
             FirebaseAuth.getInstance().revokeRefreshTokens(token.getUid());
         } catch (FirebaseAuthException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to revoke Firebase token", e);
+        }
+    }
+
+    /**
+     * Firebase Authentication 계정을 Admin SDK로 삭제한다.
+     * 클라이언트 deleteUser는 re-auth가 필요할 수 있어 서버에서 처리한다.
+     */
+    public void deleteFirebaseAccount(String uid) {
+        try {
+            FirebaseConfig.initialize();
+            FirebaseAuth.getInstance().deleteUser(uid);
+        } catch (FirebaseAuthException e) {
+            if (e.getAuthErrorCode() == AuthErrorCode.USER_NOT_FOUND) {
+                return;
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Firebase 계정 삭제에 실패했습니다.", e);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Firebase credentials are not configured", e);
         }
     }
 

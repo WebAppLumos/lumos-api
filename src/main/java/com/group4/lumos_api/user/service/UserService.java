@@ -1,5 +1,6 @@
 package com.group4.lumos_api.user.service;
 
+import com.group4.lumos_api.auth.service.AuthService;
 import com.group4.lumos_api.assignment.repository.AssignmentRepository;
 import com.group4.lumos_api.calendar.repository.CalendarEventRepository;
 import com.group4.lumos_api.certifications.repository.CertificationsRepository;
@@ -38,6 +39,7 @@ public class UserService {
     private final CertificationsRepository certificationsRepository;
     private final PreviousSemesterScoresRepository previousSemesterScoresRepository;
     private final EntityManager entityManager;
+    private final AuthService authService;
 
     // 1. 회원가입 (중복 방어 로직)
     @Transactional
@@ -122,9 +124,14 @@ public class UserService {
         return new UserResponseDto(saved);
     }
 
-    // 5. 회원 탈퇴
-    @Transactional
+    // 5. 회원 탈퇴 (DB + Firebase Auth)
     public void deleteUser(String userId) {
+        deleteUserData(userId);
+        authService.deleteFirebaseAccount(userId);
+    }
+
+    @Transactional
+    public void deleteUserData(String userId) {
 
         if (!usersRepository.existsById(userId)) {
             return;

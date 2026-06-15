@@ -22,6 +22,7 @@ public class UserResponseDto {
     private String studentNumber;
     private String profileImage;
     private Integer incomeBracket;
+    private Boolean scholarshipCurationCompleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -36,6 +37,7 @@ public class UserResponseDto {
         this.studentNumber = user.getStudentNumber();
         this.profileImage = user.getProfileImage();
         this.incomeBracket = user.getIncomeBracket();
+        this.scholarshipCurationCompleted = user.getScholarshipCurationCompleted();
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
     }

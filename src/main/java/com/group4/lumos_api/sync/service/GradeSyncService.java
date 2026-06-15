@@ -32,14 +32,13 @@ public class GradeSyncService {
     private final EdwardSessionClient edwardSessionClient;
     private final SemesterGradeRepository semesterGradeRepository;
     private final UsersRepository usersRepository;
+    private final EdwardStudentNumberGuard edwardStudentNumberGuard;
 
     public GradeSyncResponse importFromSsv(String userId, GradeImportRequest request) {
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-        if (!user.getStudentNumber().equals(request.getStudentNumber())) {
-            throw new BadRequestException("EDWARD 학번과 내 학번이 일치해야 합니다.");
-        }
+        edwardStudentNumberGuard.ensureMatchesOrAssign(user, request.getStudentNumber());
 
         if (request.getSsv() == null || request.getSsv().isBlank()) {
             throw new BadRequestException("성적 데이터가 비어 있습니다.");
@@ -58,9 +57,7 @@ public class GradeSyncService {
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-        if (!user.getStudentNumber().equals(loginName)) {
-            throw new BadRequestException("EDWARD 로그인 학번이 내 학번과 일치해야 합니다.");
-        }
+        edwardStudentNumberGuard.ensureMatchesOrAssign(user, loginName);
 
         try (EdwardSession session = edwardSessionClient.login(loginName, password)) {
             edwardSessionClient.warmUpGlioSession(session);

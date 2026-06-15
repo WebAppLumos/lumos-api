@@ -23,13 +23,13 @@ public class Users {
     @Column(name = "phone_number", length = 30, unique = true, nullable = false)
     private String phoneNumber;
 
-    @Column(name = "major", length = 100, nullable = false)
+    @Column(name = "major", length = 100)
     private String major;
 
-    @Column(name = "grade", nullable = false)
+    @Column(name = "grade")
     private Integer grade;
 
-    @Column(name = "student_number", length = 7, unique = true, nullable = false)
+    @Column(name = "student_number", length = 7, unique = true)
     private String studentNumber;
 
     @Column(name = "profile_image", columnDefinition = "TEXT")
@@ -37,6 +37,10 @@ public class Users {
 
     @Column(name = "income_bracket")
     private Integer incomeBracket;
+
+    @Column(name = "scholarship_curation_completed", nullable = false)
+    @Builder.Default
+    private Boolean scholarshipCurationCompleted = false;
 
     @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;

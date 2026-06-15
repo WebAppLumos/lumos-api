@@ -112,20 +112,7 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
                 buildConfirmationMetadata(request.getConfirmationMml()),
                 request.getCreditByTitle());
 
-        List<ParsedTimetableSlot> slots;
-        if (request.getSsv() != null && !request.getSsv().isBlank()) {
-            slots = applyConfirmationMetadata(
-                    courseRegistrationParser.parseRows(
-                            com.group4.lumos_api.sync.client.SsvCodec.parseDatasetAllRows(
-                                    request.getSsv(), "DS_COUR530M01")),
-                    confirmationMetadata);
-        } else {
-            String mml = firstNonBlankMml(request.getConfirmationMml(), request.getMml());
-            if (!mml.contains("<MML") && !mml.contains("<DOCUMENT")) {
-                throw new BadRequestException("유효한 시간표 데이터가 아닙니다.");
-            }
-            slots = applyConfirmationMetadata(parseImportedMml(mml), confirmationMetadata);
-        }
+        List<ParsedTimetableSlot> slots = resolveImportSlots(request, confirmationMetadata);
 
         int year = request.getYear() != null
                 ? request.getYear()
@@ -136,6 +123,36 @@ public class TimetableSyncService implements ExternalSyncSource<TimetableSyncRes
         AcademicTerm term = AcademicTerm.of(year, termCode);
 
         return upsertTimetable(user, term, slots);
+    }
+
+    private List<ParsedTimetableSlot> resolveImportSlots(TimetableImportRequest request,
+                                                       ConfirmationMetadata confirmationMetadata) {
+        if (request.getSsv() != null && !request.getSsv().isBlank()) {
+            List<Map<String, String>> rows = com.group4.lumos_api.sync.client.SsvCodec.parseDatasetAllRows(
+                    request.getSsv(), "DS_COUR530M01");
+            if (!rows.isEmpty()) {
+                try {
+                    List<ParsedTimetableSlot> fromSsv = applyConfirmationMetadata(
+                            courseRegistrationParser.parseRows(rows),
+                            confirmationMetadata);
+                    if (!fromSsv.isEmpty()) {
+                        return fromSsv;
+                    }
+                } catch (ExternalSyncException ignored) {
+                    // SSV에 dataset은 있지만 시간표 슬롯이 없을 때 confirmation MML로 fallback
+                }
+            }
+        }
+
+        String mml = firstNonBlankMml(request.getConfirmationMml(), request.getMml());
+        if (mml == null || mml.isBlank() || (!mml.contains("<MML") && !mml.contains("<DOCUMENT"))) {
+            if (request.getSsv() != null && !request.getSsv().isBlank()) {
+                throw new ExternalSyncException("수강신청 확인 데이터에서 시간표 정보를 찾지 못했습니다.");
+            }
+            throw new BadRequestException("유효한 시간표 데이터가 아닙니다.");
+        }
+
+        return applyConfirmationMetadata(parseImportedMml(mml), confirmationMetadata);
     }
 
     @Override

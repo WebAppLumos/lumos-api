@@ -35,8 +35,8 @@ public class Users {
     @Column(name = "profile_image", columnDefinition = "TEXT")
     private String profileImage;
 
-    @Column(name = "income_bracket")
-    private Integer incomeBracket;
+    @Column(name = "income_bracket", length = 50)
+    private String incomeBracket;
 
     @Column(name = "scholarship_curation_completed", nullable = false)
     @Builder.Default

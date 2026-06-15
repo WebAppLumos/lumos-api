@@ -17,5 +17,5 @@ public class AuthLoginRequest {
     private String department;
     private Integer grade;
     private String studentNumber;
-    private Integer incomeBracket;
+    private String incomeBracket;
 }

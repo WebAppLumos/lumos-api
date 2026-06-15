@@ -21,7 +21,7 @@ public class UserResponseDto {
     private Integer grade;
     private String studentNumber;
     private String profileImage;
-    private Integer incomeBracket;
+    private String incomeBracket;
     private Boolean scholarshipCurationCompleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

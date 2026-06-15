@@ -1,6 +1,7 @@
 package com.group4.lumos_api.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.group4.lumos_api.user.entity.Users;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ public class UserResponseDto {
     private String email;
     private String name;
     private String phoneNumber;
+    @JsonProperty("department")
     private String major;
     private Integer grade;
     private String studentNumber;

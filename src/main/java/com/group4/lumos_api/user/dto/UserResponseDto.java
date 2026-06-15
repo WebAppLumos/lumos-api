@@ -19,6 +19,7 @@ public class UserResponseDto {
     private Integer grade;
     private String studentNumber;
     private String profileImage;
+    private Integer incomeBracket;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -32,6 +33,7 @@ public class UserResponseDto {
         this.grade = user.getGrade();
         this.studentNumber = user.getStudentNumber();
         this.profileImage = user.getProfileImage();
+        this.incomeBracket = user.getIncomeBracket();
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
     }

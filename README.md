@@ -118,7 +118,7 @@ lumos-api/
 │   │   ├── repository/
 │   │   ├── service/
 │   │   └── README.md
-│   ├── calendar/              # 캘린더 및 To-Do 관리
+├── calendar/              # 캘린더 및 To-Do 관리
 │   │   ├── controller/
 │   │   ├── dto/
 │   │   ├── entity/

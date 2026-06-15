@@ -7,7 +7,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CertificationResponseDto {
+public class CertificationsResponseDto {
     private Long certId;
     private String certName;
     private LocalDate issueDate;

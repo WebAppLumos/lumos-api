@@ -1,7 +1,16 @@
 package com.group4.lumos_api.user.service;
 
+import com.group4.lumos_api.assignment.repository.AssignmentRepository;
 import com.group4.lumos_api.calendar.repository.CalendarEventRepository;
+import com.group4.lumos_api.certifications.repository.CertificationsRepository;
 import com.group4.lumos_api.dashboard.service.DashboardWidgetService;
+import com.group4.lumos_api.language_exams.repository.LanguageExamsRepository;
+import com.group4.lumos_api.previous_semester_scores.repository.PreviousSemesterScoresRepository;
+import com.group4.lumos_api.semester.repository.SemesterRepository;
+import com.group4.lumos_api.semester.service.SemesterService;
+import com.group4.lumos_api.semester_grades.repository.SemesterGradeRepository;
+import com.group4.lumos_api.common.exception.BadRequestException;
+import com.group4.lumos_api.common.exception.NotFoundException;
 import com.group4.lumos_api.user.dto.UserRequestDto;
 import com.group4.lumos_api.user.dto.UserResponseDto;
 import com.group4.lumos_api.user.entity.Users;
@@ -21,6 +30,13 @@ public class UserService {
     private final UsersRepository usersRepository;
     private final CalendarEventRepository calendarEventRepository;
     private final DashboardWidgetService dashboardWidgetService;
+    private final SemesterRepository semesterRepository;
+    private final SemesterService semesterService;
+    private final SemesterGradeRepository semesterGradeRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final LanguageExamsRepository languageExamsRepository;
+    private final CertificationsRepository certificationsRepository;
+    private final PreviousSemesterScoresRepository previousSemesterScoresRepository;
     private final EntityManager entityManager;
 
     // 1. 회원가입 (중복 방어 로직)
@@ -45,6 +61,7 @@ public class UserService {
                 .grade(dto.getGrade())
                 .studentNumber(dto.getStudentNumber())
                 .profileImage(dto.getProfileImage())
+                .incomeBracket(dto.getIncomeBracket())
                 .build();
 
         Users saved = usersRepository.saveAndFlush(user);
@@ -64,7 +81,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserResponseDto getUserById(String userId) {
         Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
         return new UserResponseDto(user);
     }
 
@@ -72,14 +89,37 @@ public class UserService {
     @Transactional
     public UserResponseDto updateUser(String userId, UserRequestDto dto) {
         Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-        user.setName(dto.getName());
-        user.setMajor(dto.getMajor());
-        user.setGrade(dto.getGrade());
-        user.setPhoneNumber(dto.getPhoneNumber());
+        if (dto.getName() != null) {
+            String name = dto.getName().trim();
+            if (name.isEmpty()) {
+                throw new BadRequestException("이름을 입력해 주세요.");
+            }
+            if (!name.matches("^[a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ]+$")) {
+                throw new BadRequestException("이름은 한글과 영문만 입력할 수 있습니다.");
+            }
+            user.setName(name);
+        }
+        if (dto.getMajor() != null) {
+            user.setMajor(dto.getMajor().trim());
+        }
+        if (dto.getGrade() != null) {
+            user.setGrade(dto.getGrade());
+        }
+        if (dto.getPhoneNumber() != null) {
+            user.setPhoneNumber(dto.getPhoneNumber().trim());
+        }
+        if (dto.getIncomeBracket() != null) {
+            user.setIncomeBracket(dto.getIncomeBracket());
+        }
+        if (dto.getScholarshipCurationCompleted() != null) {
+            user.setScholarshipCurationCompleted(dto.getScholarshipCurationCompleted());
+        }
 
-        return new UserResponseDto(usersRepository.save(user));
+        Users saved = usersRepository.saveAndFlush(user);
+        entityManager.refresh(saved);
+        return new UserResponseDto(saved);
     }
 
     // 5. 회원 탈퇴
@@ -87,14 +127,26 @@ public class UserService {
     public void deleteUser(String userId) {
 
         if (!usersRepository.existsById(userId)) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+            return;
         }
 
-        // 사용자의 일정 먼저 삭제
+        List<Long> semesterIds = semesterRepository.findAllByUser_UserIdOrderBySortOrderAscIdAsc(userId)
+                .stream()
+                .map(semester -> semester.getId())
+                .toList();
+        for (Long semesterId : semesterIds) {
+            semesterService.deleteSemester(userId, semesterId);
+        }
+
+        semesterGradeRepository.deleteAllByUser_UserId(userId);
         calendarEventRepository.deleteByUser_UserId(userId);
         dashboardWidgetService.deleteWidgetsByUserId(userId);
+        assignmentRepository.deleteAll(assignmentRepository.findAllByUserId(userId));
+        languageExamsRepository.deleteAll(languageExamsRepository.findByUserUserId(userId));
+        certificationsRepository.deleteAll(certificationsRepository.findByUserUserId(userId));
+        previousSemesterScoresRepository.deleteAll(
+                previousSemesterScoresRepository.findByUserUserId(userId));
 
-        // 사용자 삭제
         usersRepository.deleteById(userId);
     }
 

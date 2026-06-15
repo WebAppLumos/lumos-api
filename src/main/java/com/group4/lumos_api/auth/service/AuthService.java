@@ -8,6 +8,8 @@ import com.group4.lumos_api.auth.dto.AuthLoginRequest;
 import com.group4.lumos_api.auth.dto.AuthResponse;
 import com.group4.lumos_api.common.exception.BadRequestException;
 import com.group4.lumos_api.common.exception.ConflictException;
+import com.group4.lumos_api.common.exception.NotFoundException;
+import com.group4.lumos_api.dashboard.service.DashboardWidgetService;
 import com.group4.lumos_api.user.dto.UserResponseDto;
 import com.group4.lumos_api.user.entity.Users;
 import com.group4.lumos_api.user.repository.UsersRepository;
@@ -26,16 +28,22 @@ public class AuthService {
 
     private final UsersRepository usersRepository;
     private final EntityManager entityManager;
+    private final DashboardWidgetService dashboardWidgetService;
 
     @Transactional
     public AuthResponse login(AuthLoginRequest request) {
         FirebaseToken token = verifyIdToken(request.getIdToken());
+        boolean isNewUser = !usersRepository.existsById(token.getUid());
         Users user = usersRepository.findById(token.getUid())
                 .map(existingUser -> updateUser(existingUser, token, request))
-                .orElseGet(() -> createUser(token, request));
+                .orElseGet(() -> createUserForSignup(token, request));
 
         Users savedUser = usersRepository.saveAndFlush(user);
         entityManager.refresh(savedUser);
+
+        if (isNewUser) {
+            dashboardWidgetService.getWidgets(savedUser.getUserId());
+        }
         // 별도 토큰을 발급하지 않는다. 클라이언트는 로그인에 사용한 Firebase ID 토큰을
         // 이후 요청의 Authorization: Bearer 헤더에 그대로 사용한다.
         return AuthResponse.builder()
@@ -85,6 +93,19 @@ public class AuthService {
         }
     }
 
+    private Users createUserForSignup(FirebaseToken token, AuthLoginRequest request) {
+        if (!hasSignupProfile(request)) {
+            throw new NotFoundException("등록된 회원 정보가 없습니다. 회원가입을 진행해 주세요.");
+        }
+
+        return createUser(token, request);
+    }
+
+    private boolean hasSignupProfile(AuthLoginRequest request) {
+        return trimToNull(request.getName()) != null
+                && trimToNull(request.getPhoneNumber()) != null;
+    }
+
     private Users createUser(FirebaseToken token, AuthLoginRequest request) {
         validateCreateRequest(token, request);
 
@@ -96,12 +117,16 @@ public class AuthService {
                 .department(trimToNull(request.getDepartment()))
                 .grade(request.getGrade())
                 .studentNumber(trimToNull(request.getStudentNumber()))
+                .incomeBracket(request.getIncomeBracket())
                 .build();
     }
 
     private Users updateUser(Users user, FirebaseToken token, AuthLoginRequest request) {
         user.setEmail(resolveEmail(token));
-        user.setName(resolveName(token, request));
+        String requestName = trimToNull(request.getName());
+        if (requestName != null) {
+            user.setName(requestName);
+        }
         if (trimToNull(request.getPhoneNumber()) != null) {
             user.setPhoneNumber(trimToNull(request.getPhoneNumber()));
         }
@@ -114,26 +139,22 @@ public class AuthService {
         if (trimToNull(request.getStudentNumber()) != null) {
             user.setStudentNumber(trimToNull(request.getStudentNumber()));
         }
+        if (request.getIncomeBracket() != null) {
+            user.setIncomeBracket(request.getIncomeBracket());
+        }
         return user;
     }
 
     private void validateCreateRequest(FirebaseToken token, AuthLoginRequest request) {
         String email = resolveEmail(token);
+        String name = trimToNull(request.getName());
         String phoneNumber = trimToNull(request.getPhoneNumber());
-        String department = trimToNull(request.getDepartment());
-        String studentNumber = trimToNull(request.getStudentNumber());
 
+        if (name == null) {
+            throw new BadRequestException("이름을 입력해 주세요.");
+        }
         if (phoneNumber == null) {
             throw new BadRequestException("전화번호를 입력해 주세요.");
-        }
-        if (department == null) {
-            throw new BadRequestException("학과를 입력해 주세요.");
-        }
-        if (request.getGrade() == null || request.getGrade() < 1 || request.getGrade() > 4) {
-            throw new BadRequestException("학년은 1~4 사이로 입력해 주세요.");
-        }
-        if (studentNumber == null || !studentNumber.matches("\\d{7}")) {
-            throw new BadRequestException("학번은 숫자 7자리로 입력해 주세요.");
         }
         if (usersRepository.existsByEmail(email)) {
             throw new ConflictException("이미 등록된 이메일입니다.");
@@ -141,7 +162,8 @@ public class AuthService {
         if (usersRepository.existsByPhoneNumber(phoneNumber)) {
             throw new ConflictException("이미 등록된 전화번호입니다.");
         }
-        if (usersRepository.existsByStudentNumber(studentNumber)) {
+        String studentNumber = trimToNull(request.getStudentNumber());
+        if (studentNumber != null && usersRepository.existsByStudentNumber(studentNumber)) {
             throw new ConflictException("이미 등록된 학번입니다.");
         }
     }
@@ -182,6 +204,8 @@ public class AuthService {
                 .grade(user.getGrade())
                 .studentNumber(user.getStudentNumber())
                 .profileImage(user.getProfileImage())
+                .incomeBracket(user.getIncomeBracket())
+                .scholarshipCurationCompleted(user.getScholarshipCurationCompleted())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

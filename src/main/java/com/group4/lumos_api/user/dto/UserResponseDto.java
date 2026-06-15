@@ -1,6 +1,7 @@
 package com.group4.lumos_api.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.group4.lumos_api.user.entity.Users;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -15,10 +16,13 @@ public class UserResponseDto {
     private String email;
     private String name;
     private String phoneNumber;
+    @JsonProperty("department")
     private String major;
     private Integer grade;
     private String studentNumber;
     private String profileImage;
+    private Integer incomeBracket;
+    private Boolean scholarshipCurationCompleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -32,6 +36,8 @@ public class UserResponseDto {
         this.grade = user.getGrade();
         this.studentNumber = user.getStudentNumber();
         this.profileImage = user.getProfileImage();
+        this.incomeBracket = user.getIncomeBracket();
+        this.scholarshipCurationCompleted = user.getScholarshipCurationCompleted();
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
     }

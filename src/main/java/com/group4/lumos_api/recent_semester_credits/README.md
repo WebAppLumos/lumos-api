@@ -38,7 +38,8 @@ com.group4.lumos_api.recent_semester_credits/
 ### 1. 최근 학기 총 학점 조회 (GET)
 - **Endpoint**: `GET /api/recent-semester/total-credits`
 - **Response**: `200 OK`
-```text
+- **Response Body**:
+```json
 18
 ```
 

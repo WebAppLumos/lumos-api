@@ -40,3 +40,28 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+def loadDotEnv = { ->
+	def envFile = file('.env')
+	if (!envFile.exists()) {
+		return [:]
+	}
+
+	envFile.readLines()
+		.findAll { line -> line.trim() && !line.trim().startsWith('#') && line.contains('=') }
+		.collectEntries { line ->
+			def separatorIndex = line.indexOf('=')
+			[(line.substring(0, separatorIndex).trim()): line.substring(separatorIndex + 1).trim()]
+		}
+}
+
+tasks.named('bootRun') {
+	def env = new LinkedHashMap(loadDotEnv())
+	if (!env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim()) {
+		def serviceAccountFile = file('firebase-service-account.json')
+		if (serviceAccountFile.exists()) {
+			env.FIREBASE_SERVICE_ACCOUNT_JSON = serviceAccountFile.text
+		}
+	}
+	environment env
+}

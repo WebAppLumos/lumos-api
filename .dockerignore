@@ -1,0 +1,12 @@
+.git
+.gitignore
+.gradle
+build
+.env
+.env.*
+!.env.example
+firebase-service-account.json
+.idea
+.vscode
+*.md
+scripts

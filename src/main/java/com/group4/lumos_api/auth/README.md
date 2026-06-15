@@ -31,23 +31,23 @@ Authorization: Bearer <Firebase ID Token>
 
 ## Firebase Setup
 
-서버 실행 전에 Firebase Admin SDK 자격증명을 아래 방법 중 하나로 설정해야 합니다.
+서버 실행 전에 Firebase Admin SDK 자격증명을 설정해야 합니다.
 
-### 1. Service account JSON 문자열
+### 1. `FIREBASE_SERVICE_ACCOUNT_JSON` (배포·로컬 공통)
+
+GitHub Secret 또는 `.env`에 서비스 계정 JSON 전체를 넣습니다.
 
 ```powershell
 $env:FIREBASE_SERVICE_ACCOUNT_JSON='{"type":"service_account", ... }'
 ```
 
-### 2. Service account JSON 파일 경로
+### 2. 로컬 파일 (선택)
 
-```powershell
-$env:FIREBASE_SERVICE_ACCOUNT_PATH='C:\path\to\firebase-service-account.json'
-```
+`.env`에 JSON을 넣지 않아도 `lumos-api/firebase-service-account.json` 파일이 있으면 `./gradlew bootRun` 시 자동으로 환경 변수에 주입됩니다.
 
 ### 3. Application Default Credentials
 
-위 환경변수가 없으면 `GoogleCredentials.getApplicationDefault()`를 사용합니다.
+위 설정이 없으면 `GoogleCredentials.getApplicationDefault()`를 사용합니다.
 
 ## Endpoints
 

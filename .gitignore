@@ -39,6 +39,11 @@ out/
 ### Firebase ###
 firebase-service-account.json
 
+### Environment ###
+.env
+.env.*
+!.env.example
+
 ### macOS ###
 .DS_Store
 .AppleDouble

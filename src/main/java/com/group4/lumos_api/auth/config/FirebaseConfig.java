@@ -12,13 +12,9 @@ import java.nio.charset.StandardCharsets;
 
 public class FirebaseConfig {
 
-    private static String serviceAccountPath;
+    private static final String LOCAL_SERVICE_ACCOUNT_FILE = "firebase-service-account.json";
 
     private FirebaseConfig() {
-    }
-
-    public static void setServiceAccountPath(String path) {
-        serviceAccountPath = path;
     }
 
     public static FirebaseApp initialize() throws IOException {
@@ -40,29 +36,19 @@ public class FirebaseConfig {
                     new ByteArrayInputStream(serviceAccountJson.getBytes(StandardCharsets.UTF_8)));
         }
 
-        String envPath = System.getenv("FIREBASE_SERVICE_ACCOUNT_PATH");
-        if (envPath != null && !envPath.isBlank()) {
-            return GoogleCredentials.fromStream(new FileInputStream(resolveFile(envPath)));
-        }
-
-        if (serviceAccountPath != null && !serviceAccountPath.isBlank()) {
-            File file = resolveFile(serviceAccountPath);
-            if (file.exists()) {
-                return GoogleCredentials.fromStream(new FileInputStream(file));
-            }
+        File localFile = resolveLocalServiceAccountFile();
+        if (localFile.exists()) {
+            return GoogleCredentials.fromStream(new FileInputStream(localFile));
         }
 
         return GoogleCredentials.getApplicationDefault();
     }
 
-    private static File resolveFile(String path) {
-        File file = new File(path);
-        if (file.isAbsolute()) {
+    private static File resolveLocalServiceAccountFile() {
+        File file = new File(LOCAL_SERVICE_ACCOUNT_FILE);
+        if (file.isAbsolute() || file.exists()) {
             return file;
         }
-        if (file.exists()) {
-            return file;
-        }
-        return new File(System.getProperty("user.dir"), path);
+        return new File(System.getProperty("user.dir"), LOCAL_SERVICE_ACCOUNT_FILE);
     }
 }

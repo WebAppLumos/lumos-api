@@ -19,6 +19,10 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 사용자별 대시보드 위젯 표시·순서 설정.
+ * 최초 조회 시 5개 기본 위젯을 DB에 시드합니다.
+ */
 @Service
 @RequiredArgsConstructor
 public class DashboardWidgetService {
@@ -35,6 +39,7 @@ public class DashboardWidgetService {
     private final UsersRepository usersRepository;
 
     @Transactional
+    /** 사용자 위젯 설정 조회. 없으면 5개 기본 위젯을 생성합니다. */
     public List<DashboardWidgetResponse> getWidgets(String userId) {
         List<UserDashboardWidget> widgets = widgetRepository.findAllById_UserIdOrderBySortOrderAsc(userId);
         if (widgets.isEmpty()) {
@@ -44,6 +49,7 @@ public class DashboardWidgetService {
     }
 
     @Transactional
+    /** 위젯 표시/순서 일괄 저장. 5개 위젯 키가 모두 포함돼야 합니다. */
     public List<DashboardWidgetResponse> updateWidgets(String userId, List<DashboardWidgetItemRequest> items) {
         validateWidgetItems(items);
 
@@ -72,10 +78,12 @@ public class DashboardWidgetService {
     }
 
     @Transactional
+    /** 회원 탈퇴 시 해당 사용자의 위젯 설정을 삭제합니다. */
     public void deleteWidgetsByUserId(String userId) {
         widgetRepository.deleteById_UserId(userId);
     }
 
+    /** 최초 가입·조회 시 기본 5개 위젯 행을 DB에 생성합니다. */
     private List<UserDashboardWidget> createDefaultWidgets(String userId) {
         Users user = usersRepository.getReferenceById(userId);
         List<UserDashboardWidget> widgets = new ArrayList<>();
@@ -93,6 +101,7 @@ public class DashboardWidgetService {
         return widgetRepository.saveAll(widgets);
     }
 
+    /** 요청에 5개 위젯 키가 빠짐없이 포함됐는지 검증합니다. */
     private void validateWidgetItems(List<DashboardWidgetItemRequest> items) {
         Set<String> requestedKeys = items.stream()
                 .map(DashboardWidgetItemRequest::getId)

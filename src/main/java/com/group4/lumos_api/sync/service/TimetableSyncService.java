@@ -38,6 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * EDWARD 시간표 import·동기화.
+ * SSV 수강신청 데이터를 우선 사용하고, 실패 시 확인서 MML로 fallback 합니다.
+ * 결과는 학기·수업·"EDWARD 동기화" 시간표·엔트리로 upsert 됩니다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

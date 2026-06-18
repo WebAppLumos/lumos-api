@@ -21,6 +21,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * EDWARD 학기 성적 SSV import.
+ * 파싱 결과를 semester_grades 테이블에 upsert하고 요약(GPA·이수학점)을 반환합니다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

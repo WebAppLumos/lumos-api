@@ -140,6 +140,7 @@ public class UserService {
     }
 
     private void deleteUserData(String userId) {
+        // 학기 → 수업·시간표·엔트리 cascade 후 연관 테이블·users 행 삭제
         if (!usersRepository.existsById(userId)) {
             return;
         }

@@ -18,6 +18,8 @@ public interface TimetableEntryRepository extends JpaRepository<TimetableEntry, 
 
     List<TimetableEntry> findAllByTimetable_IdAndDayOfWeek(Long timetableId, Short dayOfWeek);
 
+    void deleteAllByTimetable_IdAndCourse_Id(Long timetableId, Long courseId);
+
     void deleteAllByTimetable_Id(Long timetableId);
 
     void deleteAllByCourse_Id(Long courseId);

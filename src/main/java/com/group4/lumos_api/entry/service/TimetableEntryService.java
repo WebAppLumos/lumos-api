@@ -38,10 +38,6 @@ public class TimetableEntryService {
             throw new BadRequestException("시간표와 다른 학기의 수업은 배치할 수 없습니다. course ID: " + request.getCourseId());
         }
 
-        if (entryRepository.existsByTimetable_IdAndCourse_Id(timetableId, request.getCourseId())) {
-            throw new ConflictException("이미 시간표에 배치된 수업입니다. ID: " + request.getCourseId());
-        }
-
         validateTimeRange(request.getStartTime(), request.getEndTime());
         validateNoConflict(timetableId, request.getDayOfWeek(), request.getStartTime(), request.getEndTime(), null);
 
@@ -79,6 +75,17 @@ public class TimetableEntryService {
         TimetableEntry entry = getOwnedEntry(userId, entryId);
         Long courseId = entry.getCourse().getId();
         entryRepository.delete(entry);
+        if (!entryRepository.existsByCourse_Id(courseId)) {
+            noteRepository.deleteAllByCourse_Id(courseId);
+        }
+    }
+
+    public void deleteCourseFromTimetable(String userId, Long timetableId, Long courseId) {
+        timetableService.getOwnedTimetableEntity(userId, timetableId);
+        courseRepository.findByIdAndSemester_User_UserId(courseId, userId)
+                .orElseThrow(() -> new NotFoundException("수업을 찾을 수 없습니다. ID: " + courseId));
+
+        entryRepository.deleteAllByTimetable_IdAndCourse_Id(timetableId, courseId);
         if (!entryRepository.existsByCourse_Id(courseId)) {
             noteRepository.deleteAllByCourse_Id(courseId);
         }

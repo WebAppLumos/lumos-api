@@ -49,4 +49,13 @@ public class TimetableEntryController {
         entryService.deleteEntry(userId, entryId);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/api/timetables/{timetableId}/courses/{courseId}/entries")
+    public ResponseEntity<Void> deleteCourseFromTimetable(
+            @CurrentUser String userId,
+            @PathVariable Long timetableId,
+            @PathVariable Long courseId) {
+        entryService.deleteCourseFromTimetable(userId, timetableId, courseId);
+        return ResponseEntity.noContent().build();
+    }
 }

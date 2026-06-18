@@ -184,3 +184,7 @@ DELETE http://localhost:8080/api/timetables/1
 - 단건 상세/수정/삭제는 `timetableId`만으로 식별합니다.
 - PATCH 요청 시 null 값인 필드는 수정되지 않습니다.
 - 경로에서 `{semesterId}`와 `{timetableId}`는 각각 학기 ID와 시간표 ID로 치환해야 합니다.
+
+## EDWARD 동기화
+
+EDWARD 시간표 import 시 `"EDWARD 동기화"` 제목의 시간표가 생성·갱신됩니다. [sync/README.md](../sync/README.md) 참고.

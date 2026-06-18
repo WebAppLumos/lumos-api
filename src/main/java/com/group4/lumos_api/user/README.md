@@ -1,6 +1,6 @@
 # 👤 Lumos API - User Module
 
-Firebase 인증(Firebase Auth) 기반의 사용자 계정 관리 및 프로필 정보를 관리하는 API입니다. 본인(`/me`) 관련 요청의 대상 사용자는 클라이언트가 보내는 헤더가 아니라 **검증된 Firebase ID 토큰**에서 식별합니다.
+Firebase 인증(Firebase Auth) 기반의 사용자 계정 관리, 프로필 정보, **대시보드 위젯 설정**, 학기별 성적 조회 API입니다. 본인(`/me`) 관련 요청의 대상 사용자는 클라이언트가 보내는 헤더가 아니라 **검증된 Firebase ID 토큰**에서 식별합니다.
 
 ---
 
@@ -52,7 +52,10 @@ com.group4.lumos_api.user/
 | 프로필 이미지 수정 | /api/users/me/profile-image | PATCH | 🔒 | 프로필 이미지 URL 변경 |
 | 알림 설정 조회 | /api/users/me/settings | GET | 🔒 | 사용자 알림 설정 조회 (미구현) |
 | 알림 설정 수정 | /api/users/me/settings | PATCH | 🔒 | 사용자 알림 설정 수정 (미구현) |
-| 회원 탈퇴 | /api/users/me | DELETE | 🔒 | 사용자 계정 삭제 |
+| 회원 탈퇴 | /api/users/me | DELETE | 🔒 | 사용자 계정 및 대시보드 위젯 등 연관 데이터 삭제 |
+| 대시보드 위젯 조회 | /api/users/me/dashboard/widgets | GET | 🔒 | 위젯 표시·순서 설정 조회 |
+| 대시보드 위젯 저장 | /api/users/me/dashboard/widgets | PUT | 🔒 | 위젯 표시·순서 설정 저장 |
+| 학기별 성적 조회 | /api/users/me/semester-grades | GET | 🔒 | EDWARD 동기화 성적 요약 조회 |
 
 > 신규 가입은 Firebase 로그인 흐름(`POST /api/auth/login`, 자동 등록/동기화)을 권장합니다. `POST /api/users`는 관리/직접 등록용으로 유지됩니다.
 

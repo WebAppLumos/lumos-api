@@ -83,6 +83,15 @@ lumos-api/
 │   │   ├── repository/
 │   │   ├── service/
 │   │   └── README.md
+│   ├── sync/                  # EDWARD/CTL 학사 연동
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── parser/
+│   │   └── README.md
+│   ├── dashboard/             # 대시보드 위젯 설정
+│   │   ├── controller/
+│   │   ├── service/
+│   │   └── entity/
 │   ├── semester/              # 학기 관리
 │   │   ├── controller/
 │   │   ├── dto/
@@ -162,12 +171,14 @@ lumos-api/
 | 도메인 | 문서 | 설명 |
 |---|---|---|
 | Auth | [auth/README.md](src/main/java/com/group4/lumos_api/auth/README.md) | Firebase ID 토큰 검증, 로그인(등록/동기화), 로그아웃, 토큰 재검증(세션 확인) |
-| User | [user/README.md](src/main/java/com/group4/lumos_api/user/README.md) | 내 정보(`/me`) 조회, 수정, 탈퇴 |
+| User | [user/README.md](src/main/java/com/group4/lumos_api/user/README.md) | 내 정보(`/me`) 조회·수정·탈퇴, 대시보드 위젯, 학기별 성적 |
 | Semester | [semester/README.md](src/main/java/com/group4/lumos_api/semester/README.md) | 학기 생성, 목록 조회, 상세 조회, 수정, 삭제 |
 | Course | [course/README.md](src/main/java/com/group4/lumos_api/course/README.md) | 학기에 종속된 수업 생성, 조회, 수정, 삭제 |
 | Timetable | [timetable/README.md](src/main/java/com/group4/lumos_api/timetable/README.md) | 학기에 종속된 시간표 생성, 조회, 수정, 삭제 |
 | Entry | [entry/README.md](src/main/java/com/group4/lumos_api/entry/README.md) | 시간표에 수업 배치, 배치 목록 조회, 수정, 삭제 |
 | Note | [note/README.md](src/main/java/com/group4/lumos_api/note/README.md) | 수업별 노트 생성, 조회, 검색, 수정, 삭제, 고정 |
+| Sync | [sync/README.md](src/main/java/com/group4/lumos_api/sync/README.md) | EDWARD/CTL 학사 데이터 import (학적·시간표·성적·과제) |
+| Recent Semester Credits | [recent_semester_credits/README.md](src/main/java/com/group4/lumos_api/recent_semester_credits/README.md) | 최근 학기 총 학점 조회 |
 | Certifications | [certifications/README.md](src/main/java/com/group4/lumos_api/certifications/README.md) | 학생별 자격증 취득 정보 관리 |
 | Language Exams | [language_exams/README.md](src/main/java/com/group4/lumos_api/language_exams/README.md) | 어학 시험(TOEIC 등) 성적 관리 |
 
@@ -192,6 +203,9 @@ lumos-api/
 | 내 정보 조회 | GET | `/api/users/me` |
 | 내 정보 수정 | PATCH | `/api/users/me` |
 | 프로필 이미지 수정 | PATCH | `/api/users/me/profile-image` |
+| 대시보드 위젯 조회 | GET | `/api/users/me/dashboard/widgets` |
+| 대시보드 위젯 저장 | PUT | `/api/users/me/dashboard/widgets` |
+| 학기별 성적 조회 | GET | `/api/users/me/semester-grades` |
 | 알림 설정 조회(미구현) | GET | `/api/users/me/settings` |
 | 알림 설정 수정(미구현) | PATCH | `/api/users/me/settings` |
 | 회원 탈퇴 | DELETE | `/api/users/me` |
@@ -277,6 +291,21 @@ lumos-api/
 | 성적 목록 조회 | GET | `/api/users/{userId}/previous-semester-scores` |
 | 성적 수정 | PATCH | `/api/previous-semester-scores/{scoreId}` |
 | 성적 삭제 | DELETE | `/api/previous-semester-scores/{scoreId}` |
+
+### Sync (학사 연동)
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 학적 정보 import | POST | `/api/sync/profile/import` |
+| 시간표 import | POST | `/api/sync/timetable/import` |
+| 성적 import | POST | `/api/sync/grades/import` |
+| CTL 과제 import | POST | `/api/sync/assignments/import` |
+
+### Recent Semester Credits
+
+| 기능 | 메서드 | 엔드포인트 |
+|---|---|---|
+| 최근 학기 총 학점 | GET | `/api/recent-semester/total-credits` |
 
 ## 데이터베이스
 

@@ -1,6 +1,7 @@
 # Auth API
 
-Firebase Authentication ID token을 검증한 뒤 Lumos `users` 테이블에 사용자를 등록하거나 로그인 처리하는 API입니다.
+Firebase Authentication ID token을 검증한 뒤 Lumos `users` 테이블에 사용자를 등록하거나 로그인 처리하는 API입니다.  
+프론트엔드 **회원가입** 흐름에서 Firebase 계정 생성 직후 `POST /api/auth/login`을 호출해 백엔드 사용자를 등록합니다.
 
 ## API 엔드포인트
 

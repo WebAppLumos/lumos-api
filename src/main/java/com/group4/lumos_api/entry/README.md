@@ -233,3 +233,7 @@ DELETE http://localhost:8080/api/entries/1
 - 같은 시간표의 동일 요일에 시간이 겹치는 배치는 거부됩니다. (수정 시에는 자기 자신을 제외하고 검사)
 - 수정(PATCH)은 요일/시간만 변경하며, 배치된 수업(`courseId`)은 변경할 수 없습니다.
 - 경로에서 `{timetableId}`, `{entryId}`는 각각 시간표 ID, 수업 배치 ID로 치환해야 합니다.
+
+## EDWARD 동기화
+
+EDWARD 시간표 import 시 요일·시간별 엔트리(Entry)가 자동 생성·갱신됩니다. [sync/README.md](../sync/README.md) 참고.

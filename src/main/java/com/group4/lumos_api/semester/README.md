@@ -158,3 +158,7 @@ DELETE http://localhost:8080/api/semesters/1
 
 - 학기 삭제 시 해당 학기에 속한 수업이 함께 삭제됩니다.
 - `startDate`는 `endDate`보다 빨라야 합니다.
+
+## EDWARD 동기화
+
+`POST /api/sync/timetable/import` 실행 시 해당 학년도·학기에 맞는 학기(Semester)가 자동 생성·갱신됩니다. 자세한 내용은 [sync/README.md](../sync/README.md)를 참고하세요.

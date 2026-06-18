@@ -120,3 +120,7 @@ com.group4.lumos_api.previous_semester_scores/
 1. **사용자 연동**: 성적 추가 및 조회 시 경로 변수(`{userId}`)로 전달된 사용자가 시스템에 존재해야 합니다.
 2. **날짜 형식**: `year` 필드는 `YYYY-MM-DD` 형식으로 전달해야 하며, 내부적으로 해당 연도의 정보를 저장하는 데 사용됩니다.
 3. **부분 수정**: `PATCH` 메서드를 통해 필요한 필드(`score`, `year`, `semester`)만 선택적으로 수정할 수 있습니다.
+
+## EDWARD 동기화
+
+`POST /api/sync/grades/import`로 EDWARD 학기 성적 SSV를 가져오면 `semester_grades` 테이블에 저장됩니다. 프론트엔드는 `GET /api/users/me/semester-grades`로 조회합니다. [sync/README.md](../sync/README.md) 참고.

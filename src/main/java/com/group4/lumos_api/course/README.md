@@ -237,3 +237,7 @@ DELETE http://localhost:8080/api/semesters/1
 - 수업명 `title`은 필수입니다.
 - PATCH 요청 시 null 값인 필드는 수정되지 않습니다.
 - 경로에서 `{semesterId}`와 `{courseId}`는 각각 학기 ID와 수업 ID로 치환해야 합니다.
+
+## EDWARD 동기화
+
+EDWARD 시간표 import 시 수업(Course)과 학점(`credit`)이 자동 생성·갱신됩니다. [sync/README.md](../sync/README.md) 참고.
